@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="这一篇来记一下 TVM 跟语法树 IR 相关的一些内容。 TVM 是在 Halide 的基础上发展而来的一套编译架构。早一点版本的 TVM 其实还能看到 Halide 是作为一个 git 的 submodule 放在 TVM 目录里的，当时 TVM 自身的代码中还有一个 HalideIR 的 namespace，也有不少的结构是直接继承了 Halide IR 里的内容： 12345678...us">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TVM 拆包（二）：IR">
+<meta property="og:url" content="https://jcf94.com/2020/03/08/2020-03-08-tvm2/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="这一篇来记一下 TVM 跟语法树 IR 相关的一些内容。 TVM 是在 Halide 的基础上发展而来的一套编译架构。早一点版本的 TVM 其实还能看到 Halide 是作为一个 git 的 submodule 放在 TVM 目录里的，当时 TVM 自身的代码中还有一个 HalideIR 的 namespace，也有不少的结构是直接继承了 Halide IR 里的内容： 12345678...us">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2020-03-08-tvm2-graph_exp.png">
+<meta property="article:published_time" content="2020-03-08T04:43:57.000Z">
+<meta property="article:modified_time" content="2020-03-08T08:30:15.168Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="TVM">
+<meta property="article:tag" content="Compile">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2020-03-08-tvm2-graph_exp.png">
+
+<link rel="canonical" href="https://jcf94.com/2020/03/08/2020-03-08-tvm2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>TVM 拆包（二）：IR | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2020/03/08/2020-03-08-tvm2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TVM 拆包（二）：IR
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-03-08 12:43:57 / Modified: 16:30:15" itemprop="dateCreated datePublished" datetime="2020-03-08T12:43:57+08:00">2020-03-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Project/" itemprop="url" rel="index"><span itemprop="name">Project</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>这一篇来记一下 TVM 跟语法树 IR 相关的一些内容。</p>
+<p>TVM 是在 Halide 的基础上发展而来的一套编译架构。早一点版本的 TVM 其实还能看到 Halide 是作为一个 git 的 submodule 放在 TVM 目录里的，当时 TVM 自身的代码中还有一个 <code>HalideIR</code> 的 namespace，也有不少的结构是直接继承了 Halide IR 里的内容：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="keyword">using</span> HalideIR::Type;</span><br><span class="line"><span class="keyword">using</span> HalideIR::Float;</span><br><span class="line"><span class="keyword">using</span> HalideIR::Bool;</span><br><span class="line"><span class="keyword">using</span> HalideIR::Int;</span><br><span class="line"><span class="keyword">using</span> HalideIR::UInt;</span><br><span class="line"><span class="keyword">using</span> HalideIR::Handle;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<p><a href="https://github.com/apache/incubator-tvm/pull/3533" target="_blank" rel="noopener">[INFA][IR] Build and Evolve Low-level IR. Remove HalideIR dep. #3533</a> 这个 PR 之后，Halide 相关的部分逐渐从 TVM 中删掉了，之后可以说从代码层面已经跟 Halide 没有关系了。</p>
+<blockquote>
+<p>目前 TVM IR 的结构基本上还是从 Halide IR 一脉相承，可能以后 TVM IR 进一步演化以后跟 Halide 的差别就更大了。</p>
+</blockquote>
+<h1 id="IR"><a href="#IR" class="headerlink" title="IR"></a>IR</h1><p><code>expr.h</code> 里面定义了 TVM IR 的两个基础结构：Expr 和 Stmt，分别是语法表达式和语法树节点的基类。</p>
+<p>Expr 的派生类有加减乘除、IntImm、FloatImm 等等，从文法上可以做一些 symbolic 的处理。</p>
+<p>Stmt 的派生类有 AttrStmt（语法树属性节点）、Store（数据存储节点）、Allocate（数据 Buffer 分配节点）等等。</p>
+<p>每个 Stmt 结构本身表示一个独立的语法树节点，但是语法树节点之间相互嵌套，通过 Stmt 的 body（Stmt 的通常结构）等成员继续向下查看就能够看到一颗完整的抽象语法树（AST）了。</p>
+<p>例如 IfThenElse 这个 Stmt 的结构：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">IfThenElse</span> :</span> <span class="keyword">public</span> StmtNode &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">/*! \brief The condition. */</span></span><br><span class="line">  Expr condition;</span><br><span class="line">  <span class="comment">/*! \brief The branch to be executed when condition is true. */</span></span><br><span class="line">  Stmt then_case;</span><br><span class="line">  <span class="comment">/*! \brief The branch to be executed when condition is false, can be null. */</span></span><br><span class="line">  Stmt else_case;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">VisitAttrs</span><span class="params">(AttrVisitor* v)</span> final </span>&#123;</span><br><span class="line">    v-&gt;Visit(<span class="string">"condition"</span>, &amp;condition);</span><br><span class="line">    v-&gt;Visit(<span class="string">"then_case"</span>, &amp;then_case);</span><br><span class="line">    v-&gt;Visit(<span class="string">"else_case"</span>, &amp;else_case);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function">TVM_DLL <span class="keyword">static</span> Stmt <span class="title">make</span><span class="params">(Expr condition, Stmt then_case, Stmt else_case = Stmt())</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">const</span> <span class="keyword">char</span>* _type_key = <span class="string">"IfThenElse"</span>;</span><br><span class="line">  TVM_DECLARE_NODE_TYPE_INFO(IfThenElse, StmtNode);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>判断条件是个 Expr，then_case 和 else_case 都是另外两个 Stmt，再展开又是两棵子树。</p>
+<h2 id="IRVisitor-amp-IRMutator"><a href="#IRVisitor-amp-IRMutator" class="headerlink" title="IRVisitor &amp; IRMutator"></a>IRVisitor &amp; IRMutator</h2><p>TVM 中定义了一些 ir_pass 来处理语法树，通过对语法树的修改和调整来完成编译优化的过程。</p>
+<p>各种 ir_pass 的核心结构是 IRVisitor 和 IRMutator，从名称上也可以很容易看出来，IRVisitor 的功能是遍历语法树收集信息，本身对语法树的访问是只读的，然后通过 IRMutator 完成 ir_pass 需要的语法树修改需求。</p>
+<p>看下 IRVisitor 的结构：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TVM_DLL</span> <span class="title">IRVisitor</span> &#123;</span></span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">/*!</span></span><br><span class="line"><span class="comment">   * \brief recursively visit an IR node</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">Visit</span><span class="params">(<span class="keyword">const</span> NodeRef&amp; node)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">const</span> FVisit&amp; f = vtable();</span><br><span class="line">    <span class="keyword">if</span> (node.defined()) f(node, <span class="keyword">this</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">/*! \brief destructor */</span></span><br><span class="line">  <span class="keyword">virtual</span> ~IRVisitor() &#123;&#125;</span><br><span class="line">  <span class="comment">/*! \brief functor type of visitor */</span></span><br><span class="line">  <span class="keyword">using</span> FVisit = IRFunctor&lt;<span class="keyword">void</span>(<span class="keyword">const</span> NodeRef&amp;, IRVisitor*)&gt;;</span><br><span class="line">  <span class="comment">/*! \return internal vtable*/</span></span><br><span class="line">  <span class="function"><span class="keyword">static</span> FVisit&amp; <span class="title">vtable</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="comment">// overloadable visit function.</span></span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">Visit_</span><span class="params">(<span class="keyword">const</span> Variable* op)</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">Visit_</span><span class="params">(<span class="keyword">const</span> LetStmt* op)</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">Visit_</span><span class="params">(<span class="keyword">const</span> AttrStmt* op)</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">Visit_</span><span class="params">(<span class="keyword">const</span> IfThenElse* op)</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">Visit_</span><span class="params">(<span class="keyword">const</span> For* op)</span></span>;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里面最重要的实现其实是自己构造了一个虚函数表：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">IRVisitor::FVisit&amp; IRVisitor::vtable() &#123;  <span class="comment">// NOLINT(*)</span></span><br><span class="line">  <span class="keyword">static</span> FVisit inst; <span class="keyword">return</span> inst;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>之后 IRVisitor 的派生类只需要去重载针对不同 Stmt 类型的 <code>Visit_()</code> 函数就好了。</p>
+<h2 id="Dump-Ast"><a href="#Dump-Ast" class="headerlink" title="Dump Ast"></a>Dump Ast</h2><p>看 TVM 代码包括 debug 的时候一开始会觉得两眼一抹黑连语法树长啥样都没有个概念，也不知道 build 过程中每个 ir_pass 具体做了什么事情，就很想要有个工具能把语法树打成图看下。</p>
+<p>最开始 TVM 里面是找不到这种现成的工具的，后来在论坛里有看到别人提的这方面相关 RFC，不过我后续也没有去关注最后到底有没有收进 repo 里了。其实了解完 IRVisitor 的实现之后，自己写一个语法树的 Dumper 还是挺简单的。</p>
+<p><code>ir_visitor.cc</code> 里面有一个 PostOrderVisit 的示例：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">IRApplyVisit</span> :</span> <span class="keyword">public</span> IRVisitor &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  explicit IRApplyVisit(std::function&lt;void(const NodeRef&amp;)&gt; f) : f_(f) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">Visit</span><span class="params">(<span class="keyword">const</span> NodeRef&amp; node)</span> final </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (visited_.count(node.get()) != <span class="number">0</span>) <span class="keyword">return</span>;</span><br><span class="line">    visited_.insert(node.get());</span><br><span class="line">    IRVisitor::Visit(node);</span><br><span class="line">    f_(node);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="built_in">std</span>::function&lt;<span class="keyword">void</span>(<span class="keyword">const</span> NodeRef&amp;)&gt; f_;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unordered_set</span>&lt;<span class="keyword">const</span> Node*&gt; visited_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">PostOrderVisit</span><span class="params">(<span class="keyword">const</span> NodeRef&amp; node, <span class="built_in">std</span>::function&lt;<span class="keyword">void</span>(<span class="keyword">const</span> NodeRef&amp;)&gt; fvisit)</span> </span>&#123;</span><br><span class="line">  IRApplyVisit(fvisit).Visit(node);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>按照对语法树后续遍历的顺序对每个语法树节点应用 <code>f_()</code> 函数，不过要实现语法树输出的目标，光靠这个还不够，需要再稍微进行一点点的扩充。</p>
+<p>我们通过一个栈来记录下语法树上每一个 stmt 的从属关系，首先扩展一下上面那个 Visitor 来做到在访问 stmt 节点的前后分别调一个外部函数：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">IRPrePostOrderVisitor</span> :</span> <span class="keyword">public</span> IRVisitor &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">IRPrePostOrderVisitor</span><span class="params">(<span class="built_in">std</span>::function&lt;<span class="keyword">void</span>(<span class="keyword">const</span> NodeRef&amp;)&gt; f,</span></span></span><br><span class="line">                                 std::function&lt;void(const NodeRef&amp;)&gt; e) : f_(f), e_(e) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">Visit</span><span class="params">(<span class="keyword">const</span> NodeRef&amp; node)</span> final </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (visited_.count(node.get()) != <span class="number">0</span>) <span class="keyword">return</span>;</span><br><span class="line">    visited_.insert(node.get());</span><br><span class="line">    f_(node);</span><br><span class="line">    IRVisitor::Visit(node);</span><br><span class="line">    e_(node);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="built_in">std</span>::function&lt;<span class="keyword">void</span>(<span class="keyword">const</span> NodeRef&amp;)&gt; f_, e_;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unordered_set</span>&lt;<span class="keyword">const</span> Node*&gt; visited_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">PrePostOrderVisit</span><span class="params">(<span class="keyword">const</span> NodeRef&amp; node,</span></span></span><br><span class="line"><span class="function"><span class="params">                       <span class="built_in">std</span>::function&lt;<span class="keyword">void</span>(<span class="keyword">const</span> NodeRef&amp;)&gt; fvisit,</span></span></span><br><span class="line"><span class="function"><span class="params">                       <span class="built_in">std</span>::function&lt;<span class="keyword">void</span>(<span class="keyword">const</span> NodeRef&amp;)&gt; evisit)</span> </span>&#123;</span><br><span class="line">  IRPrePostOrderVisitor(fvisit, evisit).Visit(node);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> <code>PrePostOrderVisit()</code> 相应的在 <code>ir_visitor.h</code> 里也要添加一下。</p>
+<p>接下来再往 <code>api_pass.cc</code> 里添加一下<code>_PrePostOrderVisit</code>的函数注册：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">TVM_REGISTER_API(<span class="string">"_PrePostOrderVisit"</span>)</span><br><span class="line">.set_body([](TVMArgs args, TVMRetValue *ret) &#123;</span><br><span class="line">    Stmt stmt = args[<span class="number">0</span>];</span><br><span class="line">    PackedFunc f = args[<span class="number">1</span>];</span><br><span class="line">    PackedFunc e = args[<span class="number">2</span>];</span><br><span class="line">    ir::PrePostOrderVisit(stmt, f, e);</span><br><span class="line">  &#125;);</span><br></pre></td></tr></table></figure>
+
+<p>这样在 C++ 部分的工作就完成了，之后是 Python 这一层，我们的 dump 目标是语法树，所以找个能直接拿到 stmt 结构的地方，<code>build_module.py</code> 就很不错。</p>
+<p><code>lower()</code> 是从 TVM IR 往能够运行的代码编译的第一步，涉及到多种 ir_pass 的使用，不同 ir_pass 的前后插入 dump ast 的代码可以帮助我们快速搞清楚每个 ir_pass 到底实际做了什么事情。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">lower</span><span class="params">(...)</span>:</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">for</span> f <span class="keyword">in</span> lower_phase0:</span><br><span class="line">        stmt = f(stmt)</span><br><span class="line">    <span class="comment"># Phase 1</span></span><br><span class="line">    stmt = ir_pass.StorageFlatten(stmt, binds, <span class="number">64</span>, cfg.instrument_bound_checkers)</span><br><span class="line">    stmt = ir_pass.CanonicalSimplify(stmt)</span><br><span class="line"></span><br><span class="line">    dump_ast(stmt)	<span class="comment"># &lt;-------------- here</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> f <span class="keyword">in</span> lower_phase1:</span><br><span class="line">        stmt = f(stmt)</span><br><span class="line">    <span class="comment"># Phase 2</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> simple_mode:</span><br><span class="line">        stmt = ir_pass.LoopPartition(stmt, cfg.partition_const_loop)</span><br><span class="line">    <span class="keyword">if</span> cfg.disable_vectorize:</span><br><span class="line">        stmt = ir_pass.SkipVectorize(stmt)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        stmt = ir_pass.VectorizeLoop(stmt)</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+
+<p>接下来看一下我们需要在 <code>dump_ast()</code> 里面写上什么：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dump_ast</span><span class="params">(stmt)</span>:</span></span><br><span class="line">    stack = []</span><br><span class="line">    ast_node = []</span><br><span class="line">    ast_edge = []</span><br><span class="line">    count = [<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">pre_func</span><span class="params">(stmt)</span>:</span></span><br><span class="line">        node_idx = count[<span class="number">0</span>]</span><br><span class="line">        count[<span class="number">0</span>] += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        ast_node.append([node_idx, stmt])</span><br><span class="line">        <span class="keyword">if</span> len(stack):</span><br><span class="line">            ast_edge.append([stack[<span class="number">-1</span>], node_idx])</span><br><span class="line"></span><br><span class="line">        stack.append(node_idx)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">post_func</span><span class="params">(stmt)</span>:</span></span><br><span class="line">        <span class="keyword">del</span> stack[<span class="number">-1</span>]</span><br><span class="line"></span><br><span class="line">    _api_internal._PrePostOrderVisit(stmt, pre_func, post_func)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> open(<span class="string">"graph.txt"</span>, <span class="string">"w"</span>) <span class="keyword">as</span> f:</span><br><span class="line">        f.write(<span class="string">"digraph &#123;\n"</span>)</span><br><span class="line">        f.write(<span class="string">"    node [shape=matrix]\n"</span>)</span><br><span class="line">        <span class="keyword">for</span> node <span class="keyword">in</span> ast_node:</span><br><span class="line">            ast_type = type(node[<span class="number">1</span>])</span><br><span class="line">            ast_str = str(node[<span class="number">1</span>]).replace(<span class="string">"\n"</span>, <span class="string">"\\l"</span>).replace(<span class="string">"\\n"</span>, <span class="string">"\\l"</span>)</span><br><span class="line">            f.write(<span class="string">"    node%d"</span> % (node[<span class="number">0</span>]))</span><br><span class="line">            f.write(<span class="string">"[label=\"%s\n%s\"]"</span> % (ast_type, ast_str))</span><br><span class="line">            f.write(<span class="string">";\n"</span>)</span><br><span class="line">        <span class="keyword">for</span> edge <span class="keyword">in</span> ast_edge:</span><br><span class="line">            f.write(<span class="string">"    node%d -&gt; node%d;\n"</span> % (edge[<span class="number">0</span>], edge[<span class="number">1</span>]))</span><br><span class="line">        f.write(<span class="string">"&#125;\n"</span>)</span><br></pre></td></tr></table></figure>
+
+<p>思路也是很简单的，我们只要在 PrePostOrderVisit 访问 stmt 节点前将节点入栈，然后访问节点结束后将节点退栈就完事了。</p>
+<p>这个地方也体现出上一篇中 TVM 特别搞出来的这套跨 Python 和 C++ 混合运行的 PackedFunc 机制的便利性，这里事实上我们是从 Python 层开始，调了一个 C++ 的函数，然后在这个 C++ 的函数里面又回调了两个 Python 的函数，并且这个过程中数据还是存在我们在 Python 层创建的结构上的。</p>
+<hr>
+<p>试一下下面这段示例代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">n = tvm.var(<span class="string">"n"</span>)</span><br><span class="line">A = tvm.placeholder((n,), name=<span class="string">'A'</span>)</span><br><span class="line">B = tvm.placeholder((n,), name=<span class="string">'B'</span>)</span><br><span class="line">C = tvm.compute(A.shape, <span class="keyword">lambda</span> i: A[i] + B[i], name=<span class="string">"C"</span>)</span><br><span class="line"></span><br><span class="line">s = tvm.create_schedule([C.op])</span><br><span class="line">bx, tx = s[C].split(C.op.axis[<span class="number">0</span>], factor=<span class="number">64</span>)</span><br><span class="line"></span><br><span class="line">res = tvm.lower(s, [A, B, C], simple_mode=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<p>通过 dump_ast 打出来的 dot 代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br></pre></td><td class="code"><pre><span class="line">digraph &#123;</span><br><span class="line">    node [shape&#x3D;matrix]</span><br><span class="line">    node0[label&#x3D;&quot;&lt;class &#39;tvm.stmt.ProducerConsumer&#39;&gt;</span><br><span class="line">produce C &#123;\l  for (i.outer, 0, ((n + 63)&#x2F;64)) &#123;\l    for (i.inner, 0, 64) &#123;\l      if (likely((((i.outer*64) + i.inner) &lt; n))) &#123;\l        if (likely((((i.outer*64) + i.inner) &lt; n))) &#123;\l          C[((i.outer*64) + i.inner)] &#x3D; (A[((i.outer*64) + i.inner)] + B[((i.outer*64) + i.inner)])\l        &#125;\l      &#125;\l    &#125;\l  &#125;\l&#125;\l&quot;];</span><br><span class="line">    node1[label&#x3D;&quot;&lt;class &#39;tvm.stmt.For&#39;&gt;</span><br><span class="line">for (i.outer, 0, ((n + 63)&#x2F;64)) &#123;\l  for (i.inner, 0, 64) &#123;\l    if (likely((((i.outer*64) + i.inner) &lt; n))) &#123;\l      if (likely((((i.outer*64) + i.inner) &lt; n))) &#123;\l        C[((i.outer*64) + i.inner)] &#x3D; (A[((i.outer*64) + i.inner)] + B[((i.outer*64) + i.inner)])\l      &#125;\l    &#125;\l  &#125;\l&#125;\l&quot;];</span><br><span class="line">    node2[label&#x3D;&quot;&lt;class &#39;tvm.expr.IntImm&#39;&gt;</span><br><span class="line">0&quot;];</span><br><span class="line">    node3[label&#x3D;&quot;&lt;class &#39;tvm.expr.Div&#39;&gt;</span><br><span class="line">((n + 63)&#x2F;64)&quot;];</span><br><span class="line">    node4[label&#x3D;&quot;&lt;class &#39;tvm.expr.Add&#39;&gt;</span><br><span class="line">(n + 63)&quot;];</span><br><span class="line">    node5[label&#x3D;&quot;&lt;class &#39;tvm.expr.Var&#39;&gt;</span><br><span class="line">n&quot;];</span><br><span class="line">    node6[label&#x3D;&quot;&lt;class &#39;tvm.expr.IntImm&#39;&gt;</span><br><span class="line">63&quot;];</span><br><span class="line">    node7[label&#x3D;&quot;&lt;class &#39;tvm.expr.IntImm&#39;&gt;</span><br><span class="line">64&quot;];</span><br><span class="line">    node8[label&#x3D;&quot;&lt;class &#39;tvm.stmt.For&#39;&gt;</span><br><span class="line">for (i.inner, 0, 64) &#123;\l  if (likely((((i.outer*64) + i.inner) &lt; n))) &#123;\l    if (likely((((i.outer*64) + i.inner) &lt; n))) &#123;\l      C[((i.outer*64) + i.inner)] &#x3D; (A[((i.outer*64) + i.inner)] + B[((i.outer*64) + i.inner)])\l    &#125;\l  &#125;\l&#125;\l&quot;];</span><br><span class="line">    node9[label&#x3D;&quot;&lt;class &#39;tvm.expr.IntImm&#39;&gt;</span><br><span class="line">0&quot;];</span><br><span class="line">    node10[label&#x3D;&quot;&lt;class &#39;tvm.expr.IntImm&#39;&gt;</span><br><span class="line">64&quot;];</span><br><span class="line">    node11[label&#x3D;&quot;&lt;class &#39;tvm.stmt.IfThenElse&#39;&gt;</span><br><span class="line">if (likely((((i.outer*64) + i.inner) &lt; n))) &#123;\l  if (likely((((i.outer*64) + i.inner) &lt; n))) &#123;\l    C[((i.outer*64) + i.inner)] &#x3D; (A[((i.outer*64) + i.inner)] + B[((i.outer*64) + i.inner)])\l  &#125;\l&#125;\l&quot;];</span><br><span class="line">    node12[label&#x3D;&quot;&lt;class &#39;tvm.expr.Call&#39;&gt;</span><br><span class="line">likely((((i.outer*64) + i.inner) &lt; n))&quot;];</span><br><span class="line">    node13[label&#x3D;&quot;&lt;class &#39;tvm.expr.LT&#39;&gt;</span><br><span class="line">(((i.outer*64) + i.inner) &lt; n)&quot;];</span><br><span class="line">    node14[label&#x3D;&quot;&lt;class &#39;tvm.expr.Add&#39;&gt;</span><br><span class="line">((i.outer*64) + i.inner)&quot;];</span><br><span class="line">    node15[label&#x3D;&quot;&lt;class &#39;tvm.expr.Mul&#39;&gt;</span><br><span class="line">(i.outer*64)&quot;];</span><br><span class="line">    node16[label&#x3D;&quot;&lt;class &#39;tvm.expr.Var&#39;&gt;</span><br><span class="line">i.outer&quot;];</span><br><span class="line">    node17[label&#x3D;&quot;&lt;class &#39;tvm.expr.IntImm&#39;&gt;</span><br><span class="line">64&quot;];</span><br><span class="line">    node18[label&#x3D;&quot;&lt;class &#39;tvm.expr.Var&#39;&gt;</span><br><span class="line">i.inner&quot;];</span><br><span class="line">    node19[label&#x3D;&quot;&lt;class &#39;tvm.stmt.IfThenElse&#39;&gt;</span><br><span class="line">if (likely((((i.outer*64) + i.inner) &lt; n))) &#123;\l  C[((i.outer*64) + i.inner)] &#x3D; (A[((i.outer*64) + i.inner)] + B[((i.outer*64) + i.inner)])\l&#125;\l&quot;];</span><br><span class="line">    node20[label&#x3D;&quot;&lt;class &#39;tvm.expr.Call&#39;&gt;</span><br><span class="line">likely((((i.outer*64) + i.inner) &lt; n))&quot;];</span><br><span class="line">    node21[label&#x3D;&quot;&lt;class &#39;tvm.expr.LT&#39;&gt;</span><br><span class="line">(((i.outer*64) + i.inner) &lt; n)&quot;];</span><br><span class="line">    node22[label&#x3D;&quot;&lt;class &#39;tvm.expr.Add&#39;&gt;</span><br><span class="line">((i.outer*64) + i.inner)&quot;];</span><br><span class="line">    node23[label&#x3D;&quot;&lt;class &#39;tvm.expr.Mul&#39;&gt;</span><br><span class="line">(i.outer*64)&quot;];</span><br><span class="line">    node24[label&#x3D;&quot;&lt;class &#39;tvm.expr.IntImm&#39;&gt;</span><br><span class="line">64&quot;];</span><br><span class="line">    node25[label&#x3D;&quot;&lt;class &#39;tvm.stmt.Store&#39;&gt;</span><br><span class="line">C[((i.outer*64) + i.inner)] &#x3D; (A[((i.outer*64) + i.inner)] + B[((i.outer*64) + i.inner)])\l&quot;];</span><br><span class="line">    node26[label&#x3D;&quot;&lt;class &#39;tvm.expr.Add&#39;&gt;</span><br><span class="line">(A[((i.outer*64) + i.inner)] + B[((i.outer*64) + i.inner)])&quot;];</span><br><span class="line">    node27[label&#x3D;&quot;&lt;class &#39;tvm.expr.Load&#39;&gt;</span><br><span class="line">A[((i.outer*64) + i.inner)]&quot;];</span><br><span class="line">    node28[label&#x3D;&quot;&lt;class &#39;tvm.expr.Add&#39;&gt;</span><br><span class="line">((i.outer*64) + i.inner)&quot;];</span><br><span class="line">    node29[label&#x3D;&quot;&lt;class &#39;tvm.expr.Mul&#39;&gt;</span><br><span class="line">(i.outer*64)&quot;];</span><br><span class="line">    node30[label&#x3D;&quot;&lt;class &#39;tvm.expr.IntImm&#39;&gt;</span><br><span class="line">64&quot;];</span><br><span class="line">    node31[label&#x3D;&quot;&lt;class &#39;tvm.expr.UIntImm&#39;&gt;</span><br><span class="line">(bool)1&quot;];</span><br><span class="line">    node32[label&#x3D;&quot;&lt;class &#39;tvm.expr.Load&#39;&gt;</span><br><span class="line">B[((i.outer*64) + i.inner)]&quot;];</span><br><span class="line">    node33[label&#x3D;&quot;&lt;class &#39;tvm.expr.Add&#39;&gt;</span><br><span class="line">((i.outer*64) + i.inner)&quot;];</span><br><span class="line">    node34[label&#x3D;&quot;&lt;class &#39;tvm.expr.Mul&#39;&gt;</span><br><span class="line">(i.outer*64)&quot;];</span><br><span class="line">    node35[label&#x3D;&quot;&lt;class &#39;tvm.expr.IntImm&#39;&gt;</span><br><span class="line">64&quot;];</span><br><span class="line">    node36[label&#x3D;&quot;&lt;class &#39;tvm.expr.UIntImm&#39;&gt;</span><br><span class="line">(bool)1&quot;];</span><br><span class="line">    node37[label&#x3D;&quot;&lt;class &#39;tvm.expr.Add&#39;&gt;</span><br><span class="line">((i.outer*64) + i.inner)&quot;];</span><br><span class="line">    node38[label&#x3D;&quot;&lt;class &#39;tvm.expr.Mul&#39;&gt;</span><br><span class="line">(i.outer*64)&quot;];</span><br><span class="line">    node39[label&#x3D;&quot;&lt;class &#39;tvm.expr.IntImm&#39;&gt;</span><br><span class="line">64&quot;];</span><br><span class="line">    node40[label&#x3D;&quot;&lt;class &#39;tvm.expr.UIntImm&#39;&gt;</span><br><span class="line">(bool)1&quot;];</span><br><span class="line">    node0 -&gt; node1;</span><br><span class="line">    node1 -&gt; node2;</span><br><span class="line">    node1 -&gt; node3;</span><br><span class="line">    node3 -&gt; node4;</span><br><span class="line">    node4 -&gt; node5;</span><br><span class="line">    node4 -&gt; node6;</span><br><span class="line">    node3 -&gt; node7;</span><br><span class="line">    node1 -&gt; node8;</span><br><span class="line">    node8 -&gt; node9;</span><br><span class="line">    node8 -&gt; node10;</span><br><span class="line">    node8 -&gt; node11;</span><br><span class="line">    node11 -&gt; node12;</span><br><span class="line">    node12 -&gt; node13;</span><br><span class="line">    node13 -&gt; node14;</span><br><span class="line">    node14 -&gt; node15;</span><br><span class="line">    node15 -&gt; node16;</span><br><span class="line">    node15 -&gt; node17;</span><br><span class="line">    node14 -&gt; node18;</span><br><span class="line">    node11 -&gt; node19;</span><br><span class="line">    node19 -&gt; node20;</span><br><span class="line">    node20 -&gt; node21;</span><br><span class="line">    node21 -&gt; node22;</span><br><span class="line">    node22 -&gt; node23;</span><br><span class="line">    node23 -&gt; node24;</span><br><span class="line">    node19 -&gt; node25;</span><br><span class="line">    node25 -&gt; node26;</span><br><span class="line">    node26 -&gt; node27;</span><br><span class="line">    node27 -&gt; node28;</span><br><span class="line">    node28 -&gt; node29;</span><br><span class="line">    node29 -&gt; node30;</span><br><span class="line">    node27 -&gt; node31;</span><br><span class="line">    node26 -&gt; node32;</span><br><span class="line">    node32 -&gt; node33;</span><br><span class="line">    node33 -&gt; node34;</span><br><span class="line">    node34 -&gt; node35;</span><br><span class="line">    node32 -&gt; node36;</span><br><span class="line">    node25 -&gt; node37;</span><br><span class="line">    node37 -&gt; node38;</span><br><span class="line">    node38 -&gt; node39;</span><br><span class="line">    node25 -&gt; node40;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过 GraphViz 这种 dot 可视化工具处理一下：</p>
+<p><img data-src="http://jcf94.com/download/2020-03-08-tvm2-graph_exp.png" alt="Vis Result"></p>
+<p>当然这个实现还是相当简单了，根据每个节点的类型等等还可以再加一些更复杂的判断逻辑，控制一下输出的内容量等等，以及其实可以看到里面还有很多重复的节点也都可以被筛掉。</p>
+<p>Relay IR 的整体处理结构跟 TVM IR 一致，用类似的方法也可以把 Relay 那一层的 AST 打出来。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2019/09/14/2019-09-14-tvm/" rel="bookmark">TVM 拆包（一）：Runtime basics</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/TVM/" rel="tag"># TVM</a>
+              <a href="/tags/Compile/" rel="tag"># Compile</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/09/14/2019-09-14-tvm/" rel="prev" title="TVM 拆包（一）：Runtime basics">
+      <i class="fa fa-chevron-left"></i> TVM 拆包（一）：Runtime basics
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#IR"><span class="nav-text">IR</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#IRVisitor-amp-IRMutator"><span class="nav-text">IRVisitor &amp; IRMutator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dump-Ast"><span class="nav-text">Dump Ast</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '07e7544fcc650fd4807f0deb6995ce74',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

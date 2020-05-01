@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="还是得多看别人的论文，看多了等自己有东西能写的时候才能写得出来。 迷迷糊糊地就发出去第一篇 Paper 了。。。回想起来也算是幸运吧。 把以前看过的论文都理一理，共享在 OneDrive 上了（似乎被墙了）： 【My Paper Reading List - OneDrive】">
+<meta property="og:type" content="article">
+<meta property="og:title" content="整理一下看过的论文">
+<meta property="og:url" content="https://jcf94.com/2017/08/18/2017-08-18-paper/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="还是得多看别人的论文，看多了等自己有东西能写的时候才能写得出来。 迷迷糊糊地就发出去第一篇 Paper 了。。。回想起来也算是幸运吧。 把以前看过的论文都理一理，共享在 OneDrive 上了（似乎被墙了）： 【My Paper Reading List - OneDrive】">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2017-08-18T06:57:31.000Z">
+<meta property="article:modified_time" content="2017-12-20T07:32:34.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="整理">
+<meta property="article:tag" content="Paper">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2017/08/18/2017-08-18-paper/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>整理一下看过的论文 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2017/08/18/2017-08-18-paper/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          整理一下看过的论文
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2017-08-18 14:57:31" itemprop="dateCreated datePublished" datetime="2017-08-18T14:57:31+08:00">2017-08-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2017-12-20 15:32:34" itemprop="dateModified" datetime="2017-12-20T15:32:34+08:00">2017-12-20</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Paper/" itemprop="url" rel="index"><span itemprop="name">Paper</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>还是得多看别人的论文，看多了等自己有东西能写的时候才能写得出来。</p>
+<p>迷迷糊糊地就发出去第一篇 Paper 了。。。回想起来也算是幸运吧。</p>
+<p>把以前看过的论文都理一理，共享在 OneDrive 上了（似乎被墙了）：</p>
+<p><a href="https://1drv.ms/f/s!AuxK9QzqA6LQivMQIjc5oZ6-xZxTyA" target="_blank" rel="noopener">【My Paper Reading List - OneDrive】</a></p>
+<a id="more"></a>
+
+<hr>
+<h1 id="Top-Conference"><a href="#Top-Conference" class="headerlink" title="Top Conference"></a>Top Conference</h1><p>嗯。。。当年曾经想看看顶会上的文章的，但是那时候水平有限，只是简单地翻了一下，以后有机会再多看看吧。</p>
+<ul>
+<li><a href="/2015/08/31/2015-08-31-isca2014/">ISCA 2014 会议论文整理</a></li>
+</ul>
+<h1 id="RDMA"><a href="#RDMA" class="headerlink" title="RDMA"></a>RDMA</h1><p>这几篇文章主要都是我改 RDMA 版 TensorFlow 的时候看的，借鉴其中的通信协议的设计思路，这里面的很多想法其实都是大同小异。</p>
+<p>用 RDMA 有个比较严重的问题是：为了做到 kernel bypass，通信用到的内存都必须提前注册成 MR，这样 IB 卡就能直接读写内存而不用通过 CPU。现场注册内存是一件比较耗时的事情，如果处理不好会在这里浪费很多时间。</p>
+<p>大致的想法很简单，这下面的几篇文章讲的也都差不多是类似的内容：内存管理/通信/计算 overlap。</p>
+<p>主要是实现起来还是有点麻烦。</p>
+<h2 id="2001-An-introduction-to-the-infiniband-architecture"><a href="#2001-An-introduction-to-the-infiniband-architecture" class="headerlink" title="2001 - An introduction to the infiniband architecture"></a>2001 - An introduction to the infiniband architecture</h2><p>IB 架构的介绍，没怎么看，这条就纯用来引用。</p>
+<h2 id="2004-Host-Assisted-Zero-Copy-Remote-Memory-Access-Communication-on-InfiniBand"><a href="#2004-Host-Assisted-Zero-Copy-Remote-Memory-Access-Communication-on-InfiniBand" class="headerlink" title="2004 - Host-Assisted Zero-Copy Remote Memory Access Communication on InfiniBand"></a>2004 - Host-Assisted Zero-Copy Remote Memory Access Communication on InfiniBand</h2><p>To be read.</p>
+<h2 id="2006-RDMA-Read-Based-Rendezvous-Protocol-for-MPI-over-InﬁniBand-Design-Alternatives-and-Beneﬁts"><a href="#2006-RDMA-Read-Based-Rendezvous-Protocol-for-MPI-over-InﬁniBand-Design-Alternatives-and-Beneﬁts" class="headerlink" title="2006 - RDMA Read Based Rendezvous Protocol for MPI over InﬁniBand Design Alternatives and Beneﬁts"></a>2006 - RDMA Read Based Rendezvous Protocol for MPI over InﬁniBand Design Alternatives and Beneﬁts</h2><p>在 MPI 库层面做的工作，改的是 MVAPICH，可能到今天已经整合进 MPI 的官方 RDMA 实现里面了吧。</p>
+<p>主要内容是用 RDMA_READ 换掉原本 MPI 实现中的 RDMA_WRITE 协议，配合中断机制，达到计算和通信的最大程度 overlap。</p>
+<p>To be read.</p>
+<h2 id="2007-Memory-Management-Strategies-for-Data-Serving-with-RDMA"><a href="#2007-Memory-Management-Strategies-for-Data-Serving-with-RDMA" class="headerlink" title="2007 - Memory Management Strategies for Data Serving with RDMA"></a>2007 - Memory Management Strategies for Data Serving with RDMA</h2><p>To be read.</p>
+<h2 id="2008-An-efficient-design-for-fast-memory-registration-in-RDMA"><a href="#2008-An-efficient-design-for-fast-memory-registration-in-RDMA" class="headerlink" title="2008 - An efficient design for fast memory registration in RDMA"></a>2008 - An efficient design for fast memory registration in RDMA</h2><p>跟前面的 RDMA_READ 不同，这篇文章主要讲了一种 Conditional RDMA Write 的机制，目标也是在用 RDMA_WRITE 的时候 overlap 通信和计算。</p>
+<p>关于 CRW 这种机制，RDMA 的官方文档里面我没找到，不知道这种方案是不是他们自己实现的。</p>
+<p>To be read.</p>
+<h2 id="2009-Minimizing-the-Hidden-Cost-of-RDMA"><a href="#2009-Minimizing-the-Hidden-Cost-of-RDMA" class="headerlink" title="2009 - Minimizing the Hidden Cost of RDMA"></a>2009 - Minimizing the Hidden Cost of RDMA</h2><p>主要还是针对 RDMA 通信过程中的内存管理进行优化，方案基本上还是那几个：</p>
+<ol>
+<li>根据发送的数据大小决定是重用 buffer 还是创建一个新的。例如小数据直接 memcpy 到注册好的内存里，大数据创建新的 MR；</li>
+<li>把通信和内存管理 overlap 开；</li>
+<li>注册内存的时候考虑内存在物理上的分页；</li>
+<li>并行注册 MR。</li>
+</ol>
+<p>嗯，有一种道理我们都懂，关键看你怎么实现的感觉。</p>
+<p>To be read.</p>
+<h2 id="2011-Scalable-Memory-Registration-for-High-Performance-Networks-Using-Helper-Threads"><a href="#2011-Scalable-Memory-Registration-for-High-Performance-Networks-Using-Helper-Threads" class="headerlink" title="2011 - Scalable Memory Registration for High Performance Networks Using Helper Threads"></a>2011 - Scalable Memory Registration for High Performance Networks Using Helper Threads</h2><p>创建一个新线程来专门维护 RDMA 通信用到的内存，MR 的注册什么的都通过新线程来做。</p>
+<p>其他的大同小异。</p>
+<p>To be read.</p>
+<h2 id="2016-Revisiting-RDMA-Buffer-Registration-in-the-Context-of-Lightweight-Multi-kernels"><a href="#2016-Revisiting-RDMA-Buffer-Registration-in-the-Context-of-Lightweight-Multi-kernels" class="headerlink" title="2016 - Revisiting RDMA Buffer Registration in the Context of Lightweight Multi-kernels"></a>2016 - Revisiting RDMA Buffer Registration in the Context of Lightweight Multi-kernels</h2><p>To be read.</p>
+<hr>
+<h1 id="Deep-Learning"><a href="#Deep-Learning" class="headerlink" title="Deep Learning"></a>Deep Learning</h1><h2 id="2012-Alexnet-Imagenet-classification-with-deep-convolutional-neural-networks"><a href="#2012-Alexnet-Imagenet-classification-with-deep-convolutional-neural-networks" class="headerlink" title="2012 Alexnet - Imagenet classification with deep convolutional neural networks"></a>2012 Alexnet - Imagenet classification with deep convolutional neural networks</h2><p>大名鼎鼎的 Alexnet。</p>
+<p>2012 年 ImageNet 的冠军算法，这一历史性的事件似乎可以看成是深度学习热潮的起点。</p>
+<p>最早我开始接触深度学习方面的知识的时候分析过 <a href="/2017/04/04/2017-04-04-alexnet/">Alexnet 的结构</a>，事实上我对 CNN、卷积、全连接等等有个比较明确的认识也就是从这个网络开始的，之后在我的文章里面也是拿 Alexnet 作为我的 Benchmark。</p>
+<p>Alexnet 比较突出的贡献还有就是提出了一些防止过拟合的方法：</p>
+<ol>
+<li>对整个 256x256 的图片做一遍水平翻转，同时按照 224x224 做滑窗，相当于把原本的 1 张图变成了 2048 张</li>
+<li>Dropout 层！！</li>
+</ol>
+<p>嗯，跑完整个 ImageNet 的数据集，作者用 2 块 GTX 580 跑了五六天。</p>
+<h2 id="2014-Adam-A-Method-for-Stochastic-Optimization"><a href="#2014-Adam-A-Method-for-Stochastic-Optimization" class="headerlink" title="2014 - Adam: A Method for Stochastic Optimization"></a>2014 - Adam: A Method for Stochastic Optimization</h2><p>一种效果比梯度下降更好的优化修正方法。</p>
+<p>To be read.</p>
+<h2 id="2014-Baidu-Deep-Speech-Scaling-up-end-to-end-speech-recognition"><a href="#2014-Baidu-Deep-Speech-Scaling-up-end-to-end-speech-recognition" class="headerlink" title="2014 Baidu - Deep Speech Scaling up end-to-end speech recognition"></a>2014 Baidu - Deep Speech Scaling up end-to-end speech recognition</h2><p>百度做的端到端语音识别框架。</p>
+<p>Mozilla 用 TensorFlow 把他们的这个工作实现了一遍，在<a href="https://github.com/mozilla/DeepSpeech" target="_blank" rel="noopener">这里</a>。</p>
+<p>To be read.</p>
+<h2 id="2017-HKBU-Benchmarking-State-of-the-Art-Deep-Learning-Software-Tools"><a href="#2017-HKBU-Benchmarking-State-of-the-Art-Deep-Learning-Software-Tools" class="headerlink" title="2017 HKBU - Benchmarking State-of-the-Art Deep Learning Software Tools"></a>2017 HKBU - Benchmarking State-of-the-Art Deep Learning Software Tools</h2><p>香港浸会大学对几个主流 DL 框架做的一些对比评测，实验室师兄据说看出问题来了。详细的还没仔细看。</p>
+<p>也就是 <a href="http://dlbench.comp.hkbu.edu.hk/" target="_blank" rel="noopener">DLBench 项目</a>。</p>
+<p>To be read.</p>
+<hr>
+<h1 id="Distributed-Machine-Learning-System-Distributed-Deep-Learning-System-Large-Scale-Neural-Network-Training"><a href="#Distributed-Machine-Learning-System-Distributed-Deep-Learning-System-Large-Scale-Neural-Network-Training" class="headerlink" title="Distributed Machine Learning System / Distributed Deep Learning System / Large Scale Neural Network Training"></a>Distributed Machine Learning System / Distributed Deep Learning System / Large Scale Neural Network Training</h1><p>这块内容有点多，单独整理了一篇出来：</p>
+<ul>
+<li><a href="/2017/12/20/2017-12-20-distributeddl/">【分布式机器学习 / 深度学习论文整理】</a></li>
+</ul>
+<hr>
+<h1 id="TensorFlow"><a href="#TensorFlow" class="headerlink" title="TensorFlow"></a>TensorFlow</h1><p>花了比较多的时间在 TensorFlow 这个框架上，源码也折腾过很久，但是最后还是觉得这玩意改起来过于复杂。</p>
+<p>首先是 TF 的 Google 4 部曲：</p>
+<h2 id="1-TensorFlow-A-System-for-Large-Scale-Machine-Learning"><a href="#1-TensorFlow-A-System-for-Large-Scale-Machine-Learning" class="headerlink" title="1 - TensorFlow A System for Large-Scale Machine Learning"></a>1 - TensorFlow A System for Large-Scale Machine Learning</h2><p>TensorFlow 开山之作，TF 本体也是跟着一起发布，基本把整个框架的情况都讲了一遍。</p>
+<h2 id="2-TensorFlow-Large-Scale-Machine-Learning-on-Heterogeneous-Distributed-Systems"><a href="#2-TensorFlow-Large-Scale-Machine-Learning-on-Heterogeneous-Distributed-Systems" class="headerlink" title="2 - TensorFlow Large-Scale Machine Learning on Heterogeneous Distributed Systems"></a>2 - TensorFlow Large-Scale Machine Learning on Heterogeneous Distributed Systems</h2><p>TensorFlow 分布式版的介绍，v0.8 版 TF。</p>
+<p>话说其实在第一篇里面就已经介绍过分布式了，这篇是更详细地介绍其运行机制。</p>
+<h2 id="3-Deep-Learning-with-Dynamic-Compution-Graphs"><a href="#3-Deep-Learning-with-Dynamic-Compution-Graphs" class="headerlink" title="3 - Deep Learning with Dynamic Compution Graphs"></a>3 - Deep Learning with Dynamic Compution Graphs</h2><p>TF 的动态图功能。</p>
+<p>暂时还没研究过。</p>
+<h2 id="4-In-Datacenter-Performance-Analysis-of-a-Tensor-Processing-Unit"><a href="#4-In-Datacenter-Performance-Analysis-of-a-Tensor-Processing-Unit" class="headerlink" title="4 - In-Datacenter Performance Analysis of a Tensor Processing Unit"></a>4 - In-Datacenter Performance Analysis of a Tensor Processing Unit</h2><p>TPU 的介绍。</p>
+<p>发布这篇文章的时候其实 TPU 在 Google 内部已经测试了快一年了，基本上可以说是跟 TF 同期开始做的东西。</p>
+<p>可怕。</p>
+<h2 id="2016-DeepSpark-A-Spark-Based-Distributed-Deep-Learning-Framework-for-Commodity-Clusters"><a href="#2016-DeepSpark-A-Spark-Based-Distributed-Deep-Learning-Framework-for-Commodity-Clusters" class="headerlink" title="2016 - DeepSpark A Spark-Based Distributed Deep Learning Framework for Commodity Clusters"></a>2016 - DeepSpark A Spark-Based Distributed Deep Learning Framework for Commodity Clusters</h2><p>用 Spark 来做上层框架，底下跑单节点版的 TF 来完成多节点分布式。</p>
+<h2 id="2016-Distributed-TensorFlow-with-MPI"><a href="#2016-Distributed-TensorFlow-with-MPI" class="headerlink" title="2016 - Distributed TensorFlow with MPI"></a>2016 - Distributed TensorFlow with MPI</h2><p>跟上面那篇 Spark 的类似，这是用 MPI 做上层框架（大概是 Python-MPI），底下跑单节点版的 TF 来完成多节点分布式。</p>
+<hr>
+<h1 id="Algorithm-amp-Math"><a href="#Algorithm-amp-Math" class="headerlink" title="Algorithm &amp; Math"></a>Algorithm &amp; Math</h1><h2 id="1991-Wait-free-parallel-algorithms-for-the-union-find-problem"><a href="#1991-Wait-free-parallel-algorithms-for-the-union-find-problem" class="headerlink" title="1991 - Wait-free parallel algorithms for the union-find problem"></a>1991 - Wait-free parallel algorithms for the union-find problem</h2><p>多线程下的并行并查集实现，说起来这个也是该花时间好好研究一下。</p>
+<p>下面有个别人的实现 <a href="https://github.com/wjakob/dset" target="_blank" rel="noopener">Lock-free parallel disjoint set data structure</a>。</p>
+<h2 id="1971-Today-Tarjan’s-Algorithm-amp-Data-Structure"><a href="#1971-Today-Tarjan’s-Algorithm-amp-Data-Structure" class="headerlink" title="1971 ~ Today - Tarjan’s Algorithm &amp; Data Structure"></a>1971 ~ Today - Tarjan’s Algorithm &amp; Data Structure</h2><p>Robert E Tarjan，1986 年图灵奖得主，发明了一堆经典算法（主要是图和树的）。</p>
+<ul>
+<li><a href="/2017/09/27/2017-09-27-tarjan/">Tarjan 大佬的算法们</a></li>
+</ul>
+<hr>
+<h1 id="Other"><a href="#Other" class="headerlink" title="Other"></a>Other</h1><p>帮本科生看 SCC17 赛题的时候读的论文：</p>
+<h2 id="2014-A-practical-guide-to-identifying-members-of-the-Bemisia-tabaci-species-complex-and-other-morphologically-identical-species"><a href="#2014-A-practical-guide-to-identifying-members-of-the-Bemisia-tabaci-species-complex-and-other-morphologically-identical-species" class="headerlink" title="2014 - A practical guide to identifying members of the Bemisia tabaci species complex and other morphologically identical species"></a>2014 - A practical guide to identifying members of the Bemisia tabaci species complex and other morphologically identical species</h2><p>一篇有关一种白蚁物种分类的综述。</p>
+<p>某个白蚁种群中有大约 34 种不同的种类，区分这些种类并且对一个未知个体来说，如果能快速识别出属于哪一个种类对于生物学研究来说至关重要。但从形态学和种系演变方面很难做到。</p>
+<p>为了生物研究能够继续做下去，科学家开始从基因和概率分析方面想办法。</p>
+<p>在已有一个成熟的线粒体 DNA 库的基础上，目前可行的方案是对个体进行 DNA 采样和 PCR 倍增，然后用 HPC 的技术来分析 DNA 的结构，找出进化树，最后判别属于哪个种群。</p>
+<h2 id="2001-An-Introduction-to-Bayesian-Inference-of-Phylogeny"><a href="#2001-An-Introduction-to-Bayesian-Inference-of-Phylogeny" class="headerlink" title="2001 - An Introduction to Bayesian Inference of Phylogeny"></a>2001 - An Introduction to Bayesian Inference of Phylogeny</h2><p>介绍了如何用贝叶斯推论的方法来分析物种的种系进化，就是上面那篇综述中的可行方案。</p>
+<p>贝叶斯推论这种方法大概是：根据看到的现象来反推出初始情况（？我的理解可能有误）</p>
+<p>文中一开始是拿骰子举例，假设盒子里面有 100 个骰子，90 个是正常的，10 个是有偏重的。从中随机取出一个骰子投两次，根据这两次投出的结果，我们可以算出正常骰子出现这种结果的概率和偏重骰子出现这种结果的概率，再反推出这个骰子是正常的还是偏重的的概率。</p>
+<p>大概是这么个问题，实际情况下会更难一点，假定我们不知道 90/10 这个数量信息，也不知道偏重骰子投出每个点数的概率，然后还要根据观察到的现象推断出骰子的情况（。。。666）。</p>
+<p>种系生成学中，物种的进化关系可以用一棵生成树来表示，每种基因都有一定概率突变成其他的基因，生成树上的分支就是由于基因突变产生的。跟贝叶斯推论的方法结合在一起，就是事先根据一定的模型定下生成树的结构，然后<strong>枚举所有进化情况</strong>的概率（？大概是这样），从里面找出似然度最大的一种，就是最终的进化推断了。</p>
+<p>嗯，上面这个方法看上去就很有问题。。。首先，只要用于分析的 DNA 链不短，那么进化树的可能情况应该是指数上涨的，并且贝叶斯推论需要的后验概率也没有办法确定下来。</p>
+<p>所以就需要<strong><a href="https://www.wikiwand.com/zh/马尔科夫蒙特卡洛" target="_blank" rel="noopener">马尔科夫链蒙特卡洛方法</a></strong>。构造一条马尔科夫链，用它的平稳分布作为问题所需要的后验分布，基于马尔科夫链达到平稳分布时的有效样本进行蒙特卡洛积分（？其实并不是很懂）。</p>
+<p>马尔科夫链有个初始状态，然后计算转化到下一个状态的概率，如果超过某个值就是可以接受的，马尔科夫链转化成下一个状态然后继续进行下一轮迭代。在这个迭代过程中，对马尔科夫链进行采样（？），采样出的分布作为进化树的后验分布然后计算贝叶斯推论（？）。</p>
+<blockquote>
+<p>例如 MrBayes 中的几个参数：马尔科夫链迭代多少代，每多少代采样一次</p>
+</blockquote>
+<p>后面又举了个实际的例子：用 5 条 DNA 数据进行分析，分别来自鱼、青蛙、鸟、鼠类和人。这 5 个物种的进化树有 15 种可能（根据某种模型计算出来的）。马尔科夫链迭代 100000 代，跑完 10000 代之后开始每 100 代采样一次，这样就得到了 900 个采样结果（900 棵进化树？）用这 900 个采样的数据作为后验分布进行贝叶斯推论分析就得到了最后的结果。（某一条进化枝的后验概率，就是所有树中包含这条进化枝的概率和？）（最后结果大概就是这 15 种可能的进化树分别的概率，概率最高的一种就是推论得出的进化树答案了）</p>
+<hr>
+<h1 id="Mine"><a href="#Mine" class="headerlink" title="Mine"></a>Mine</h1><h2 id="2017-Improving-the-performance-of-distributed-TensorFlow-with-RDMA"><a href="#2017-Improving-the-performance-of-distributed-TensorFlow-with-RDMA" class="headerlink" title="2017 - Improving the performance of distributed TensorFlow with RDMA"></a>2017 - Improving the performance of distributed TensorFlow with RDMA</h2><ul>
+<li><a href="https://doi.org/10.1007/s10766-017-0520-3" target="_blank" rel="noopener">Jia, C., Liu, J., Jin, X. et al. Improving the Performance of Distributed TensorFlow with RDMA. Int J Parallel Prog (2017). https://doi.org/10.1007/s10766-017-0520-3</a></li>
+</ul>
+<p>16 年参加 RDMA 竞赛的时候，赛题就是分布式版 TensorFlow 的 RDMA 实现。当时采用的方法是把 TF 中的通信模块 gRPC 改成 RDMA 的，这样 TF 本体就不用动了（事实上当时试过直接改 TF，但是不知道该从什么地方下手）。</p>
+<p>当时比赛结束之后没有放弃这个题目，继续尝试从 TF 本体上下手，把整个 gRPC 给干掉。</p>
+<p>最后终于成功做出来了，想想也是悲惨。。。如果重新经历一遍我不敢说能不能再做到了。</p>
+<p>后来发现了 <a href="https://github.com/yahoo/tensorflow" target="_blank" rel="noopener">Yahoo 的 RDMA 版 TF 项目</a>，跟我们做的工作基本上是一样的，心里一凉，不过东西都做了大半年了，想想还是硬着头皮把文章写完了。投文章的时候看着他们的项目从 pull request 开始，一点点被 TF 官方的 Repo 吸收，最后终于在 1.2.0-rc0 收录了。特别煎熬。</p>
+<p>最后中了 <a href="http://npc-china2017.org/" target="_blank" rel="noopener">NPC</a> 有很大的运气成分吧。</p>
+<hr>
+<p>To be continued.</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/11/04/2015-11-04-book/" rel="bookmark">我的书单整理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/01/11/2016-01-11-tools/" rel="bookmark">工具软件整理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/09/27/2017-09-27-tarjan/" rel="bookmark">Tarjan 大佬的算法们</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/12/20/2017-12-20-distributeddl/" rel="bookmark">分布式机器学习 / 深度学习论文整理</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B4%E7%90%86/" rel="tag"># 整理</a>
+              <a href="/tags/Paper/" rel="tag"># Paper</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/08/06/2017-08-06-efi/" rel="prev" title="UEFI -- 又被坑了一次">
+      <i class="fa fa-chevron-left"></i> UEFI -- 又被坑了一次
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/08/23/2017-08-23-segbit/" rel="next" title="几道 线段树&树状数组 的题">
+      几道 线段树&树状数组 的题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Top-Conference"><span class="nav-text">Top Conference</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RDMA"><span class="nav-text">RDMA</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2001-An-introduction-to-the-infiniband-architecture"><span class="nav-text">2001 - An introduction to the infiniband architecture</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2004-Host-Assisted-Zero-Copy-Remote-Memory-Access-Communication-on-InfiniBand"><span class="nav-text">2004 - Host-Assisted Zero-Copy Remote Memory Access Communication on InfiniBand</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2006-RDMA-Read-Based-Rendezvous-Protocol-for-MPI-over-InﬁniBand-Design-Alternatives-and-Beneﬁts"><span class="nav-text">2006 - RDMA Read Based Rendezvous Protocol for MPI over InﬁniBand Design Alternatives and Beneﬁts</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2007-Memory-Management-Strategies-for-Data-Serving-with-RDMA"><span class="nav-text">2007 - Memory Management Strategies for Data Serving with RDMA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2008-An-efficient-design-for-fast-memory-registration-in-RDMA"><span class="nav-text">2008 - An efficient design for fast memory registration in RDMA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2009-Minimizing-the-Hidden-Cost-of-RDMA"><span class="nav-text">2009 - Minimizing the Hidden Cost of RDMA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2011-Scalable-Memory-Registration-for-High-Performance-Networks-Using-Helper-Threads"><span class="nav-text">2011 - Scalable Memory Registration for High Performance Networks Using Helper Threads</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2016-Revisiting-RDMA-Buffer-Registration-in-the-Context-of-Lightweight-Multi-kernels"><span class="nav-text">2016 - Revisiting RDMA Buffer Registration in the Context of Lightweight Multi-kernels</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Deep-Learning"><span class="nav-text">Deep Learning</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2012-Alexnet-Imagenet-classification-with-deep-convolutional-neural-networks"><span class="nav-text">2012 Alexnet - Imagenet classification with deep convolutional neural networks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2014-Adam-A-Method-for-Stochastic-Optimization"><span class="nav-text">2014 - Adam: A Method for Stochastic Optimization</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2014-Baidu-Deep-Speech-Scaling-up-end-to-end-speech-recognition"><span class="nav-text">2014 Baidu - Deep Speech Scaling up end-to-end speech recognition</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2017-HKBU-Benchmarking-State-of-the-Art-Deep-Learning-Software-Tools"><span class="nav-text">2017 HKBU - Benchmarking State-of-the-Art Deep Learning Software Tools</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Distributed-Machine-Learning-System-Distributed-Deep-Learning-System-Large-Scale-Neural-Network-Training"><span class="nav-text">Distributed Machine Learning System &#x2F; Distributed Deep Learning System &#x2F; Large Scale Neural Network Training</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TensorFlow"><span class="nav-text">TensorFlow</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-TensorFlow-A-System-for-Large-Scale-Machine-Learning"><span class="nav-text">1 - TensorFlow A System for Large-Scale Machine Learning</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-TensorFlow-Large-Scale-Machine-Learning-on-Heterogeneous-Distributed-Systems"><span class="nav-text">2 - TensorFlow Large-Scale Machine Learning on Heterogeneous Distributed Systems</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Deep-Learning-with-Dynamic-Compution-Graphs"><span class="nav-text">3 - Deep Learning with Dynamic Compution Graphs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-In-Datacenter-Performance-Analysis-of-a-Tensor-Processing-Unit"><span class="nav-text">4 - In-Datacenter Performance Analysis of a Tensor Processing Unit</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2016-DeepSpark-A-Spark-Based-Distributed-Deep-Learning-Framework-for-Commodity-Clusters"><span class="nav-text">2016 - DeepSpark A Spark-Based Distributed Deep Learning Framework for Commodity Clusters</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2016-Distributed-TensorFlow-with-MPI"><span class="nav-text">2016 - Distributed TensorFlow with MPI</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Algorithm-amp-Math"><span class="nav-text">Algorithm &amp; Math</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1991-Wait-free-parallel-algorithms-for-the-union-find-problem"><span class="nav-text">1991 - Wait-free parallel algorithms for the union-find problem</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1971-Today-Tarjan’s-Algorithm-amp-Data-Structure"><span class="nav-text">1971 ~ Today - Tarjan’s Algorithm &amp; Data Structure</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Other"><span class="nav-text">Other</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2014-A-practical-guide-to-identifying-members-of-the-Bemisia-tabaci-species-complex-and-other-morphologically-identical-species"><span class="nav-text">2014 - A practical guide to identifying members of the Bemisia tabaci species complex and other morphologically identical species</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2001-An-Introduction-to-Bayesian-Inference-of-Phylogeny"><span class="nav-text">2001 - An Introduction to Bayesian Inference of Phylogeny</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Mine"><span class="nav-text">Mine</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2017-Improving-the-performance-of-distributed-TensorFlow-with-RDMA"><span class="nav-text">2017 - Improving the performance of distributed TensorFlow with RDMA</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '2e4f6a25d9cb3dfa6e76461b7accbf92',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="还是应该多写东西，感觉离开学校以后写的越来越少了，真是惭愧。 之后的工作有很多是要跟神经网络的编译执行相关，准备继 TF 拆包之后再来记一下我对 TVM 的探索过程。这个系列的坑会开多久也不一定，毕竟之前 TF 的其实也只做了一点点微小的工作，还有很多方面的内容没有看，另外 TF 要更到 2.0 之后可能有不少地方已经有一些变动了。 （也许有空也会看一下 XLA 吧，不过那个应该是要合到 TF 的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TVM 拆包（一）：Runtime basics">
+<meta property="og:url" content="https://jcf94.com/2019/09/14/2019-09-14-tvm/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="还是应该多写东西，感觉离开学校以后写的越来越少了，真是惭愧。 之后的工作有很多是要跟神经网络的编译执行相关，准备继 TF 拆包之后再来记一下我对 TVM 的探索过程。这个系列的坑会开多久也不一定，毕竟之前 TF 的其实也只做了一点点微小的工作，还有很多方面的内容没有看，另外 TF 要更到 2.0 之后可能有不少地方已经有一些变动了。 （也许有空也会看一下 XLA 吧，不过那个应该是要合到 TF 的">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-09-14T01:53:09.000Z">
+<meta property="article:modified_time" content="2020-03-08T05:01:26.020Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="TVM">
+<meta property="article:tag" content="Compile">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2019/09/14/2019-09-14-tvm/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>TVM 拆包（一）：Runtime basics | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2019/09/14/2019-09-14-tvm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TVM 拆包（一）：Runtime basics
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-09-14 09:53:09" itemprop="dateCreated datePublished" datetime="2019-09-14T09:53:09+08:00">2019-09-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-03-08 13:01:26" itemprop="dateModified" datetime="2020-03-08T13:01:26+08:00">2020-03-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Project/" itemprop="url" rel="index"><span itemprop="name">Project</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>还是应该多写东西，感觉离开学校以后写的越来越少了，真是惭愧。</p>
+<p>之后的工作有很多是要跟神经网络的编译执行相关，准备继 TF 拆包之后再来记一下我对 TVM 的探索过程。这个系列的坑会开多久也不一定，毕竟之前 TF 的其实也只做了一点点微小的工作，还有很多方面的内容没有看，另外 TF 要更到 2.0 之后可能有不少地方已经有一些变动了。</p>
+<p>（也许有空也会看一下 XLA 吧，不过那个应该是要合到 TF 的拆包系列里面去了）</p>
+<p>一些基础的背景可以见前面一篇对 TVM 作者一门课的课程记录：<a href="/2018/10/04/2018-10-04-cse559w/">【CSE 599W： Systems for ML】</a></p>
+<a id="more"></a>
+
+<hr>
+<p>第一篇先从代码中一些基础的结构开始，最早读代码的时候没看明白一些东西是怎么实现的，为了看懂细节吃了不少的苦头。</p>
+<p>参考文档：<a href="https://docs.tvm.ai/dev/runtime.html" target="_blank" rel="noopener">【TVM Runtime System】</a></p>
+<h1 id="Node-amp-NodeRef"><a href="#Node-amp-NodeRef" class="headerlink" title="Node &amp; NodeRef"></a>Node &amp; NodeRef</h1><p>Node 和 NodeRef 这两个类在 TVM 中几乎是所有对象的基类了，Node 是功能本体，NodeRef 可以看成是对 Node 的一个指针引用。举例来说 TVM IR 语法树中的两个结构 Statement 和 Expression 的实际存储对象是 <code>StmtNode</code> 和 <code>ExprNode</code>，从 Node 继承而来，但是在被其他结构用到的时候用的却是 <code>Stmt</code> 和 <code>Expr</code> 两个结构，从 NodeRef 继承而来。</p>
+<p>Node 这个结构本身没什么好看的，看一下 NodeRef 的实现：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*! \brief Base class of all node reference object */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NodeRef</span> &#123;</span></span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">/*! \brief type indicate the container type */</span></span><br><span class="line">  <span class="keyword">using</span> ContainerType = Node;</span><br><span class="line">  <span class="comment">/*!</span></span><br><span class="line"><span class="comment">   * \brief Comparator</span></span><br><span class="line"><span class="comment">   * \param other Another node ref.</span></span><br><span class="line"><span class="comment">   * \return the compare result.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">inline</span> <span class="keyword">bool</span> <span class="keyword">operator</span>==(<span class="keyword">const</span> NodeRef&amp; other) <span class="keyword">const</span>;</span><br><span class="line">  <span class="comment">/*!</span></span><br><span class="line"><span class="comment">   * \brief Comparator</span></span><br><span class="line"><span class="comment">   * \param other Another node ref.</span></span><br><span class="line"><span class="comment">   * \return the compare result.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="keyword">inline</span> <span class="keyword">bool</span> <span class="title">same_as</span><span class="params">(<span class="keyword">const</span> NodeRef&amp; other)</span> <span class="keyword">const</span></span>;</span><br><span class="line">  <span class="comment">/*!</span></span><br><span class="line"><span class="comment">   * \brief Comparator</span></span><br><span class="line"><span class="comment">   * \param other Another node ref.</span></span><br><span class="line"><span class="comment">   * \return the compare result.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">inline</span> <span class="keyword">bool</span> <span class="keyword">operator</span>&lt;(<span class="keyword">const</span> NodeRef&amp; other) <span class="keyword">const</span>;</span><br><span class="line">  <span class="comment">/*!</span></span><br><span class="line"><span class="comment">   * \brief Comparator</span></span><br><span class="line"><span class="comment">   * \param other Another node ref.</span></span><br><span class="line"><span class="comment">   * \return the compare result.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">inline</span> <span class="keyword">bool</span> <span class="keyword">operator</span>!=(<span class="keyword">const</span> NodeRef&amp; other) <span class="keyword">const</span>;</span><br><span class="line">  <span class="comment">/*! \return the hash function for NodeRef */</span></span><br><span class="line">  <span class="function"><span class="keyword">inline</span> size_t <span class="title">hash</span><span class="params">()</span> <span class="keyword">const</span></span>;</span><br><span class="line">  <span class="comment">/*! \return whether the expression is null */</span></span><br><span class="line">  <span class="function"><span class="keyword">inline</span> <span class="keyword">bool</span> <span class="title">defined</span><span class="params">()</span> <span class="keyword">const</span></span>;</span><br><span class="line">  <span class="comment">/*! \return the internal type index of IRNode */</span></span><br><span class="line">  <span class="function"><span class="keyword">inline</span> uint32_t <span class="title">type_index</span><span class="params">()</span> <span class="keyword">const</span></span>;</span><br><span class="line">  <span class="comment">/*! \return the internal node pointer */</span></span><br><span class="line">  <span class="function"><span class="keyword">inline</span> <span class="keyword">const</span> Node* <span class="title">get</span><span class="params">()</span> <span class="keyword">const</span></span>;</span><br><span class="line">  <span class="comment">/*! \return the internal node pointer */</span></span><br><span class="line">  <span class="keyword">inline</span> <span class="keyword">const</span> Node* <span class="keyword">operator</span>-&gt;() <span class="keyword">const</span>;</span><br><span class="line">  <span class="comment">/*!</span></span><br><span class="line"><span class="comment">   * \brief Downcast this ir node to its actual type (e.g. Add, or</span></span><br><span class="line"><span class="comment">   * Select). This returns nullptr if the node is not of the requested</span></span><br><span class="line"><span class="comment">   * type. Example usage:</span></span><br><span class="line"><span class="comment">   *</span></span><br><span class="line"><span class="comment">   * if (const Add *add = node-&gt;as&lt;Add&gt;()) &#123;</span></span><br><span class="line"><span class="comment">   *   // This is an add node</span></span><br><span class="line"><span class="comment">   * &#125;</span></span><br><span class="line"><span class="comment">   * \tparam T the target type, must be subtype of IRNode</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">  <span class="function"><span class="keyword">inline</span> <span class="keyword">const</span> T *<span class="title">as</span><span class="params">()</span> <span class="keyword">const</span></span>;</span><br><span class="line">  <span class="comment">/*!</span></span><br><span class="line"><span class="comment">   * \brief A more powerful version of as that also works with</span></span><br><span class="line"><span class="comment">   *  intermediate base types.</span></span><br><span class="line"><span class="comment">   * \tparam T the target type, must be subtype of IRNode</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">  <span class="function"><span class="keyword">inline</span> <span class="keyword">const</span> T *<span class="title">as_derived</span><span class="params">()</span> <span class="keyword">const</span></span>;</span><br><span class="line">  <span class="comment">/*! \brief default constructor */</span></span><br><span class="line">  NodeRef() = <span class="keyword">default</span>;</span><br><span class="line">  explicit NodeRef(NodePtr&lt;Node&gt; node) : node_(node) &#123;&#125;</span><br><span class="line">  <span class="comment">/*! \brief the internal node object, do not touch  */</span></span><br><span class="line">  NodePtr&lt;Node&gt; node_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="keyword">const</span> Node* NodeRef::<span class="keyword">operator</span>-&gt;() <span class="keyword">const</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> node_.get();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最关键的点在于 NodeRef 对它的 <code>-&gt;</code>运算符做了一下重载，即返回自己实际代表的实体对象，所以 NodeRef 以及其派生结构虽然实际是个对象，但是在代码里面可以当成指针来用，<code>-&gt;</code>运算符之后直接跟的就是本体 Node 的成员。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*! \brief Container of all statements */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Stmt</span> :</span> <span class="keyword">public</span> NodeRef &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  TVM_DEFINE_NODE_REF_METHODS(Stmt, NodeRef, StmtNode);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*!</span></span><br><span class="line"><span class="comment"> * \brief Macro to define common node ref methods.</span></span><br><span class="line"><span class="comment"> * \param TypeName The name of the NodeRef.</span></span><br><span class="line"><span class="comment"> * \param BaseTypeName The Base type.</span></span><br><span class="line"><span class="comment"> * \param NodeName The node container type.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TVM_DEFINE_NODE_REF_METHODS(TypeName, BaseTypeName, NodeName)   \</span></span><br><span class="line">  TypeName() &#123;&#125;                                                         \</span><br><span class="line">  explicit TypeName(::tvm::NodePtr&lt;::tvm::Node&gt; n) : BaseTypeName(n) &#123;&#125; \</span><br><span class="line">  <span class="keyword">const</span> NodeName* <span class="keyword">operator</span>-&gt;() <span class="keyword">const</span> &#123;                                  \</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">static_cast</span>&lt;<span class="keyword">const</span> NodeName*&gt;(node_.get());                   \</span><br><span class="line">  &#125;                                                                     \</span><br><span class="line">  <span class="function"><span class="keyword">operator</span> <span class="title">bool</span><span class="params">()</span> <span class="keyword">const</span> </span>&#123; <span class="keyword">return</span> <span class="keyword">this</span>-&gt;defined(); &#125;                     \</span><br><span class="line">  <span class="keyword">using</span> ContainerType = NodeName;</span><br></pre></td></tr></table></figure>
+
+<p>以上面的 <code>Stmt</code> 类为例，其他很多 NodeRef 的派生类结构也会用一个 <code>TVM_DEFINE_NODE_REF</code> 的宏来扩展出这部分的关键代码。</p>
+<hr>
+<p>那么问题来了，为什么要设计成这个样子呢。</p>
+<blockquote>
+<p>这里谈一下我自己的理解，如果有问题的话也欢迎看到的同学指正一下。</p>
+</blockquote>
+<p>一方面可能是为了方便下面 C++ runtime 和 Python 部分所有结构的无缝衔接；另一方面从上面的代码也可以看到，NodeRef 重载了 <code>-&gt;</code> 运算符之后返回的是个 const 的指针对象，所以通过 <code>-&gt;</code> 访问到的实际的成员结构都是只读的了，这就保证了 TVM 这套复杂系统里面各种数据结构的安全性。</p>
+<p>当然严格的只读访问在某些情况下是不够的，所以 TVM 提供了 <code>CopyOnWrite()</code> 的机制，如果某个 NodeRef 类的定义中包含了 <code>TVM_DEFINE_NODE_REF_COW</code> 这个宏的话，可以通过 <code>NodeRef.CopyOnWrite()</code> 获得一个可修改的 Node 指针，之后对成员内容的修改均通过这个指针来做就可以了。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*!</span></span><br><span class="line"><span class="comment"> * \brief Macro to define CopyOnWrite function in a NodeRef.</span></span><br><span class="line"><span class="comment"> * \param NodeName The Type of the Node.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> *  CopyOnWrite will generate a unique copy of the internal node.</span></span><br><span class="line"><span class="comment"> *  The node will be copied if it is referenced by multiple places.</span></span><br><span class="line"><span class="comment"> *  The function returns the raw pointer to the node to allow modification</span></span><br><span class="line"><span class="comment"> *  of the content.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * \code</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> *  MyCOWNodeRef ref, ref2;</span></span><br><span class="line"><span class="comment"> *  ref2 = ref;</span></span><br><span class="line"><span class="comment"> *  ref.CopyOnWrite()-&gt;value = new_value;</span></span><br><span class="line"><span class="comment"> *  assert(ref2-&gt;value == old_value);</span></span><br><span class="line"><span class="comment"> *  assert(ref-&gt;value == new_value);</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * \endcode</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TVM_DEFINE_NODE_REF_COW(NodeName)                               \</span></span><br><span class="line">  <span class="function">NodeName* <span class="title">CopyOnWrite</span><span class="params">()</span> </span>&#123;                                             \</span><br><span class="line">      CHECK(node_ != <span class="literal">nullptr</span>);                                          \</span><br><span class="line">      <span class="keyword">if</span> (!node_.unique())  &#123;                                           \</span><br><span class="line">        NodePtr&lt;NodeName&gt; n = make_node&lt;NodeName&gt;(*(<span class="keyword">operator</span>-&gt;()));     \</span><br><span class="line">        NodePtr&lt;Node&gt;(<span class="built_in">std</span>::move(n)).swap(node_);                        \</span><br><span class="line">      &#125;                                                                 \</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">static_cast</span>&lt;NodeName*&gt;(node_.get());                       \</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>话说 <code>CopyOnWrite()</code> 这个函数名称我感觉可能不是特别确切，也许改成 <code>GetMutablePtr()</code> 之类的会更好点？因为这个实际上并不 Copy，直接调用这个函数返回的是对这个 NodeRef 自己所指代对象的指针，之后的改动也都是对这个 Node 自身做的。</p>
+<p>如果确切希望实现 Copy 的语义，则需要像前面注释里面示例的那样，先用另一个 <code>ref2</code> 复制一份 <code>ref</code>，之后再在 <code>ref2</code> 上进行修改。</p>
+<h1 id="PackedFunc"><a href="#PackedFunc" class="headerlink" title="PackedFunc"></a>PackedFunc</h1><p>TVM 的整个软件栈涉及到很多高层脚本语言（Python、JavaScript）和 C++ 运行时的交互，因此这里提供了一套 PackedFunc 的基础用来把整个过程方便地串接起来。</p>
+<p>第一次看到这种实现时真的是被惊到了，感觉非常神奇。</p>
+<p>在 C++ 层面创建一个函数，可以直接进行本地调用：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;tvm/runtime/packed_func.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">MyAdd</span><span class="params">(TVMArgs args, TVMRetValue* rv)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// automatically convert arguments to desired type.</span></span><br><span class="line">  <span class="keyword">int</span> a = args[<span class="number">0</span>];</span><br><span class="line">  <span class="keyword">int</span> b = args[<span class="number">1</span>];</span><br><span class="line">  <span class="comment">// automatically assign value return to rv</span></span><br><span class="line">  *rv = a + b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">CallPacked</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  PackedFunc myadd = PackedFunc(MyAdd);</span><br><span class="line">  <span class="comment">// get back 3</span></span><br><span class="line">  <span class="keyword">int</span> c = myadd(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也可以通过 API 注册之后（要注册到 TVM 的 C++ 运行时库里面去），从 Python 层进行调用：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// register a global packed function in c++</span></span><br><span class="line">TVM_REGISTER_GLOBAL(<span class="string">"myadd"</span>)</span><br><span class="line">.set_body(MyAdd);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tvm</span><br><span class="line"></span><br><span class="line">myadd = tvm.get_global_func(<span class="string">"myadd"</span>)</span><br><span class="line"><span class="comment"># prints 3</span></span><br><span class="line">print(myadd(<span class="number">1</span>, <span class="number">2</span>))</span><br></pre></td></tr></table></figure>
+
+<p>反过来 Python 层写好的函数也可以直接从 C++ 层调用：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">TVM_REGISTER_GLOBAL(<span class="string">"callhello"</span>)</span><br><span class="line">.set_body([](TVMArgs args, TVMRetValue* rv) &#123;</span><br><span class="line">  PackedFunc f = args[<span class="number">0</span>];</span><br><span class="line">  f(<span class="string">"hello world"</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tvm</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(msg)</span>:</span></span><br><span class="line">  print(msg)</span><br><span class="line"></span><br><span class="line"><span class="comment"># convert to PackedFunc</span></span><br><span class="line">f = tvm.convert(callback)</span><br><span class="line">callhello = tvm.get_global_func(<span class="string">"callhello"</span>)</span><br><span class="line"><span class="comment"># prints hello world</span></span><br><span class="line">callhello(f)</span><br></pre></td></tr></table></figure>
+
+<p>Python 层定义的 <code>callback(msg)</code> 通过 <code>callhello</code> 传递给 C++ 层，C++ 层执行时直接从输入参数中得到了 Python 的函数对象并调用执行。</p>
+<hr>
+<p>实现方面，C++ 层的 PackedFunc 是一个对 std::function 对象的封装结构，而 Python 层面<code>tvm.convert</code> 实际上是把 Python 的函数用 ctype 做了一下封装：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">TVMPackedCFunc = ctypes.CFUNCTYPE(</span><br><span class="line">    ctypes.c_int,</span><br><span class="line">    ctypes.POINTER(TVMValue),</span><br><span class="line">    ctypes.POINTER(ctypes.c_int),</span><br><span class="line">    ctypes.c_int,</span><br><span class="line">    ctypes.c_void_p,</span><br><span class="line">    ctypes.c_void_p)</span><br></pre></td></tr></table></figure>
+
+<p>PackedFunc 对函数的输入参数、返回值的解析处理做了比较精巧的处理，最终达到了从 API 层面看上去非常好的使用体验。</p>
+<blockquote>
+<p>Amazing!</p>
+<p>有空的话可以试一下把 TVM 里面的这部分内容单独扒出来，这个实现思路真的非常有意思。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2020/03/08/2020-03-08-tvm2/" rel="bookmark">TVM 拆包（二）：IR</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/TVM/" rel="tag"># TVM</a>
+              <a href="/tags/Compile/" rel="tag"># Compile</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/06/18/2019-06-18-note/" rel="prev" title="大半年的流水账">
+      <i class="fa fa-chevron-left"></i> 大半年的流水账
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/08/2020-03-08-tvm2/" rel="next" title="TVM 拆包（二）：IR">
+      TVM 拆包（二）：IR <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Node-amp-NodeRef"><span class="nav-text">Node &amp; NodeRef</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PackedFunc"><span class="nav-text">PackedFunc</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'e55802717abff2b71b3556b4bfe8748e',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

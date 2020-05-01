@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="接上篇：  计算机组成与设计.硬件&#x2F;软件接口 学习笔记（一） 计算机组成与设计.硬件&#x2F;软件接口 学习笔记（二）  本篇为第六章的内容。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机组成与设计.硬件&#x2F;软件接口 学习笔记（三）">
+<meta property="og:url" content="https://jcf94.com/2018/02/12/2018-02-12-cod3/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="接上篇：  计算机组成与设计.硬件&#x2F;软件接口 学习笔记（一） 计算机组成与设计.硬件&#x2F;软件接口 学习笔记（二）  本篇为第六章的内容。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-6.1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-6.4.1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-06-cod2-gpu.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-06-cod2-Fermi.svg">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-06-cod2-gpumem.png">
+<meta property="article:published_time" content="2018-02-12T12:53:23.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="体系结构">
+<meta property="article:tag" content="组成与设计.硬软件接口">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2015-09-09-cod-6.1.jpg">
+
+<link rel="canonical" href="https://jcf94.com/2018/02/12/2018-02-12-cod3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>计算机组成与设计.硬件/软件接口 学习笔记（三） | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2018/02/12/2018-02-12-cod3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机组成与设计.硬件/软件接口 学习笔记（三）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-02-12 20:53:23" itemprop="dateCreated datePublished" datetime="2018-02-12T20:53:23+08:00">2018-02-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Architecture/" itemprop="url" rel="index"><span itemprop="name">Computer Architecture</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>接上篇：</p>
+<ul>
+<li><a href="/2015/09/09/2015-09-09-cod/">计算机组成与设计.硬件/软件接口 学习笔记（一）</a></li>
+<li><a href="/2018/02/06/2018-02-06-cod2/">计算机组成与设计.硬件/软件接口 学习笔记（二）</a></li>
+</ul>
+<p>本篇为第六章的内容。</p>
+<a id="more"></a>
+
+<h1 id="CHAPTER-6-Parallel-Processors-from-Client-to-Cloud"><a href="#CHAPTER-6-Parallel-Processors-from-Client-to-Cloud" class="headerlink" title="CHAPTER 6. Parallel Processors from Client to Cloud"></a>CHAPTER 6. Parallel Processors from Client to Cloud</h1><p>从客户端到云端的并行计算，这一章主要关注于处理器之间、集群之间的网络连接，并行性等等。</p>
+<p><img data-src="http://jcf94.com/download/2015-09-09-cod-6.1.jpg" alt="img"></p>
+<h2 id="6-1-Introduction"><a href="#6-1-Introduction" class="headerlink" title="6.1. Introduction"></a>6.1. Introduction</h2><p>关于并行的好处，前面的章节也已经有提到过了。</p>
+<p>这里再重新明确一下串行（Serial）、并行（Parallel）、顺序（Sequential）、并发（Concurrent）的概念：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>顺序</th>
+<th>并发</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>串行</td>
+<td>在Intel Pentium 4上运行一个MATLAB的矩阵乘法程序</td>
+<td>在Intel Pentium 4上运行Windows Vista操作系统</td>
+</tr>
+<tr>
+<td>并行</td>
+<td>在Intel Core i7 上运行一个MATLAB的矩阵乘法程序</td>
+<td>在Intel Core i7 上运行Windows Vista操作系统</td>
+</tr>
+</tbody></table>
+<h2 id="6-2-The-Difficulty-of-Creating-Parallel-Processing-Programs"><a href="#6-2-The-Difficulty-of-Creating-Parallel-Processing-Programs" class="headerlink" title="6.2. The Difficulty of Creating Parallel Processing Programs"></a>6.2. The Difficulty of Creating Parallel Processing Programs</h2><p>事实上，现在的处理器技术中比如<strong>超标量</strong>和<strong>乱序执行</strong>的设计就已经是进行了<strong>指令级并行</strong>了，对于程序员来说，不需要做任何事情，编译器和计算机自己就会完成中间的步骤。</p>
+<p>而要把一个串行的程序写成并行的，则会另外引入许多新的问题，包括：调度、将任务划分成多块、平衡多部分之间的负载、同步、多部分通信等等。而且这种情况是核心数量越多，越麻烦。</p>
+<p>根据Amdahl定律，可以得出如下结论：</p>
+<ol>
+<li>为了充分利用好多核，程序中任何一个很小的部分都需要并行化。为了在100个核心上达到90倍的加速比，程序中顺序执行的部分只能够占到0.1%。</li>
+<li>核心数的增加只有在数据规模也同样提升时才能有比较明显的效果。</li>
+<li>负载均衡很重要。</li>
+</ol>
+<p>书上有详细的举例和计算。</p>
+<p>也就是说，理论计算上的并行加速比其实是很难达到的，中间有太多的限制条件在，实际编程时也是非常困难。</p>
+<h2 id="6-3-SISD-MIMD-SIMD-SPMD-and-Vector"><a href="#6-3-SISD-MIMD-SIMD-SPMD-and-Vector" class="headerlink" title="6.3. SISD, MIMD, SIMD, SPMD, and Vector"></a>6.3. SISD, MIMD, SIMD, SPMD, and Vector</h2><p>基于指令流和数据流的数量，并行硬件有如下一些分类：</p>
+<ul>
+<li>SISD（Single Instruction stream Single Data stream），就是常见的单核处理器结构。</li>
+<li>MIMD（Multiple Instruction streams Multiple Data streams），常见的多核处理器结构。</li>
+<li>SIMD（Single Instruction stream Multiple Data streams）。</li>
+</ul>
+<p>举例：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Single Data stream</th>
+<th>Multiple Data streams</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Single Instruction stream</td>
+<td>Intel Pentium 4</td>
+<td>x86上的SSE指令集</td>
+</tr>
+<tr>
+<td>Multiple Instruction streams</td>
+<td>目前还没有</td>
+<td>Intel Core i7</td>
+</tr>
+</tbody></table>
+<p>通常在MIMD的结构上写程序的方法是只写一个单独的程序跑在多个核心上，根据判断语句来让多个核心分别执行不同的部分，这样的开发方法叫做SPMD（Single Program Multiple Data）。</p>
+<p>MISD非常少见，最接近的情况可能是“流处理器”：对于一个输入流，用一系列的流水线指令去处理数据。</p>
+<p>反之SIMD则很常见，例如出现在向量计算机上，对于同一条指令，同时有多个ALU分别参与计算（也可以叫做数据级并行）。它的优点是所有并行执行单元都是同步的，从程序员的角度看，这个其实非常接近于SISD（尽管每个单元都执行相同的指令，但是每个单元都有独立的地址寄存器和独立的数据地址），可能一个顺序应用程序在串行硬件上编译时按SISD组织，到并行硬件上编译就会按照SIMD组织。</p>
+<p>基于SIMD的想法，x86处理器中的MMX（Multimedia Extension）、SSE（Streaming SIMD Extension）和后来的AVX（Advanced Vector Extension）得到了发展。</p>
+<hr>
+<p>SIMD的一个更加古老和优雅的称呼是向量机体系结构（Vector Architecture）。</p>
+<p>这种结构的特点在于拥有一些特殊的向量寄存器。</p>
+<p>用Linpack基准测试中的DAXPY（Double Precision a*X Plus Y）循环来举例：</p>
+<p>其中X和Y是64位双精度浮点数的向量，a是一个双精度标量。</p>
+<p>常规的MIPS代码为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">start:</span><br><span class="line">        l.d $f0,a($sp)          :输入标量a</span><br><span class="line">        addiu   $t0,$s0,#512    :设定上界</span><br><span class="line">loop:   l.d $f2,0($s0)          :输入x(i)</span><br><span class="line">        mul.d   $f2,$f2,$f0     :a*x(i)</span><br><span class="line">        l.d $f4,0($s1)          :输入y(i)</span><br><span class="line">        add.d   $f4,$f4,$f2     :a*x(i)+y(i)</span><br><span class="line">        s.d $f4,0($s1)          :写回y(i)</span><br><span class="line">        addiu   $s0,$s0,#8      :递增x的索引</span><br><span class="line">        addiu   $s1,$s1,#8      :递增y的索引</span><br><span class="line">        subu    $t1,$t0,$s0     :计算边界</span><br><span class="line">        bne $t1,$zero,loop      :检查是否完成</span><br></pre></td></tr></table></figure>
+
+<p>向量版的MIPS代码为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">start:</span><br><span class="line">        l.d $f0,a($sp)          :输入标量a</span><br><span class="line">        lv  $v1,0($s0)          :输入向量X</span><br><span class="line">        mulvs.d $v2,$v1,$f0     :a*X</span><br><span class="line">        lv  $v3,0($s1)          :输入向量Y</span><br><span class="line">        addv.d  $v4,$v2,$v3     :a*X+Y</span><br><span class="line">        sv  $v4,0($s1)          :写回</span><br></pre></td></tr></table></figure>
+
+<p>向量处理器大大降低了<strong>动态指令带宽</strong>，仅用6条指令就完成了接近600条普通MIPS指令的工作：原因一是整个向量操作是在多个数据元上同时进行的，二是节省了原本在普通MIPS中接近一半开销的循环指令。</p>
+<p>另外普通的MIPS指令在流水线中是存在阻塞的，每次add.d必须等待mul.d，每次s.d也必须等待add.d，而在向量处理器中，每条向量指令只会在每个向量的起始数据元阻塞，随后的数据元会流畅地通过流水线。</p>
+<p>效率被大大提高了。</p>
+<p>向量结构对比标量结构、多媒体扩展来说都有很大的优势。</p>
+<h2 id="6-4-Hardware-Multithreading"><a href="#6-4-Hardware-Multithreading" class="headerlink" title="6.4. Hardware Multithreading"></a>6.4. Hardware Multithreading</h2><p><strong>硬件多线程</strong>是跟 MIMD 相关的一个重要概念。</p>
+<p>MIMD需要用多处理器去解决多项任务，为了保证效率的提升，需要<strong>硬件多线程</strong>技术来尽量填满每个处理器，即当一个线程发生阻塞时马上切换到另一个线程上运行，保证每个处理器都有较高的利用率。</p>
+<blockquote>
+<p>线程与进程：</p>
+<p>线程：包括PC、寄存器状态、栈的状态。可以是轻量的<strong>进程</strong>，线程通常共享一个单独的地址空间。</p>
+<p>进程：进程包含一个或多个<strong>线程</strong>、一个地址空间、操作系统状态。</p>
+<p><strong>进程切换</strong>通常要涉及到操作系统层面，要花上几百到几千个时钟周期，而<strong>线程切换</strong>则只是处理器上的切换，处理器设计时就要保证能够快速切换。</p>
+</blockquote>
+<p>硬件多线程的几种形式：</p>
+<ul>
+<li>细粒度多线程（Fine-grained Multithreading）</li>
+</ul>
+<p>每一个指令结束后都能进行线程切换，多线程循环交错地执行。</p>
+<p>这种方式下，无论线程的阻塞时间长短，总体吞吐量不会受影响，因为通常会采用 round-robin 算法，一条线程出现阻塞时总能切换到另外的线程上去。缺点是降低了单条线程的执行速度，如果这条线程上不存在阻塞，则本来可以更快地执行完毕，现在中间还有穿插执行其他线程。</p>
+<ul>
+<li>粗粒度多线程（Coarse-grained Multithreading）</li>
+</ul>
+<p>这种方式是在一条线程出现较大的阻塞之后再切换至另一条，比如末级Cache缺失等。</p>
+<p>对于单一线程来说，执行速度受的影响就很小了。</p>
+<p>但这种方式的问题出现在线程流水线的启动上。正常运行单一线程时，单一线程填充在流水线中，当阻塞发生时，则需要清空流水线，并把另外一条线程的状态填入流水线。阻塞开始后执行的新线程必须要在指令完成之前填充流水线（否则还不如继续执行原来的呢）。</p>
+<p>流水线启动开销在阻塞时间短的情况下影响特别明显，一般只有在阻塞时间比较长时，才能忽略掉这个启动开销。</p>
+<ul>
+<li>同时多线程（SMT，Simultaneous Multithreading）</li>
+</ul>
+<p>主要还是依靠<strong>多发射动态调度的流水线</strong>的能力来挖掘线程级并行，同时保持指令级并行。这种方式的核心思想是多发射处理器有多个功能单元，而单个线程可能根本用不上这些多余的硬件资源，依靠动态调度、寄存器重命名等等技术，来自不同线程的多条指令之间完全不会有数据依赖，能够被同时发射出来处理。</p>
+<p>这种方式应该是最完美的，但具体实现起来还是有很多困难点的。需要用到超标量、寄存器重命名、动态调度等等技术，解决来自不同线程的多条指令的相关性等等问题。</p>
+<p>最新的Intel Core i7处理器也只能够支持2个线程的实时多线程处理。</p>
+<p><img data-src="http://jcf94.com/download/2015-09-09-cod-6.4.1.jpg" alt="img"></p>
+<p>上面这张图的各种实现已经是基于超标量了。</p>
+<p>可以很明显地看出，SMT下超标量+实时多线程的效果之强。</p>
+<h2 id="6-5-Multicore-and-Other-Shared-Memory-Multiprocessors"><a href="#6-5-Multicore-and-Other-Shared-Memory-Multiprocessors" class="headerlink" title="6.5. Multicore and Other Shared Memory Multiprocessors"></a>6.5. Multicore and Other Shared Memory Multiprocessors</h2><p>这里讲的是一些常规的各种并行问题。</p>
+<p>书上在这里也提到了OpenMP。</p>
+<h2 id="6-6-Introduction-to-Graphics-Processing-Units"><a href="#6-6-Introduction-to-Graphics-Processing-Units" class="headerlink" title="6.6. Introduction to Graphics Processing Units"></a>6.6. Introduction to Graphics Processing Units</h2><p>这一节是GPU 的介绍。</p>
+<p>随着游戏、图像等需求的发展，一类<strong>主要用于浮点运算</strong>的芯片开始发挥重要作用，用GPU把它们与CPU分类开来。用很便宜的价格就能够买到一个具有上百个流处理器核心的GPU。</p>
+<p>GPU是辅助CPU的加速卡，因而它们只需要<strong>致力于提高浮点运算性能</strong>即可，其他的功能和控制能力可以很弱，甚至并不需要，交给CPU来完成即可。</p>
+<p>GPU和CPU最大的区别是，GPU不需要依赖多级Cache来解决内存延迟，而是依靠<strong>硬件多线程</strong>，对于一个运算请求，通常GPU可以启动成百上千个独立的线程。它的设计完全是用来面向数据级并行问题的，就是说要大量用到 SIMD 特性的问题才适合在 GPU 上跑。</p>
+<blockquote>
+<p>GPU 是一堆多线程 SIMD 处理器组合在一起的 MIMD 处理器结构。</p>
+</blockquote>
+<p>GPU的主存是<strong>面向带宽而不是面向延迟的</strong>，GPU的主存通常能够提供更大的带宽，而容量通常要小于CPU的主存。</p>
+<p><img data-src="http://jcf94.com/download/2018-02-06-cod2-gpu.png" alt="gpu流处理器的简要数据通路图"></p>
+<p>上面是个简单的GPU流处理器结构。</p>
+<blockquote>
+<p>刚看到这里的时候，感觉书上讲的 Fermi 架构跟网上查到的还不太一样。</p>
+<p>所以先查了一下官方资料。</p>
+</blockquote>
+<hr>
+<p><a href="https://www.wikiwand.com/en/Fermi_(microarchitecture)" target="_blank" rel="noopener">维基百科上的 Fermi</a></p>
+<p><img data-src="http://jcf94.com/download/2018-02-06-cod2-Fermi.svg" alt="Fermi架构"></p>
+<p>一个Fermi流处理器（SM，Streaming Multiprocessor）里有32个单精 CUDA 核，16个 load/store 单元以及4个特殊功能单元（Special Functional Unit）。</p>
+<p>CUDA 核内部是一个 32 位的整数 ALU（支持 64 位扩展运算），以及一个 FPU（支持单双精浮点运算以及 FMA）。64位的双精运算需要一排的两个 CUDA 核共同完成。所以一个 SM 在一个时钟周期内最多可以完成 16 个双精 FMA 操作。</p>
+<p>接下来要说到流处理中的线程调度策略，Fermi 架构采用两级硬件调度器：</p>
+<ol>
+<li><p>Block 级的线程调度器，这里叫 GigaThread global scheduler，<strong>在 SM 的外面</strong>，负责把线程 block 调度给空闲的 SM 来处理。</p>
+<p>SM 本身能处理的指令都是 SIMD 的，这里的一条 SIMD 指令可以同时用上上图绿色部分的任意一排，即 16 个 CUDA 核、16 个 load/store 单元或者 4 个 SFU。</p>
+</li>
+<li><p>Wrap 级的线程调度器，就是上图中的 Warp Scheduler，<strong>在 SM 里面</strong>，且<strong>一个 SM 中有两个独立的 Warp 调度器和两个指令分发单元（dispatch unit）</strong>，负责把 Wrap 中的线程扔给具体的执行单元去跑。</p>
+<p>Wrap 本身表示的是 CUDA 里面的<strong>一组线程</strong>，即 32 个相似的线程打包在一起算是一个 Wrap。一个 SM 一次可以发射两个 Wrap，上图 4 排硬件中的任意两排可以同时执行。</p>
+<blockquote>
+<p>当然如果是两个用 SFU 的 Wrap或者两个用 load/store 单元的 Wrap 肯定就不能双发射了。 </p>
+</blockquote>
+</li>
+</ol>
+<p>然后回到书上那张图，这样就能明白是什么意思了。</p>
+<p>书上的 SIMD 通道其实就是把 CUDA 核和 load/store 单元给放在了一起，相当于半个 SM 的硬件数据通路的结构。抽象成这个样子之后，这个抽象结构跟之前 6.4 节的传统多线程处理器基本是一致的，只是这里的每条指令都是 SIMD 的。</p>
+<p>接下来是 GPU 上的存储结构：</p>
+<p><img data-src="http://jcf94.com/download/2018-02-06-cod2-gpumem.png" alt="GPU中的存储结构"></p>
+<p>一个 SM 中的寄存器大小是 32k * 32 位，被所有这些 CUDA 核共享，均摊下来相当于每个 CUDA 核可以用到 1k 个 32 位的寄存器，这个也就是前面那张书上的图上画着的数据。实际运行中单个线程最多可以用到 63 个向量寄存器，每个向量寄存器由 32 个 32 位的寄存器元素组成（不超过 64 * 32 = 2k 个 32 位寄存器）。</p>
+<p>片上有一块 64KB 大小的 shared memory 作为每个 block 的 local memory，这块片上内存可以配置成 L1 cache 或者手动来管理 shared memory。材质是 SRAM。</p>
+<p>再往下一级，被所有的 grid 共享的就是 GPU 上的主存，材质是 GDDR 内存。</p>
+<h2 id="6-7-Clusters-Warehouse-Scale-Computers-and-Other-Message-Passing-Multiprocessors"><a href="#6-7-Clusters-Warehouse-Scale-Computers-and-Other-Message-Passing-Multiprocessors" class="headerlink" title="6.7. Clusters, Warehouse Scale Computers, and Other Message-Passing Multiprocessors"></a>6.7. Clusters, Warehouse Scale Computers, and Other Message-Passing Multiprocessors</h2><p>简要地介绍了一下集群中的环境，多节点之间的通信方式这时候就要用到消息传递了，因为已经没有了统一的共享内存。</p>
+<h2 id="6-8-Introduction-to-Multiprocessor-Network-Topologies"><a href="#6-8-Introduction-to-Multiprocessor-Network-Topologies" class="headerlink" title="6.8. Introduction to Multiprocessor Network Topologies"></a>6.8. Introduction to Multiprocessor Network Topologies</h2><p>多处理器网络拓扑结构介绍。</p>
+<p>资料：</p>
+<ul>
+<li><a href="https://zhuanlan.zhihu.com/p/32216294" target="_blank" rel="noopener">破茧化蝶，从Ring Bus到Mesh网络，CPU片内总线的进化之路</a></li>
+</ul>
+<h2 id="6-9-Communicating-to-the-Outside-World-Cluster-Networking"><a href="#6-9-Communicating-to-the-Outside-World-Cluster-Networking" class="headerlink" title="6.9. Communicating to the Outside World: Cluster Networking"></a>6.9. Communicating to the Outside World: Cluster Networking</h2><p>与外界的通信：集群网络</p>
+<h2 id="6-10-Multiprocessor-Benchmarks-and-Performance-Models"><a href="#6-10-Multiprocessor-Benchmarks-and-Performance-Models" class="headerlink" title="6.10. Multiprocessor Benchmarks and Performance Models"></a>6.10. Multiprocessor Benchmarks and Performance Models</h2><p>多处理器基准测试和性能模型</p>
+<h2 id="6-11-Real-Stuff-Benchmarking-Intel-Core-i7-versus-NVIDIA-Tesla-GPU-538"><a href="#6-11-Real-Stuff-Benchmarking-Intel-Core-i7-versus-NVIDIA-Tesla-GPU-538" class="headerlink" title="6.11. Real Stuff: Benchmarking Intel Core i7 versus NVIDIA Tesla GPU 538"></a>6.11. Real Stuff: Benchmarking Intel Core i7 versus NVIDIA Tesla GPU 538</h2><p>实例：Intel Core i7与NVIDIA Tesla GPU 538的基准性能对比</p>
+<h2 id="6-12-Going-Faster-Multiple-Processors-and-Matrix-Multiply"><a href="#6-12-Going-Faster-Multiple-Processors-and-Matrix-Multiply" class="headerlink" title="6.12. Going Faster: Multiple Processors and Matrix Multiply"></a>6.12. Going Faster: Multiple Processors and Matrix Multiply</h2><p>这一章肯定就是把原本单核的改成多核啦，16 线程的 OpenMP 大约又提升了 14 倍不到的加速比，那么再算上前面所有的这些加速方案，到这里为止，相比第三章中一开始的最初版程序一共提高了 212 倍的性能！</p>
+<h2 id="6-13-Fallacies-and-Pitfalls"><a href="#6-13-Fallacies-and-Pitfalls" class="headerlink" title="6.13. Fallacies and Pitfalls"></a>6.13. Fallacies and Pitfalls</h2><h2 id="6-14-Concluding-Remarks"><a href="#6-14-Concluding-Remarks" class="headerlink" title="6.14. Concluding Remarks"></a>6.14. Concluding Remarks</h2><h2 id="6-15-Historical-Perspective-and-Further-Reading"><a href="#6-15-Historical-Perspective-and-Further-Reading" class="headerlink" title="6.15. Historical Perspective and Further Reading"></a>6.15. Historical Perspective and Further Reading</h2><p><a href="http://booksite.elsevier.com/9780124077263/downloads/historial%20perspectives/section_6.15.pdf" target="_blank" rel="noopener">PDF材料</a></p>
+<h2 id="6-16-Exercises"><a href="#6-16-Exercises" class="headerlink" title="6.16. Exercises"></a>6.16. Exercises</h2><p><a href="http://jcf94.com/download/2015-09-09-cod-CH06_Solution.pdf">答案</a></p>
+<hr>
+<h1 id="APPENDICES-A-Assemblers-Linkers-and-the-SPiM-Simulator"><a href="#APPENDICES-A-Assemblers-Linkers-and-the-SPiM-Simulator" class="headerlink" title="APPENDICES A. Assemblers, Linkers, and the SPiM Simulator"></a>APPENDICES A. Assemblers, Linkers, and the SPiM Simulator</h1><h2 id="A-1-Introduction"><a href="#A-1-Introduction" class="headerlink" title="A.1. Introduction"></a>A.1. Introduction</h2><h2 id="A-2-Assemblers"><a href="#A-2-Assemblers" class="headerlink" title="A.2. Assemblers"></a>A.2. Assemblers</h2><h2 id="A-3-Linkers"><a href="#A-3-Linkers" class="headerlink" title="A.3. Linkers"></a>A.3. Linkers</h2><h2 id="A-4-Loading"><a href="#A-4-Loading" class="headerlink" title="A.4. Loading"></a>A.4. Loading</h2><h2 id="A-5-Memory-Usage"><a href="#A-5-Memory-Usage" class="headerlink" title="A.5. Memory Usage"></a>A.5. Memory Usage</h2><h2 id="A-6-Procedure-Call-Convention"><a href="#A-6-Procedure-Call-Convention" class="headerlink" title="A.6. Procedure Call Convention"></a>A.6. Procedure Call Convention</h2><h2 id="A-7-Exceptions-and-Interrupts"><a href="#A-7-Exceptions-and-Interrupts" class="headerlink" title="A.7. Exceptions and Interrupts"></a>A.7. Exceptions and Interrupts</h2><h2 id="A-8-Input-and-Output"><a href="#A-8-Input-and-Output" class="headerlink" title="A.8. Input and Output"></a>A.8. Input and Output</h2><h2 id="A-9-SPIM"><a href="#A-9-SPIM" class="headerlink" title="A.9. SPIM"></a>A.9. SPIM</h2><h2 id="A-10-MIPS-R2000-Assembly-Language"><a href="#A-10-MIPS-R2000-Assembly-Language" class="headerlink" title="A.10. MIPS R2000 Assembly Language"></a>A.10. MIPS R2000 Assembly Language</h2><h2 id="A-11-Concluding-Remarks"><a href="#A-11-Concluding-Remarks" class="headerlink" title="A.11. Concluding Remarks"></a>A.11. Concluding Remarks</h2><h2 id="A-12-Exercises"><a href="#A-12-Exercises" class="headerlink" title="A.12. Exercises"></a>A.12. Exercises</h2><hr>
+<h1 id="APPENDICES-B-TH-2-High-Performance-Computing-System"><a href="#APPENDICES-B-TH-2-High-Performance-Computing-System" class="headerlink" title="APPENDICES B. TH-2 High Performance Computing System"></a>APPENDICES B. TH-2 High Performance Computing System</h1><h2 id="B-1-Introduction"><a href="#B-1-Introduction" class="headerlink" title="B.1. Introduction"></a>B.1. Introduction</h2><h2 id="B-2-Compute-Node"><a href="#B-2-Compute-Node" class="headerlink" title="B.2. Compute Node"></a>B.2. Compute Node</h2><h2 id="B-3-The-Frontend-Processors"><a href="#B-3-The-Frontend-Processors" class="headerlink" title="B.3. The Frontend Processors"></a>B.3. The Frontend Processors</h2><h2 id="B-4-The-Interconnect"><a href="#B-4-The-Interconnect" class="headerlink" title="B.4. The Interconnect"></a>B.4. The Interconnect</h2><h2 id="B-5-The-Software-Stack"><a href="#B-5-The-Software-Stack" class="headerlink" title="B.5. The Software Stack"></a>B.5. The Software Stack</h2><h2 id="B-6-LINPACK-Benchmark-Run-HPL"><a href="#B-6-LINPACK-Benchmark-Run-HPL" class="headerlink" title="B.6. LINPACK Benchmark Run (HPL)"></a>B.6. LINPACK Benchmark Run (HPL)</h2><h2 id="B-7-Concluding-Remarks"><a href="#B-7-Concluding-Remarks" class="headerlink" title="B.7. Concluding Remarks"></a>B.7. Concluding Remarks</h2><hr>
+<h1 id="APPENDICES-F-Networks-on-Chip"><a href="#APPENDICES-F-Networks-on-Chip" class="headerlink" title="APPENDICES F. Networks-on-Chip"></a>APPENDICES F. Networks-on-Chip</h1><hr>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/09/09/2015-09-09-cod/" rel="bookmark">计算机组成与设计.硬件/软件接口 学习笔记（一）</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/10/23/2015-10-23-virtualmemory/" rel="bookmark">硬件/软件接口 Virtual Memory</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/02/06/2018-02-06-cod2/" rel="bookmark">计算机组成与设计.硬件/软件接口 学习笔记（二）</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/08/16/2015-08-16-compilers/" rel="bookmark">编译原理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/11/03/2015-11-03-mpi/" rel="bookmark">并行编程 MPI初探</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 学习笔记</a>
+              <a href="/tags/%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/" rel="tag"># 体系结构</a>
+              <a href="/tags/%E7%BB%84%E6%88%90%E4%B8%8E%E8%AE%BE%E8%AE%A1-%E7%A1%AC%E8%BD%AF%E4%BB%B6%E6%8E%A5%E5%8F%A3/" rel="tag"># 组成与设计.硬软件接口</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/02/06/2018-02-06-cod2/" rel="prev" title="计算机组成与设计.硬件/软件接口 学习笔记（二）">
+      <i class="fa fa-chevron-left"></i> 计算机组成与设计.硬件/软件接口 学习笔记（二）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/02/13/2018-02-13-intel/" rel="next" title="Intel 处理器架构演进">
+      Intel 处理器架构演进 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#CHAPTER-6-Parallel-Processors-from-Client-to-Cloud"><span class="nav-text">CHAPTER 6. Parallel Processors from Client to Cloud</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#6-1-Introduction"><span class="nav-text">6.1. Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-2-The-Difficulty-of-Creating-Parallel-Processing-Programs"><span class="nav-text">6.2. The Difficulty of Creating Parallel Processing Programs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-3-SISD-MIMD-SIMD-SPMD-and-Vector"><span class="nav-text">6.3. SISD, MIMD, SIMD, SPMD, and Vector</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-4-Hardware-Multithreading"><span class="nav-text">6.4. Hardware Multithreading</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-5-Multicore-and-Other-Shared-Memory-Multiprocessors"><span class="nav-text">6.5. Multicore and Other Shared Memory Multiprocessors</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-6-Introduction-to-Graphics-Processing-Units"><span class="nav-text">6.6. Introduction to Graphics Processing Units</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-7-Clusters-Warehouse-Scale-Computers-and-Other-Message-Passing-Multiprocessors"><span class="nav-text">6.7. Clusters, Warehouse Scale Computers, and Other Message-Passing Multiprocessors</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-8-Introduction-to-Multiprocessor-Network-Topologies"><span class="nav-text">6.8. Introduction to Multiprocessor Network Topologies</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-9-Communicating-to-the-Outside-World-Cluster-Networking"><span class="nav-text">6.9. Communicating to the Outside World: Cluster Networking</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-10-Multiprocessor-Benchmarks-and-Performance-Models"><span class="nav-text">6.10. Multiprocessor Benchmarks and Performance Models</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-11-Real-Stuff-Benchmarking-Intel-Core-i7-versus-NVIDIA-Tesla-GPU-538"><span class="nav-text">6.11. Real Stuff: Benchmarking Intel Core i7 versus NVIDIA Tesla GPU 538</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-12-Going-Faster-Multiple-Processors-and-Matrix-Multiply"><span class="nav-text">6.12. Going Faster: Multiple Processors and Matrix Multiply</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-13-Fallacies-and-Pitfalls"><span class="nav-text">6.13. Fallacies and Pitfalls</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-14-Concluding-Remarks"><span class="nav-text">6.14. Concluding Remarks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-15-Historical-Perspective-and-Further-Reading"><span class="nav-text">6.15. Historical Perspective and Further Reading</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-16-Exercises"><span class="nav-text">6.16. Exercises</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#APPENDICES-A-Assemblers-Linkers-and-the-SPiM-Simulator"><span class="nav-text">APPENDICES A. Assemblers, Linkers, and the SPiM Simulator</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-1-Introduction"><span class="nav-text">A.1. Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-2-Assemblers"><span class="nav-text">A.2. Assemblers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-3-Linkers"><span class="nav-text">A.3. Linkers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-4-Loading"><span class="nav-text">A.4. Loading</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-5-Memory-Usage"><span class="nav-text">A.5. Memory Usage</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-6-Procedure-Call-Convention"><span class="nav-text">A.6. Procedure Call Convention</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-7-Exceptions-and-Interrupts"><span class="nav-text">A.7. Exceptions and Interrupts</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-8-Input-and-Output"><span class="nav-text">A.8. Input and Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-9-SPIM"><span class="nav-text">A.9. SPIM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-10-MIPS-R2000-Assembly-Language"><span class="nav-text">A.10. MIPS R2000 Assembly Language</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-11-Concluding-Remarks"><span class="nav-text">A.11. Concluding Remarks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-12-Exercises"><span class="nav-text">A.12. Exercises</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#APPENDICES-B-TH-2-High-Performance-Computing-System"><span class="nav-text">APPENDICES B. TH-2 High Performance Computing System</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#B-1-Introduction"><span class="nav-text">B.1. Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-2-Compute-Node"><span class="nav-text">B.2. Compute Node</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-3-The-Frontend-Processors"><span class="nav-text">B.3. The Frontend Processors</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-4-The-Interconnect"><span class="nav-text">B.4. The Interconnect</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-5-The-Software-Stack"><span class="nav-text">B.5. The Software Stack</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-6-LINPACK-Benchmark-Run-HPL"><span class="nav-text">B.6. LINPACK Benchmark Run (HPL)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-7-Concluding-Remarks"><span class="nav-text">B.7. Concluding Remarks</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#APPENDICES-F-Networks-on-Chip"><span class="nav-text">APPENDICES F. Networks-on-Chip</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '0586fde6bf02838c693cf41f605ab878',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

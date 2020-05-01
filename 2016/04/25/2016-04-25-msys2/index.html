@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="生命不息，折腾不止。   最近感觉Linux越用越顺手了，尤其是Linux下的shell（此处可以特指一下目前正在用的zsh…）甩了Windows的cmd好多条街。 我平时在Windows下也经常用命令行，之前装了个Git for Windows之后，里面自带的ls&#x2F;ssh&#x2F;grep等等基本上已经成了我Windows下常用的命令了。 以前没怎么注意，昨天看了下Git for Windows本身就">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MSYS2-Windows下的类Unix环境">
+<meta property="og:url" content="https://jcf94.com/2016/04/25/2016-04-25-msys2/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="生命不息，折腾不止。   最近感觉Linux越用越顺手了，尤其是Linux下的shell（此处可以特指一下目前正在用的zsh…）甩了Windows的cmd好多条街。 我平时在Windows下也经常用命令行，之前装了个Git for Windows之后，里面自带的ls&#x2F;ssh&#x2F;grep等等基本上已经成了我Windows下常用的命令了。 以前没怎么注意，昨天看了下Git for Windows本身就">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-04-25T02:30:24.000Z">
+<meta property="article:modified_time" content="2016-04-27T08:06:31.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="MSYS2">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2016/04/25/2016-04-25-msys2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>MSYS2-Windows下的类Unix环境 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2016/04/25/2016-04-25-msys2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MSYS2-Windows下的类Unix环境
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-04-25 10:30:24" itemprop="dateCreated datePublished" datetime="2016-04-25T10:30:24+08:00">2016-04-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2016-04-27 16:06:31" itemprop="dateModified" datetime="2016-04-27T16:06:31+08:00">2016-04-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote class="blockquote-center">
+生命不息，折腾不止。
+</blockquote>
+
+<p>最近感觉Linux越用越顺手了，尤其是Linux下的shell（此处可以特指一下目前正在用的zsh…）甩了Windows的cmd好多条街。</p>
+<p>我平时在Windows下也经常用命令行，之前装了个Git for Windows之后，里面自带的ls/ssh/grep等等基本上已经成了我Windows下常用的命令了。</p>
+<p>以前没怎么注意，昨天看了下Git for Windows本身就是用MSYS环境搭的，想想干脆装一个完整的MSYS2好了。</p>
+<a id="more"></a>
+
+<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>MSYS是基于MinGW开发的一个类Unix环境，MinGW可以认为是Windows下的GNU环境，也是一直以来我就在Dev和Code::Blocks上面用的东西。感觉是相当于在Windows下面用MinGW把Linux下GNU写的东西再实现一遍。</p>
+<p>相对的，还有个Unix环境叫cygwin，比起MSYS来说cygwin更接近正常的Linux，它是依靠一个中间层把Posix调用转换成Windows的API，就像一个虚拟机一样。可能运行速度会慢一点，不过已经跟普通的Linux没什么区别了，而MSYS可能会弱很多。</p>
+<p>问题是MinGW和MSYS更新得比较慢，然后就有人开发了MSYS2，它是fork了cygwin比较新的开发版，然后用MinGW重新实现了一部分内容而成，保持了MSYS的轻巧，同时功能上也不比cygwin弱多少。</p>
+<p>更加重要的是，MSYS2用<strong>pacman</strong>作为包管理器！这个对于一个刚转到Arch Linux，然后逐渐开始习惯Arch的环境的人来说简直就是送上门来的好事。</p>
+<p>更多详细介绍，详见知乎上的这个问题：</p>
+<ul>
+<li><a href="https://www.zhihu.com/question/22137175" target="_blank" rel="noopener">Cygwin和MinGW的区别与联系是怎样的？</a></li>
+</ul>
+<h1 id="开始折腾"><a href="#开始折腾" class="headerlink" title="开始折腾"></a>开始折腾</h1><p>MSYS2的<a href="https://msys2.github.io/" target="_blank" rel="noopener">官网</a>居然是搭在github pages上面的，跟我的博客一样，一看这地址就觉得亲切了。</p>
+<p>下载安装包，然后装上。</p>
+<p>打开msys的shell之后首先升级一下pacman，然后就可以愉快地<code>Syu</code>了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ pacman -Sy pacman</span><br><span class="line">$ pacman -Syu</span><br></pre></td></tr></table></figure>
+
+<p>看到pacman这个熟悉的指令，感觉更亲切了~</p>
+<p><code>Syu</code>可能需要多次，第一次的时候升级了文件系统等等工具软件，结束后需要直接关闭shell软件然后重启继续更新。</p>
+<p>然后把常用的一些东西都装上：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pacman -S git zsh vim</span><br></pre></td></tr></table></figure>
+
+<p>把MSYS目录中的<code>usr/bin</code>加到环境变量里面去，在正常的cmd下面就也能跑其中的软件了。</p>
+<p>装好vim之后可以把软件源改成<a href="https://lug.ustc.edu.cn/wiki/mirrors/help/msys2" target="_blank" rel="noopener">科大</a>的。</p>
+<h2 id="zsh"><a href="#zsh" class="headerlink" title="zsh"></a>zsh</h2><p>MSYS自带的几个exe文件都是生成好的，默认用的是bash，我试了下正常打开之后找不到Linux下chsh等等命令，因此需要在启动mintty的时候直接加上使用zsh的参数。</p>
+<p>MSYS目录下提供了几个bat和cmd的脚本，用于添加环境和启动shell。</p>
+<p>直接修改<code>start_shell.cmd</code>，找到<code>startmintty</code>下面启动的参数，把bash改成zsh即可。之后要使用<code>msys2_shell.bat</code>这个脚本来启动MSYS的环境。</p>
+<p>为了能在<code>win+R</code>窗口中直接打开MSYS，我给<code>msys2_shell.bat</code>脚本做了个软链接，<code>win+X+a</code>管理员权限启动cmd窗口，然后切到MSYS的<code>usr/bin</code>目录里面：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">c:\msys64\usr\bin&gt; mklink msys.bat c:\msys64\msys2_shell.bat</span><br></pre></td></tr></table></figure>
+
+<p>这样就创建了一个名字是<code>msys.bat</code>的软链接，由于上面已经把<code>usr/bin</code>加到系统环境变量中了，现在可以在<code>win+R</code>的窗口中直接输入<code>msys</code>就能正常打开MSYS的shell了。</p>
+<blockquote>
+<p>有个问题是在cmd下输入msys的话，会跳出来：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'"c:\msys64\usr\bin\start_shell.cmd"'</span> 不是内部或外部命令，也不是可运行的程序或批处理文件。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这样的东西。<br>看来这两个的执行机制稍微有点区别啊，感觉还是怪怪的，让人不太舒服，等等想办法解决一下。</p>
+</blockquote>
+<p>或者直接在cmd里面输入<code>zsh --login</code>即可打开加载了完整环境内容的zsh。</p>
+<h2 id="SHELL变量"><a href="#SHELL变量" class="headerlink" title="SHELL变量"></a>SHELL变量</h2><p>打开MSYS时，想用<code>echo $SHELL</code>输出shell信息时是空的，需要改改把信息加上去。编辑<code>/etc/profile</code>文件，找到：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">elif</span> [ ! <span class="string">"x<span class="variable">$&#123;ZSH_VERSION&#125;</span>"</span> = <span class="string">"x"</span> ]; <span class="keyword">then</span></span><br><span class="line">  HOSTNAME=<span class="string">"<span class="variable">$(/usr/bin/hostname)</span>"</span></span><br><span class="line">  profile_d zsh</span><br><span class="line">  PS1=<span class="string">'(%n@%m)[%h] %~ %% '</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个if语句里面加上<code>SHELL=\</code>which zsh``即可。</p>
+<h2 id="Linux中的软链接“ln-s”"><a href="#Linux中的软链接“ln-s”" class="headerlink" title="Linux中的软链接“ln -s”"></a>Linux中的软链接“ln -s”</h2><p>然后是MSYS因为受到Windows机制的影响，默认使用<code>ln -s</code>做软链接的时候直接就变成复制了，也需要在<code>/etc/profile</code>文件里面加上一个关键变量：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> MSYS=<span class="string">"winsymlinks:lnk"</span></span><br></pre></td></tr></table></figure>
+
+<p>之后<code>ln -s</code>就正常了。</p>
+<h2 id="访问其他目录"><a href="#访问其他目录" class="headerlink" title="访问其他目录"></a>访问其他目录</h2><p>在MSYS里面查看当前的文件系统是这样的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ df -h</span><br><span class="line">Filesystem      Size  Used Avail Use% Mounted on</span><br><span class="line">C:/msys64       100G   76G   24G  77% /</span><br><span class="line">D:              832G  715G  117G  86% /d</span><br></pre></td></tr></table></figure>
+
+<p>MSYS的安装目录作为当前Linux环境的根目录，然后我的D盘挂在<code>/d</code>下面。在这样的环境中，Linux的挂载命令就非常好用了，建个文件夹然后直接用<code>mount</code>把目标目录挂上去就可以了，比如C盘：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir ~/c</span><br><span class="line">$ mount c:/ ~/c</span><br></pre></td></tr></table></figure>
+
+<p>即可。</p>
+<blockquote>
+<p>刚才作了个死，吓出一身冷汗。<br>测试挂载的时候刚好也在试软链接，然后一下忘了c这个文件夹是C盘的挂载点了，还以为是软链接就直接<code>rm -rf</code>下去了…<br>还好C盘里面的东西MSYS没有权限，所以它只删掉了自己的安装目录…删掉了自己的安装目录…自己的安装目录…安装目录！！！！<br>只好卸了重装了一遍MSYS</p>
+<p>以后用<code>rm</code>命令一定要特别特别特别小心！！！</p>
+</blockquote>
+<h2 id="右键添加“在此打开MSYS2”选项"><a href="#右键添加“在此打开MSYS2”选项" class="headerlink" title="右键添加“在此打开MSYS2”选项"></a>右键添加“在此打开MSYS2”选项</h2><p><code>win+R</code>输入regedit打开注册表管理器，在<code>[HKEY_CLASSES_ROOT\Directory\Background\shell]</code>下新建一个项，命名为<code>msys2</code>，值的内容是“Open MSYS2 Here”；</p>
+<p>在<code>[HKEY_CLASSES_ROOT\Directory\Background\shell\msys2]</code>下新建一个项，命名为<code>command</code>，值的内容是“c:\msys64\msys2_shell.bat”</p>
+<blockquote>
+<p>shift+右键菜单里面本来也就有一个打开cmd的选项，用那个感觉更方便一点，把需要加载的环境变量内容直接写在<code>.zshrc</code>里面，然后在cmd中不加<code>--login</code>选项运行zsh就好。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/07/13/2015-07-13-makefile/" rel="bookmark">Makefile解析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/04/15/2016-04-15-gcc/" rel="bookmark">记一段差点被Gcc逼疯的历程</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/04/10/2016-04-10-arch/" rel="bookmark">Arch Linux over Yoga 3 11</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/08/30/2016-08-30-iptables/" rel="bookmark">填坑系列 - Iptables</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/tags/MSYS2/" rel="tag"># MSYS2</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/04/18/2016-04-18-spring/" rel="prev" title="USTC Spring Outing 2016">
+      <i class="fa fa-chevron-left"></i> USTC Spring Outing 2016
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/04/30/2016-04-30-qcloud/" rel="next" title="VPS 的折腾之路">
+      VPS 的折腾之路 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#介绍"><span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#开始折腾"><span class="nav-text">开始折腾</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#zsh"><span class="nav-text">zsh</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SHELL变量"><span class="nav-text">SHELL变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux中的软链接“ln-s”"><span class="nav-text">Linux中的软链接“ln -s”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#访问其他目录"><span class="nav-text">访问其他目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#右键添加“在此打开MSYS2”选项"><span class="nav-text">右键添加“在此打开MSYS2”选项</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '091323d1162f2e5a53ac647ae001cc64',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

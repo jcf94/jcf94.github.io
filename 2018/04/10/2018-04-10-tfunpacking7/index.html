@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="接上篇：  TensorFlow 拆包（一）：Session.Run() TensorFlow 拆包（二）：TF 的数据流模型实现 TensorFlow 拆包（三）：Graph 和 Node TensorFlow 拆包（四）：Device TensorFlow 拆包（五）：Distributed TensorFlow 拆包（六）：RDMA  开始分析性能瓶颈了，本篇记录一下研究 TF 中自带的 P">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TensorFlow 拆包（七）：Profiling 踩坑 &amp; Benchmark">
+<meta property="og:url" content="https://jcf94.com/2018/04/10/2018-04-10-tfunpacking7/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="接上篇：  TensorFlow 拆包（一）：Session.Run() TensorFlow 拆包（二）：TF 的数据流模型实现 TensorFlow 拆包（三）：Graph 和 Node TensorFlow 拆包（四）：Device TensorFlow 拆包（五）：Distributed TensorFlow 拆包（六）：RDMA  开始分析性能瓶颈了，本篇记录一下研究 TF 中自带的 P">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2018-04-10-tfunpacking7-graph_timeline.png">
+<meta property="article:published_time" content="2018-04-10T05:26:52.000Z">
+<meta property="article:modified_time" content="2018-10-30T08:37:52.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="TensorFlow">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2018-04-10-tfunpacking7-graph_timeline.png">
+
+<link rel="canonical" href="https://jcf94.com/2018/04/10/2018-04-10-tfunpacking7/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>TensorFlow 拆包（七）：Profiling 踩坑 & Benchmark | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2018/04/10/2018-04-10-tfunpacking7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TensorFlow 拆包（七）：Profiling 踩坑 & Benchmark
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-04-10 13:26:52" itemprop="dateCreated datePublished" datetime="2018-04-10T13:26:52+08:00">2018-04-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-10-30 16:37:52" itemprop="dateModified" datetime="2018-10-30T16:37:52+08:00">2018-10-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Project/" itemprop="url" rel="index"><span itemprop="name">Project</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>接上篇：</p>
+<ul>
+<li><a href="/2018/01/13/2018-01-13-tfunpacking/">TensorFlow 拆包（一）：Session.Run()</a></li>
+<li><a href="/2018/01/23/2018-01-23-tfunpacking2/">TensorFlow 拆包（二）：TF 的数据流模型实现</a></li>
+<li><a href="/2018/02/28/2018-02-28-tfunpacking3/">TensorFlow 拆包（三）：Graph 和 Node</a></li>
+<li><a href="/2018/03/07/2018-03-07-tfunpacking4/">TensorFlow 拆包（四）：Device</a></li>
+<li><a href="/2018/03/09/2018-03-09-tfunpacking5/">TensorFlow 拆包（五）：Distributed</a></li>
+<li><a href="/2018/03/12/2018-03-12-tfunpacking6/">TensorFlow 拆包（六）：RDMA</a></li>
+</ul>
+<p>开始分析性能瓶颈了，本篇记录一下研究 TF 中自带的 Profiling 工具时遇到的几个坑点。</p>
+<a id="more"></a>
+
+<h1 id="profiler"><a href="#profiler" class="headerlink" title="profiler"></a>profiler</h1><p>大概 17 年 5 月左右，<code>/tensorflow/core/</code> 中新加了一个 profiler 的目录，里面是把原本在 contrib 中的 profiling 工具移过来了，大概正式 release 应该是在 1.6、1.7 里面。</p>
+<ul>
+<li><a href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/core/profiler" target="_blank" rel="noopener">TensorFlow Profiler and Advisor</a></li>
+</ul>
+<p>关于生成 profiling 的 context 文件详见 <code>tf.profiler</code> 相关的内容，这里直接开始记录怎么用 <code>tfprof</code> 这个工具。</p>
+<p>试了一下 pip 包里面应该是没有单独包含的，需要从源码手动编译：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bazel build //tensorflow/core/profiler</span><br></pre></td></tr></table></figure>
+
+<p>然后使用也是要从 bazel-bin 的目录中打开：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bazel-bin/tensorflow/core/profiler/profiler --profile_path=xxxxx</span><br></pre></td></tr></table></figure>
+
+<h2 id="profiler-ui"><a href="#profiler-ui" class="headerlink" title="profiler_ui"></a>profiler_ui</h2><p>profiler 的 README 中，示例代码除了 profiler 以外还有个 profiler_ui，基本上是一个类似 tensorboard 的网页前端，方便调用后端的 profiler 进行可视化查看用的。</p>
+<p>这里虽然写着暂未开源，但是在 TensorFlow 的 github 总目录里面可以找到一个<a href="https://github.com/tensorflow/profiler-ui" target="_blank" rel="noopener">叫 profiler-ui 的项目</a>，就是那个未完善开源的 ui 版了。</p>
+<p>看了下，安装需要用到 go 以及 Google 自家的 pprof 工具，可能是因为耦合的其他部件比较多，所以暂时还没有并入 TF 的主代码中去。不过这里的 Installation 已经足够我们自己装上了。</p>
+<blockquote>
+<p>装 pprof 的时候会有个坑点，CentOS 库中可以找到 gperftools 这个工具，也是 Google 提供的，yum 装上之后可执行文件的名字也叫 pprof ！！但是跟这里用到的 pprof 不是一个玩意！！</p>
+</blockquote>
+<p>之后按照示例上的说明：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python ui.py --profile_context_path=xxxx</span><br></pre></td></tr></table></figure>
+
+<p>即可启用。</p>
+<p>在我尝试使用它的时候，距离这个库上一次 git 的更新已经过去 1 个月左右了，不知道是 python 版本还是什么原因，直接运行可能会遇到找不到 <code>server</code> 的路径等等的 bug，直接在 <code>ui.py</code> 里面稍微改一下就好。</p>
+<h1 id="Profiling"><a href="#Profiling" class="headerlink" title="Profiling"></a>Profiling</h1><p>运行 TF 时保存出来的 profiling 文件包含了大量信息，主要有几个方面：</p>
+<ul>
+<li>scope：应该是 python 层代码中用 <code>tf.name_scope()</code> 包起来的视图</li>
+<li>graph：TensorFlow 计算图的视图</li>
+<li>op：把 TensorFlow 计算图再细化一层</li>
+<li>code：Python 代码视图</li>
+</ul>
+<p>默认会按列表把所选的视图中的一些信息给输出出来，另外用<code>-output</code> 选项可以指定输出成另外的格式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">tfprof&gt;</span><br><span class="line">xxx xxx -output timeline:outfile=xxxxx</span><br><span class="line"><span class="comment"># 把结果输出成 chrome 用的时间线 trace 文件，可以在 chrome 地址栏中输入 chrome://tracing 打开</span></span><br><span class="line"><span class="comment"># 只支持 graph、scope、code 这 3 种视图</span></span><br><span class="line">xxx xxx -output pprof:outfile=xxxxx</span><br><span class="line"><span class="comment"># 把结果输出成 pprof 用的可视化文件（所以前面装 pprof 就是为了这个）</span></span><br><span class="line"><span class="comment"># 只支持 code 这种视图</span></span><br><span class="line"><span class="comment"># --------------------------------------------------------------------------</span></span><br><span class="line"><span class="comment"># pprof 可视化文件之后可以用 pprof 来变成图片（猜测大概是类似 GraphViz 的数据结构）</span></span><br><span class="line">pprof -svg --nodecount=10000 --sample_index=1 xxxxxx.prof &gt; xxxxxx.svg</span><br></pre></td></tr></table></figure>
+
+<p>profiler_ui 打开时的第一个页面就是 graph 视图生成的 timeline：</p>
+<p><img data-src="http://jcf94.com/download/2018-04-10-tfunpacking7-graph_timeline.png" alt=""></p>
+<p>其中包含了计算图中每个 node 在卡上的情况，运行时间、数据流动依赖关系等等。（话说显示的太复杂了，事实上我觉得还是很难看）</p>
+<p>然后默认的 scope 视图以及 code 视图得到的 timeline 我也感觉并没有什么用。</p>
+<p>code 视图输出成的 pprof 图片倒是还可以看一下，但是感觉用处也不大</p>
+<blockquote>
+<p>所以最后感觉还是不知道该怎么用好这套 profiling 工具</p>
+</blockquote>
+<h2 id="Options"><a href="#Options" class="headerlink" title="Options"></a>Options</h2><p>在 tfprof 界面直接回车可以看到默认的选项，然后这里面的内容都是可以改的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">tfprof&gt;                             </span><br><span class="line">-max_depth                  10      </span><br><span class="line">-min_bytes                  0       </span><br><span class="line">-min_peak_bytes             0       </span><br><span class="line">-min_residual_bytes         0       </span><br><span class="line">-min_output_bytes           0       </span><br><span class="line">-min_micros                 0       </span><br><span class="line">-min_accelerator_micros     0       </span><br><span class="line">-min_cpu_micros             0       </span><br><span class="line">-min_params                 0       </span><br><span class="line">-min_float_ops              0       </span><br><span class="line">-min_occurrence             0       </span><br><span class="line">-step                       -1      </span><br><span class="line">-order_by                   name    </span><br><span class="line">-account_type_regexes       .*      </span><br><span class="line">-start_name_regexes         .*      </span><br><span class="line">-trim_name_regexes                  </span><br><span class="line">-show_name_regexes          .*      </span><br><span class="line">-hide_name_regexes                  </span><br><span class="line">-account_displayed_op_only  <span class="literal">false</span>   </span><br><span class="line">-select                     micros  </span><br><span class="line">-output                     stdout:</span><br></pre></td></tr></table></figure>
+
+<p>稍微挑几个写一下：</p>
+<p><code>-max_depth</code>：指定显示前多少个 node（配合下面的 -order_by ？）</p>
+<p><code>-step</code>：profiling 记录的文件可能包含了很多个 step，用这个选项来指定当前分析哪个 step 的信息，默认 -1 是对所有 step 做平均</p>
+<p><code>-order_by</code>：打出来列表的时候，按照什么来排序：</p>
+<ul>
+<li>name：node 的名称</li>
+<li>depth：node 在节点树中的深度</li>
+<li>bytes：占用的内存数</li>
+<li>peak_bytes：占用的峰值内存数</li>
+<li>residual_bytes：计算完成之后，还剩下不释放的内存数</li>
+<li>output_bytes：输出的大小</li>
+<li>micros：node 计算所花费的时间</li>
+<li>accelerator_micros：node 计算所花费的加速卡时间（区别于 CPU 的其他设备）</li>
+<li>cpu_micros：node 计算所花费的 CPU 时间</li>
+<li>params：node 中包含的参数量</li>
+<li>float_ops：node 所需要的浮点运算次数</li>
+<li>occurrence：node 在图中出现的次数</li>
+</ul>
+<p><code>-account_type_regexes</code>：筛选出类型里面带有某些前缀的 node 有多少个</p>
+<p><code>-start_name_regexes</code>：筛选出名字中带某些前缀的 node</p>
+<p><code>-trim_name_regexes</code>：隐藏掉名字中带某些前缀的 node</p>
+<p><code>-show_name_regexes</code>：筛选出名字中带某些字符的 node</p>
+<p><code>-hide_name_regexes</code>：隐藏掉名字中带某些字符的 node</p>
+<p><code>-select</code>：选择视图中的哪些内容（有点像从数据库里面找东西的感觉），输出 timeline 的时候配合这个应该能够得到不同的数据：</p>
+<ul>
+<li>bytes：占用的内存数</li>
+<li>peak_bytes：占用的峰值内存数</li>
+<li>residual_bytes：计算完成之后，还剩下不释放的内存数</li>
+<li>output_bytes：输出的大小</li>
+<li>micros：计算所花费的时间</li>
+<li>accelerator_micros：计算所花费的加速卡时间</li>
+<li>cpu_micros：计算所花费的 CPU 时间</li>
+<li>params： 参数量</li>
+<li>float_ops：浮点运算次数</li>
+<li>occurrence：在计算图中出现的次数</li>
+<li>tensor_value：tensor 数据的值（估计需要配合 checkpoint 用）</li>
+<li>device：op 放在哪个设备上</li>
+<li>op_types：op 类型</li>
+<li>input_shapes：输入的形状</li>
+</ul>
+<h1 id="Trace"><a href="#Trace" class="headerlink" title="Trace"></a>Trace</h1><p>抛开上面那个目前还没有正式 Release 的 Profiling 接口不说，实际可以用来做分析的是一套生成 trace_file 的 API。</p>
+<p>用法也很简单：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)</span><br><span class="line">run_metadata = tf.RunMetadata()</span><br><span class="line"></span><br><span class="line">_ = sess.run(optimizer, options=options, run_metadata=run_metadata)</span><br><span class="line"></span><br><span class="line">fetched_timeline = timeline.Timeline(run_metadata.step_stats)</span><br><span class="line">chrome_trace = fetched_timeline.generate_chrome_trace_format()</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> open(FLAGS.trace_file, <span class="string">'w'</span>) <span class="keyword">as</span> f:</span><br><span class="line">    f.write(chrome_trace)</span><br><span class="line">print(<span class="string">'Chrome Trace File write in %s'</span> % FLAGS.trace_file)</span><br></pre></td></tr></table></figure>
+
+<p>在 RunOptions 中设置好追踪的级别，然后作为参数一起参与 <code>Session.run()</code>，最后记录得到的每个 step 的追踪数据通过 run_metadata 的结构返回出来。通过对追踪结果的解析即可生成我们可以理解的图形数据了，这个用的是 chrome 支持的 json 格式，在 chrome 地址栏中输入 <code>chrome://tracing/</code> 即可很方便地查看，timeline 最后出来的效果跟上面的是一致的。</p>
+<blockquote>
+<p>应该说，前面这个 Profiling 的 API 应该底层封装的也是这套机制。</p>
+</blockquote>
+<p>在 DirectSession 中可以非常容易地找到与 trace_level 相关的代码：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">  <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;DeviceTracer&gt; tracer;</span><br><span class="line">  <span class="keyword">if</span> (run_options.trace_level() &gt;= RunOptions::HARDWARE_TRACE) &#123;</span><br><span class="line">    tracer = CreateDeviceTracer();</span><br><span class="line">    <span class="comment">// tracer may be NULL on platforms without accelerators.</span></span><br><span class="line">    <span class="keyword">if</span> (tracer) &#123;</span><br><span class="line">      Status s = tracer-&gt;Start();</span><br><span class="line">      <span class="keyword">if</span> (!s.ok()) &#123;</span><br><span class="line">        run_state.executors_done.Notify();</span><br><span class="line">        <span class="keyword">delete</span> barrier;</span><br><span class="line">        <span class="keyword">return</span> s;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">...</span><br><span class="line">  <span class="keyword">if</span> (tracer) &#123;</span><br><span class="line">    TF_RETURN_IF_ERROR(tracer-&gt;Stop());</span><br><span class="line">    TF_RETURN_IF_ERROR(tracer-&gt;Collect(run_state.collector.get()));</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中 DeviceTracer 是一个预留给多种设备来方便进行性能分析的接口，可惜的是目前里面的实现只有 GPU 的，需要依靠 CUDA 提供的 CUPTI 库。所以大概追踪过程中得到的与 CPU 相关的信息应该也是 CUPTI 附带的，如果是纯 CPU 版本的 TensorFlow，<code>CreateDeviceTracer()</code> 直接返回的是一个空指针。</p>
+<h2 id="Distributed"><a href="#Distributed" class="headerlink" title="Distributed"></a>Distributed</h2><p>由于分布式环境下的 Session 的执行模式与单机情况下有所不同，因而分布式下运行 trace 的工作方式也会有所区别。</p>
+<p>MasterSession 中首次执行 PartialRun 时会初始化 PerStepState：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// If this is the first partial run, initialize the PerStepState.</span></span><br><span class="line"><span class="keyword">if</span> (!run_state-&gt;step_started) &#123;</span><br><span class="line">  run_state-&gt;step_started = <span class="literal">true</span>;</span><br><span class="line">  PerStepState pss;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">auto</span> count = run_state-&gt;count;</span><br><span class="line">  pss.collect_timeline =</span><br><span class="line">      req.options().trace_level() == RunOptions::FULL_TRACE;</span><br><span class="line">  pss.collect_rpcs = req.options().trace_level() == RunOptions::FULL_TRACE;</span><br><span class="line">  pss.report_tensor_allocations_upon_oom =</span><br><span class="line">      req.options().report_tensor_allocations_upon_oom();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Build the cost model every 'build_cost_model_every' steps after skipping</span></span><br><span class="line">  <span class="comment">// an</span></span><br><span class="line">  <span class="comment">// initial 'build_cost_model_after' steps.</span></span><br><span class="line">  <span class="keyword">const</span> int64 build_cost_model_after =</span><br><span class="line">      session_opts_.config.graph_options().build_cost_model_after();</span><br><span class="line">  <span class="keyword">const</span> int64 build_cost_model_every =</span><br><span class="line">      session_opts_.config.graph_options().build_cost_model();</span><br><span class="line">  pss.collect_costs =</span><br><span class="line">      build_cost_model_every &gt; <span class="number">0</span> &amp;&amp;</span><br><span class="line">      ((count + <span class="number">1</span> - build_cost_model_after) % build_cost_model_every == <span class="number">0</span>);</span><br><span class="line">  pss.collect_partition_graphs = req.options().output_partition_graphs();</span><br><span class="line"></span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;ProfileHandler&gt; ph = run_state-&gt;rcg-&gt;GetProfileHandler(</span><br><span class="line">      run_state-&gt;step_id, count, req.options());</span><br><span class="line">  <span class="keyword">if</span> (ph) &#123;</span><br><span class="line">    pss.collect_timeline = <span class="literal">true</span>;</span><br><span class="line">    pss.collect_rpcs = ph-&gt;should_collect_rpcs();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  run_state-&gt;pss = <span class="built_in">std</span>::move(pss);</span><br><span class="line">  run_state-&gt;ph = <span class="built_in">std</span>::move(ph);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里会根据 trace_level 的值来设置一些标记。</p>
+<p>下一步，pss 中的内容又会被写到 exec_opts 结构中：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Collect execution cost stats on a smoothly decreasing frequency.</span></span><br><span class="line">ExecutorOpts exec_opts;</span><br><span class="line"><span class="keyword">if</span> (pss-&gt;report_tensor_allocations_upon_oom) &#123;</span><br><span class="line">  exec_opts.set_report_tensor_allocations_upon_oom(<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (pss-&gt;collect_costs) &#123;</span><br><span class="line">  exec_opts.set_record_costs(<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (pss-&gt;collect_timeline) &#123;</span><br><span class="line">  exec_opts.set_record_timeline(<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (pss-&gt;collect_rpcs) &#123;</span><br><span class="line">  SetRPCLogging(<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (pss-&gt;collect_partition_graphs) &#123;</span><br><span class="line">  exec_opts.set_record_partition_graphs(<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (pss-&gt;collect_costs || pss-&gt;collect_timeline) &#123;</span><br><span class="line">  pss-&gt;step_stats.resize(partitions_.size());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个结构会被封装在 rpc 的 call 中发送给 WorkerService 来处理。</p>
+<p>在 Worker 的运行结构中，可以看到这样的代码：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">StepStatsCollector* collector = <span class="literal">nullptr</span>;</span><br><span class="line"><span class="keyword">if</span> (request-&gt;exec_opts().report_tensor_allocations_upon_oom() ||</span><br><span class="line">    request-&gt;exec_opts().record_timeline() ||</span><br><span class="line">    request-&gt;exec_opts().record_costs()) &#123;</span><br><span class="line">  collector = <span class="keyword">new</span> StepStatsCollector(response-&gt;mutable_step_stats());</span><br><span class="line">  <span class="comment">// TODO(mrry,pbar): GPU tracing for distributed steps.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>好吧，StepStatsCollector 都已经创建了，但是可惜后续具体的 GPU tracing 部分还没有往里面完善。</p>
+<h1 id="Benchmark"><a href="#Benchmark" class="headerlink" title="Benchmark"></a>Benchmark</h1><p>TensorFlow 官方的 <a href="https://tensorflow.google.cn/performance" target="_blank" rel="noopener">Performance 页</a> 和 <a href="https://tensorflow.google.cn/performance/benchmarks" target="_blank" rel="noopener">Benchmarks 页</a> 中给出了官方测性能用的 benchmark 脚本：</p>
+<ul>
+<li><a href="https://github.com/tensorflow/benchmarks" target="_blank" rel="noopener">Github: tensorflow/benchmarks</a></li>
+</ul>
+<p>基本上把目前 TF 里最高效的 API 都用上了，并且包含了各种常见的多机多卡方案，很值得作为高效的样例脚本来参照。</p>
+<blockquote>
+<p>有个问题是这个库目前没有定期 release，各种更新全都合并到 master 分支里面去了，然后随着 TF 版本的不断更新，它的 master 分支是跟着 TF 的 master 分支走的。</p>
+<p>因此要想正常跑最新的 benchmarks，就需要装 tf-nightly-gpu 包或者源码编译一个比较新的 TensorFlow 分支。</p>
+</blockquote>
+<p>简单分析一下这份脚本的结构。</p>
+<p>从 <code>tf_cnn_benchmarks.py</code> 这个入口进去之后，核心的执行流程在 <code>benchmark_cnn.py</code> 中。</p>
+<p>只测试前向走 <code>BenchmarkCNN._eval_cnn()</code>，测试训练全过程走 <code>BenchmarkCNN._benchmark_cnn()</code> 。</p>
+<p>前面的 FLAG 解析什么的直接略过，从训练部分开始看。</p>
+<h2 id="benchmark-cnn"><a href="#benchmark-cnn" class="headerlink" title="_benchmark_cnn"></a>_benchmark_cnn</h2><p>首先构建计算图：<code>(image_producer_ops, enqueue_ops, fetches) = self._build_model()</code> </p>
+<p><code>image_producer_ops</code> 是处理输入数据的部分，<code>enqueue_ops</code> 涉及到计算图中的流水线队列，最后的 <code>fetches</code> 是等一下 <code>sess.run()</code> 中的目标 op。</p>
+<p>设置 <code>tf.summary</code> 以及 <code>tf.train.Saver</code> 等等，Saver 中传入的是 <code>variable_mgr.savable_variables()</code>。</p>
+<p>创建 <code>tf.train.Supervisor</code> 时同时完成变量初始化，初始化 op 组包含：</p>
+<ul>
+<li><code>tf.local_variables_initializer</code> 初始化本地变量</li>
+<li><code>tf.tables_initializer</code> 初始化用到的各种表（哈希表等等）</li>
+<li>本地变量初始化之后，执行<code>variable_mgr.get_post_init_ops()</code> 完成自定义的一些初始化执行动作，这个部分要根据不同的参数维护算法来定</li>
+<li>如果有同步用的队列 barrier，也一起在这里完成初始化</li>
+</ul>
+<p>之后 <code>sv.managed_session</code> 开始真正的执行循环：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> sv.managed_session(...) <span class="keyword">as</span> sess:</span><br><span class="line">    如果使用的是真实数据，则往 enqueue_ops 中插入提取数据到队列的 op</span><br><span class="line">    初始化 global_step</span><br><span class="line">    创建一个 global_step_watcher，在新线程中监控 global_step 的变动情况</span><br><span class="line">    <span class="keyword">while</span> <span class="keyword">not</span> done_fn():     这个函数与 global_step_watcher 相关，用于控制训练循环什么时候结束</span><br><span class="line">        ...</span><br><span class="line">        benchmark_one_step() 训练一个 step</span><br><span class="line">        ...</span><br><span class="line">    后续再处理一些收尾内容</span><br></pre></td></tr></table></figure>
+
+<h2 id="build-model"><a href="#build-model" class="headerlink" title="_build_model"></a>_build_model</h2><p>回到第一步看一下计算图的构建部分。</p>
+<p><code>(image_producer_ops, image_producer_stages) = self._build_image_processing(shift_ratio=0)</code> 创建输入数据。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">对于当前设备上的每一块 GPU，variable_mgr.create_outer_variable_scope() 创建命名域：</span><br><span class="line">    add_forward_pass_and_gradients()    添加网络的前向部分，并且计算得到梯度</span><br><span class="line">    根据当前的任务是训练还是预测，处理准备网络中需要返回的内容</span><br><span class="line">    从计算图中提取出 Batch Normalization 的更新部分，添加到 <span class="number">0</span> 号卡的更新部分中，BatchNorm 只需要一块卡来计算</span><br></pre></td></tr></table></figure>
+
+<p>如果图中用了 staging_area 的数据组织方式，这里另外再添加一下，扩充 enqueue_ops。</p>
+<p><code>fetches = self._build_fetches()</code> 最终收集前面所有的信息，构建出等一下需要传入 sess.run() 中去的目标</p>
+<p>完成前面的内容后，把 image_producer_ops，enqueue_ops，fetches 三部分内容返回给上一层的函数。</p>
+<h2 id="add-forward-pass-and-gradients"><a href="#add-forward-pass-and-gradients" class="headerlink" title="add_forward_pass_and_gradients"></a>add_forward_pass_and_gradients</h2><p>创建随机数据作为输入，或者处理传入的数据产生器。</p>
+<p><code>logits, aux_logits = self.model.build_network()</code> 构建完整的前向网络。</p>
+<p>添加输出结果以及计算 loss 误差。</p>
+<p><code>variable_mgr.trainable_variables_on_device()</code> 获取当前 GPU 上所有的可训练参数。</p>
+<p>如果当前是最后一块 GPU 卡，那么再额外计算 L2_loss，添加到前面的 loss 中去，L2_loss 只需要计算一次。</p>
+<p><code>grads = tf.gradients(scaled_loss, params, aggregation_method=aggmeth)</code> 根据前面收集的当前 GPU 上的可训练参数信息构建反向的梯度计算图，返回得到的是图中所有的梯度。</p>
+<p>接下来再获取一次 <code>variable_mgr.trainable_variables_on_device()</code> ，然后把得到的参数与前面的梯度打包在一起返回回去，准备接下来的参数更新。<strong>需要注意的是</strong>，第一次调用 <code>trainable_variables_on_device</code> 时传入了一个 <code>writable=False</code> 的参数，这里传入的是 <code>writable=True</code>，在某些特别的多卡参数管理算法中，用于梯度计算和最终梯度更新写回的目标是不一样的。</p>
+<p>所有前面的这些都封装在一个 results 的 dict 中返回回去。</p>
+<h2 id="build-fetches"><a href="#build-fetches" class="headerlink" title="_build_fetches"></a>_build_fetches</h2><p>这里算是计算图构建的收尾部分了，传入的内容是所有 GPU 上计算图的合集。</p>
+<p><code>variable_mgr.preprocess_device_grads()</code> 预处理出需要在哪些设备上执行梯度更新操作。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">对于梯度更新设备中的每一块 GPU：</span><br><span class="line">    tf.reduce_mean()                          计算前面所有卡上梯度的平均值</span><br><span class="line">    variable_mgr.get_gradients_to_apply()     获取有哪些梯度是要在当前设备上更新的</span><br><span class="line">    get_learning_rate()                       计算学习率</span><br><span class="line">    get_optimizer()                           获取梯度更新用的 Optimizer</span><br><span class="line">    variable_mgr.append_apply_gradients_ops() 应用 Optimizer 进行梯度更新</span><br></pre></td></tr></table></figure>
+
+<p>把前面所有的东西打包在 fetches 这个 dict 中返回回去。</p>
+<h2 id="VariableMgr"><a href="#VariableMgr" class="headerlink" title="VariableMgr"></a>VariableMgr</h2><p>可以看到上面有很多核心的操作都是通过 <code>variable_mgr</code> 结构完成的，这套脚本定义了一个 VariableMgr 类，想要自己修改参数管理、更新的算法只需要重写这里面的一些函数即可。</p>
+<p>前面出现过的比较有用的几个接口函数：</p>
+<ul>
+<li>def <strong>create_outer_variable_scope</strong>(self, device_num)</li>
+</ul>
+<p>封装变量命名域，主要用于维护变量创建时要做的事情，一般情况下直接返回一个普通的 <code>tf.variable_scope</code>，需要对变量创建进行额外操作的话需要自己构造一个 custom_getter 作为参数传入<code>tf.variable_scope</code>。</p>
+<ul>
+<li>def <strong>preprocess_device_grads</strong>(self, device_grads)</li>
+</ul>
+<p>预处理出需要做梯度更新操作的设备，以及对应设备上的梯度和参数。</p>
+<ul>
+<li>def <strong>get_gradients_to_apply</strong>(self, device_num, gradient_state)</li>
+</ul>
+<p>与上一个函数对应使用，用于找出每个设备需要处理哪些参数更新任务。</p>
+<ul>
+<li>def <strong>append_apply_gradients_ops</strong>(self, gradient_state, opt, grads, training_ops, loss_scale_params)</li>
+</ul>
+<p>在设备上针对每一对需要更新的变量及其梯度，应用 apply_gradients 操作。</p>
+<ul>
+<li>def <strong>get_post_init_ops</strong>(self)</li>
+</ul>
+<p>用于额外附加一些在所有变量完成初始化之后，开始训练之前，需要执行的操作。</p>
+<ul>
+<li>def <strong>get_devices</strong>(self)</li>
+</ul>
+<p>返回当前节点中可用的 GPU 列表，在某些 PS-WORKER 的实现方式中，返回的是 <code>tf.replica_device_setter</code> 的封装。</p>
+<ul>
+<li>def <strong>savable_variables</strong>(self)</li>
+</ul>
+<p>返回哪些变量是需要被 <code>tf.Saver</code> 保存进检查点的。</p>
+<ul>
+<li>def <strong>trainable_variables_on_device</strong>(self, rel_device_num, abs_device_num, writable=False)</li>
+</ul>
+<p>返回当前设备上的可训练参数（即能计算梯度，可以进行反向更新的参数）。输入的两个 device_num 分别是 GPU 在<strong>当前节点中</strong>的编号以及<strong>在全局环境中</strong>的编号。</p>
+<p>writable 用于标识需要被写回更新的参数，在有些情况下图中可能存在多份参数备份，writable 为 False 时返回的是图中用于求梯度以及构建反向数据通路用的参数，为 True 时返回的是等一下 apply_gradients 需要应用梯度更新操作的参数。</p>
+<h2 id="replica-device-setter-amp-variable-scope-custom-getter"><a href="#replica-device-setter-amp-variable-scope-custom-getter" class="headerlink" title="replica_device_setter &amp; variable_scope-custom_getter"></a>replica_device_setter &amp; variable_scope-custom_getter</h2><p>前面建图时用到的两个很重要的接口，用于额外处理 op 在设备上的分配操作。</p>
+<p>benchmarks 脚本中的用法大概是这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> device_num <span class="keyword">in</span> range(len(self.devices)):</span><br><span class="line">    <span class="keyword">with</span> self.variable_mgr.create_outer_variable_scope(device_num):</span><br><span class="line">        <span class="comment"># ...</span></span><br><span class="line">        <span class="keyword">with</span> tf.device(self.devices[rel_device_num]):</span><br><span class="line">        <span class="comment"># self.devices[] 里面是实现设好的 tf.replica_device_setter</span></span><br><span class="line">            <span class="comment">#...build_network</span></span><br></pre></td></tr></table></figure>
+
+<p>对节点中的每一块 GPU 卡，首先套上一个 variable_scope（里面可能会使用到 custom_getter），在构建 op 时再套一层 replica_device_setter。</p>
+<p><code>tf.replica_device_setter</code> 需要配合 <code>tf.device</code> 使用，作用范围是其 python 作用域以内的所有 op，这个函数简单地说就是对传入的 op 进行判断，如果是计算型的 op 就正常分配在运算设备上，如果是需要在 PS-WORKER 之间共享的参数型 op 则需要在参数服务器上。它的返回值是需要分配给的 device 的名字，所以直接用 <code>tf.device</code> 指定即可。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">replica_device_setter</span><span class="params">(ps_tasks=<span class="number">0</span>, ps_device=<span class="string">"/job:ps"</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">                          worker_device=<span class="string">"/job:worker"</span>, merge_devices=True,</span></span></span><br><span class="line"><span class="function"><span class="params">                          cluster=None, ps_ops=None, ps_strategy=None)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>具体的源码实现上，主要是对新创建 op 的类型进行判断，如果在 ps_ops 包含的范围内（为 None 时会用一个 STANDARD_PS_OPS 来作为检查范围）则用某种 ps 分配策略放到参数服务器上，否则放到默认的计算设备上。</p>
+<p>默认的 ps_strategy 不指定的话就是用的 round-robin，简单地说就是按顺序依次分。</p>
+<p><code>tf.variable_scope</code> 中 custom_getter 的作用范围就只限于作用域以内所有的 <code>tf.get_variable</code> 调用了（注意，必须是 <code>tf.get_variable</code>，这个对 <code>tf.variable</code> 是无效的）。前面 replica_device_setter 只是指定了参数存放的位置，这里则可以对参数创建进行更多的改动。</p>
+<p>例如 StagedVariableGetter 做的事情就是把变量封装上一层 StagingArea，计算图中需要读取变量的时候返回一个 StagingArea.get，对于 apply_gradient 这种需要修改变量本身的操作，则返回参数本体（也就是前面看到的 writable 这个参数起作用的方式）。</p>
+<h1 id="VariableMgr-instances"><a href="#VariableMgr-instances" class="headerlink" title="VariableMgr instances"></a>VariableMgr instances</h1><p>官方的 Benchmark 脚本中提供了 8 种内置的 VariableMgr 实例。</p>
+<h2 id="VariableMgrIndependent"><a href="#VariableMgrIndependent" class="headerlink" title="VariableMgrIndependent"></a>VariableMgrIndependent</h2><p>不同卡之间完全不作数据交互，单纯用来测单机多卡的理论计算速度用。</p>
+<p>不需要封装 custom_getter 和 replica_device_setter。</p>
+<h2 id="VariableMgrLocalFetchFromPS"><a href="#VariableMgrLocalFetchFromPS" class="headerlink" title="VariableMgrLocalFetchFromPS"></a>VariableMgrLocalFetchFromPS</h2><p>多卡中的参数统一存储，不同卡在计算时直接从统一的 PS 中读取需要的数据。</p>
+<p>不需要封装 custom_getter。</p>
+<p>get_device 这里：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> self.benchmark_cnn.local_parameter_device_flag == <span class="string">'gpu'</span>:</span><br><span class="line">  <span class="keyword">return</span> [</span><br><span class="line">      variable_mgr_util.ParamServerDeviceSetter(d, raw_devices)</span><br><span class="line">      <span class="keyword">for</span> d <span class="keyword">in</span> raw_devices</span><br><span class="line">  ]</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">  <span class="keyword">return</span> [</span><br><span class="line">      tf.train.replica_device_setter(</span><br><span class="line">          worker_device=d,</span><br><span class="line">          ps_device=self.benchmark_cnn.param_server_device,</span><br><span class="line">          ps_tasks=<span class="number">1</span>) <span class="keyword">for</span> d <span class="keyword">in</span> raw_devices</span><br><span class="line">  ]</span><br></pre></td></tr></table></figure>
+
+<p>如果参数存放在 CPU 上，直接对每个 GPU 设备返回一个指定好 ps_device 的 replica_device_setter。</p>
+<p>如果选择参数存放在 GPU 上，这里的做法是将所有参数均衡负载平分在各块卡上。</p>
+<h2 id="VariableMgrLocalFetchFromStagedPS"><a href="#VariableMgrLocalFetchFromStagedPS" class="headerlink" title="VariableMgrLocalFetchFromStagedPS"></a>VariableMgrLocalFetchFromStagedPS</h2><p>多卡中的参数统一存储，相比之前的增加了 StagingArea 的流水线操作。</p>
+<p>custom_getter 中为每个变量额外创建了一个 StagingArea，计算图中需要读取变量的时候返回对应的 StagingArea.get。</p>
+<p>trainable_variables_on_device 中 writable 为 True 时，返回变量本体，否则返回对应的 StagingArea.get。</p>
+<p>其他部分与上一种方式相同。</p>
+<h2 id="VariableMgrLocalReplicated"><a href="#VariableMgrLocalReplicated" class="headerlink" title="VariableMgrLocalReplicated"></a>VariableMgrLocalReplicated</h2><p>每块卡上的计算图完全独立，各卡都是自己存储自己的参数，梯度更新的时候再采用某种 Allreduce 的算法对各卡上的参数做统一规约。</p>
+<p>get_post_init_ops 在初始化完成后拷贝 GPU0 上的参数到其他卡上覆盖掉，保证所有卡的初始参数一致。</p>
+<p>不需要封装 custom_getter 和 replica_device_setter。</p>
+<p>preprocess_device_grads 中返回的梯度是调用某种规约算法去综合所有卡上的梯度值，之后再跟本地的参数一起交给 apply_gradient 去更新即可。</p>
+<p>因此这里的计算流程是，初始所有卡上参数一致，训练完一步之后规约梯度，规约完成后所有卡上得到的梯度也都一致了，再 apply 更新到本地的卡上，这样下一步开始时所有卡上的参数仍然是一致的。</p>
+<h2 id="VariableMgrDistributedAllReduce"><a href="#VariableMgrDistributedAllReduce" class="headerlink" title="VariableMgrDistributedAllReduce"></a>VariableMgrDistributedAllReduce</h2><p>用于分布式。</p>
+<p>这是脚本中唯一一种需要用到 single_session 的模式，基本上跟 Replicated 的方式一致，每块卡上都独立存数据，更新时全局规约，特殊点在于这种方式只需要由一个 python 进程来启动，所有 worker 上的图构造等等都是由一个 controller 的角色完成，其他所有的 worker 都像平时的 ps 一样 join_server 即可。</p>
+<p>大体实现上跟上一种一致</p>
+<h2 id="VariableMgrDistributedFetchFromPS"><a href="#VariableMgrDistributedFetchFromPS" class="headerlink" title="VariableMgrDistributedFetchFromPS"></a>VariableMgrDistributedFetchFromPS</h2><p>用于分布式。</p>
+<p>大体实现跟单节点的 FetchFromPS 一致。</p>
+<p>custom_getter 使用了 OverrideCachingDevice，虽然由 replica_device_setter 指定好了所有参数都保存在 ps 上，但是在 worker 还可以做一次数据缓存。caching_device 这个参数与 <code>tf.get_variable()</code> 中的参数对应，即 worker 端的多块卡从远程 ps 获取数据只在第一块卡拉取数据时通过网络取一次，后续的几次直接从缓存中读取。缓存数据的分配方案跟单节点 ps 时 CPU/GPU 上存储参数的方案类似。</p>
+<h2 id="VariableMgrDistributedFetchFromStagedPS"><a href="#VariableMgrDistributedFetchFromStagedPS" class="headerlink" title="VariableMgrDistributedFetchFromStagedPS"></a>VariableMgrDistributedFetchFromStagedPS</h2><p>用于分布式。</p>
+<p>在上一种的基础上加上了 StagingArea。</p>
+<h2 id="VariableMgrDistributedReplicated"><a href="#VariableMgrDistributedReplicated" class="headerlink" title="VariableMgrDistributedReplicated"></a>VariableMgrDistributedReplicated</h2><p>用于分布式。</p>
+<p>计算流程其实跟 DistributedAllReduce 是一致的，大体上跟前面类似实现相一致。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/02/04/2017-02-04-tensorflow/" rel="bookmark">TensorFlow</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/04/04/2017-04-04-alexnet/" rel="bookmark">AlexNet</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/13/2018-01-13-tfunpacking/" rel="bookmark">TensorFlow 拆包（一）：Session.Run()</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/23/2018-01-23-tfunpacking2/" rel="bookmark">TensorFlow 拆包（二）：TF 的数据流模型实现以及自动求导</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/03/07/2018-03-07-tfunpacking4/" rel="bookmark">TensorFlow 拆包（四）：Device</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/TensorFlow/" rel="tag"># TensorFlow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/03/12/2018-03-12-tfunpacking6/" rel="prev" title="TensorFlow 拆包（六）：RDMA">
+      <i class="fa fa-chevron-left"></i> TensorFlow 拆包（六）：RDMA
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/06/11/2018-06-11-tfunpacking8/" rel="next" title="TensorFlow 拆包（八）：Dynamic Control Flow in Large-Scale Machine Learning">
+      TensorFlow 拆包（八）：Dynamic Control Flow in Large-Scale Machine Learning <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#profiler"><span class="nav-text">profiler</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#profiler-ui"><span class="nav-text">profiler_ui</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Profiling"><span class="nav-text">Profiling</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Options"><span class="nav-text">Options</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Trace"><span class="nav-text">Trace</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Distributed"><span class="nav-text">Distributed</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Benchmark"><span class="nav-text">Benchmark</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#benchmark-cnn"><span class="nav-text">_benchmark_cnn</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#build-model"><span class="nav-text">_build_model</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#add-forward-pass-and-gradients"><span class="nav-text">add_forward_pass_and_gradients</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#build-fetches"><span class="nav-text">_build_fetches</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VariableMgr"><span class="nav-text">VariableMgr</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#replica-device-setter-amp-variable-scope-custom-getter"><span class="nav-text">replica_device_setter &amp; variable_scope-custom_getter</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VariableMgr-instances"><span class="nav-text">VariableMgr instances</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#VariableMgrIndependent"><span class="nav-text">VariableMgrIndependent</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VariableMgrLocalFetchFromPS"><span class="nav-text">VariableMgrLocalFetchFromPS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VariableMgrLocalFetchFromStagedPS"><span class="nav-text">VariableMgrLocalFetchFromStagedPS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VariableMgrLocalReplicated"><span class="nav-text">VariableMgrLocalReplicated</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VariableMgrDistributedAllReduce"><span class="nav-text">VariableMgrDistributedAllReduce</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VariableMgrDistributedFetchFromPS"><span class="nav-text">VariableMgrDistributedFetchFromPS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VariableMgrDistributedFetchFromStagedPS"><span class="nav-text">VariableMgrDistributedFetchFromStagedPS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VariableMgrDistributedReplicated"><span class="nav-text">VariableMgrDistributedReplicated</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '9f2a6b650f4c31f5dc6302d56f4db70b',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

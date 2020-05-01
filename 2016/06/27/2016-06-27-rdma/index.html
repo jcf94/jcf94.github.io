@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="RDMA(Remote Direct Memory Access) is a technique for computers to access memory on a remote machine without interrupting the processing of its own CPU(s). Refer to:  RDMAmojo  Wikepedia - RDMA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RDMA Warming Up">
+<meta property="og:url" content="https://jcf94.com/2016/06/27/2016-06-27-rdma/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="RDMA(Remote Direct Memory Access) is a technique for computers to access memory on a remote machine without interrupting the processing of its own CPU(s). Refer to:  RDMAmojo  Wikepedia - RDMA">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2016-06-27-rdma-1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2016-06-27-rdma-2.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2016-06-27-rdma-4.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2016-06-27-rdma-3.jpg">
+<meta property="article:published_time" content="2016-06-27T14:49:16.000Z">
+<meta property="article:modified_time" content="2018-10-21T02:32:34.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="RDMA">
+<meta property="article:tag" content="InfiniBand">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2016-06-27-rdma-1.jpg">
+
+<link rel="canonical" href="https://jcf94.com/2016/06/27/2016-06-27-rdma/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>RDMA Warming Up | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2016/06/27/2016-06-27-rdma/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RDMA Warming Up
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-06-27 22:49:16" itemprop="dateCreated datePublished" datetime="2016-06-27T22:49:16+08:00">2016-06-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-10-21 10:32:34" itemprop="dateModified" datetime="2018-10-21T10:32:34+08:00">2018-10-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Architecture/" itemprop="url" rel="index"><span itemprop="name">Computer Architecture</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>RDMA(Remote Direct Memory Access) is a technique for computers to access memory on a <strong>remote</strong> machine <strong>without</strong> interrupting the processing of its own CPU(s).</p>
+<p>Refer to:</p>
+<ul>
+<li><p><a href="http://www.rdmamojo.com/" target="_blank" rel="noopener">RDMAmojo</a></p>
+</li>
+<li><p><a href="https://en.wikipedia.org/wiki/Remote_direct_memory_access" target="_blank" rel="noopener">Wikepedia - RDMA</a></p>
+</li>
+</ul>
+<a id="more"></a>
+
+<hr>
+<h1 id="Basic"><a href="#Basic" class="headerlink" title="Basic"></a>Basic</h1><ul>
+<li>OpenFabrics Alliance</li>
+</ul>
+<p>A non-profit organization that promotes RDMA technologies for server and storage connectivity.</p>
+<p>It aims to develop open-source software that supports the three major RDMA fabric technologies: IB(InfiniBand), RoCE(RDMA over Converged Ethernet) and iWARP(Internet Wide Area RDMA Protocol).</p>
+<p>The software includes two packages, one that runs on Linux and FreeBSD and one that runs on Microsoft Windows.</p>
+<ul>
+<li>OFED(OpenFabrics Enterprise Distribution)</li>
+</ul>
+<p>It was released by the OpenFabrics Alliance. The OFED stack includes software drivers, core kernel-code, middleware, and user-level interfaces. It offers a range of standard protocols.</p>
+<ul>
+<li>IB(InfiniBand)</li>
+</ul>
+<p>A new generation network protocol which supports RDMA natively from the beginning.</p>
+<ul>
+<li>RoCE(RDMA over Converged Ethernet)</li>
+</ul>
+<p>It allows performing RDMA over Ethernet network. Its lower network headers are Ethernet headers and its upper network headers (including the data) are InfiniBand headers. This allows using RDMA over standard Ethernet infrastructure (switches).</p>
+<ul>
+<li>iWARP(Internet Wide Area RDMA Protocol)</li>
+</ul>
+<p>It allows performing RDMA over TCP which means RDMA can be used over standard Ethernet infrastructure.</p>
+<p>However, some features that exist in IB and RoCE may not be supported in iWARP, as well as loosing some of the RDMA performance advantages.</p>
+<h2 id="Advantages"><a href="#Advantages" class="headerlink" title="Advantages"></a>Advantages</h2><ul>
+<li>Direct user-level access to HW</li>
+</ul>
+<p>Zero-copy: Applications can perform data transfer <strong>without the network software stack involvement</strong> and data is being send /received <strong>directly</strong> to the buffers without being copied between the network layers.</p>
+<img data-src="http://jcf94.com/download/2016-06-27-rdma-1.jpg" title="Zero Copy"/>
+
+<p>Kernel bypass in the fast path: Applications can perform data transfer directly from userspace without the need to perform context switches.</p>
+<p>No CPU involvement: Applications can access remote memory without consuming any CPU in the remote machine. <strong>The caches in the remote CPU(s) won’t be filled with the accessed memory content.</strong></p>
+<ul>
+<li>Asynchronous Communication</li>
+</ul>
+<p>Computation and communication overlap.</p>
+<ul>
+<li>Hardware managed transport</li>
+</ul>
+<p>Software deals with buffers, not packets.</p>
+<img data-src="http://jcf94.com/download/2016-06-27-rdma-2.jpg" title="Full Protocol Offloading">
+
+<h2 id="Infiniband"><a href="#Infiniband" class="headerlink" title="Infiniband"></a>Infiniband</h2><p>A <strong>pervasive</strong>, <strong>low-latency</strong>, <strong>high-bandwidth</strong> interconnect which requires low processing overhead and is <strong>ideal</strong> to carry multiple traffic types (clustering, communications, storage, management, etc) over a single connection.</p>
+<p>IB mainly consists of 5 layers.</p>
+<p>|No|Layers|Functions|<br>|-|<br>|1st|Software Transport Verbs and Upper Layer Protocols|Interface between applications and hardwares<br>Define methodology for management functions|<br>|2nd|Transport|Delivers packets to the appropriate QP node<br>Message Assembly/De-assembly<br>Access Right|<br>|3rd|Network|Route packets between different partitions/subnets|<br>|4th|Data Link(Symbols and framing)|Route packets on the same partition/subnet|<br>|5th|Physical|Signal levels/Media/Connections|</p>
+<img data-src="http://jcf94.com/download/2016-06-27-rdma-4.jpg" title="Layers of IB Network"/>
+
+<p>In an IB net, there are devices:</p>
+<p>HCA(Host Channel Adapter): Like a Ethernet NIC. Connects the InfiniBand Cable to the PCI Express bus. It is the <strong>end node</strong> of the InfiniBand network, executing transport-level functions as well as supporting the InfiniBand verbs interface.</p>
+<p>TCA(Target Channel Adapter): Similar to HCA,</p>
+<img data-src="http://jcf94.com/download/2016-06-27-rdma-3.jpg" title="Infiniband Architecture"/>
+
+<h1 id="Test"><a href="#Test" class="headerlink" title="Test"></a>Test</h1><p>Use <code>lsmod</code> to show the loaded kernel modules. Check for ‘<strong>rdma</strong>‘ and ‘<strong>ib</strong>‘.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">jcf@node1:~&gt; lsmod | grep ib</span><br><span class="line">ib_ucm                 18507  0</span><br><span class="line">ib_ipoib              140788  0</span><br><span class="line">ib_cm                  47822  3 ib_ucm,rdma_cm,ib_ipoib</span><br><span class="line">ib_uverbs              75527  2 rdma_ucm,ib_ucm</span><br><span class="line">ib_umad                22476  6</span><br><span class="line">mlx5_ib               188056  0</span><br><span class="line">mlx5_core             397618  1 mlx5_ib</span><br><span class="line">mlx4_ib               209139  0</span><br><span class="line">ib_sa                  33470  5 rdma_ucm,rdma_cm,ib_ipoib,ib_cm,mlx4_ib</span><br><span class="line">ib_mad                 56507  4 ib_cm,ib_umad,mlx4_ib,ib_sa</span><br><span class="line">ib_core               138343  12 rdma_ucm,ib_ucm,rdma_cm,iw_cm,ib_ipoib,ib_cm,ib_uverbs,ib_umad,mlx5_ib,mlx4_ib,ib_sa,ib_mad</span><br><span class="line">ib_addr                18889  3 rdma_ucm,rdma_cm,ib_core</span><br><span class="line">mlx4_core             370626  2 mlx4_en,mlx4_ib</span><br><span class="line">mlx_compat             30364  17 rdma_ucm,ib_ucm,rdma_cm,iw_cm,ib_ipoib,ib_cm,ib_uverbs,ib_umad,mlx5_ib,mlx5_core,mlx4_en,mlx4_ib,ib_sa,ib_mad,ib_core,ib_addr,mlx4_core</span><br><span class="line">libcrc32c              12644  0</span><br><span class="line">ipv6_lib              344914  187 ib_ipoib,ib_core,ib_addr,ipv6</span><br><span class="line">libsas                 88001  1 isci</span><br><span class="line">scsi_transport_sas     40887  2 isci,libsas</span><br><span class="line">libahci                35044  1 ahci</span><br><span class="line">libata                230626  5 libsas,ata_generic,ata_piix,ahci,libahci</span><br><span class="line">scsi_mod              235785  13 usb_storage,sr_mod,sg,sd_mod,isci,libsas,scsi_transport_sas,scsi_dh_emc,scsi_dh_alua,scsi_dh_hp_sw,scsi_dh_rdac,scsi_dh,libata</span><br></pre></td></tr></table></figure>
+
+<p><code>ib_uverbs</code> and low-level driver of the hardware shoule be checked.</p>
+<blockquote>
+<p>USERSPACE VERBS ACCESS</p>
+<p>The ib_uverbs module, built by enabling CONFIG_INFINIBAND_USER_VERBS, enables direct userspace access to IB hardware via “verbs”.</p>
+<p>See <a href="https://www.kernel.org/doc/Documentation/infiniband/" target="_blank" rel="noopener">Kernel Documentation - Infiniband</a></p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">jcf@node1:~&gt; lsmod | grep rdma</span><br><span class="line">rdma_ucm               22630  0</span><br><span class="line">rdma_cm                54692  1 rdma_ucm</span><br><span class="line">iw_cm                  36675  1 rdma_cm</span><br><span class="line">configfs               35817  2 rdma_cm</span><br><span class="line">ib_cm                  47822  3 ib_ucm,rdma_cm,ib_ipoib</span><br><span class="line">ib_uverbs              75527  2 rdma_ucm,ib_ucm</span><br><span class="line">ib_sa                  33470  5 rdma_ucm,rdma_cm,ib_ipoib,ib_cm,mlx4_ib</span><br><span class="line">ib_core               138343  12 rdma_ucm,ib_ucm,rdma_cm,iw_cm,ib_ipoib,ib_cm,ib_uverbs,ib_umad,mlx5_ib,mlx4_ib,ib_sa,ib_mad</span><br><span class="line">ib_addr                18889  3 rdma_ucm,rdma_cm,ib_core</span><br><span class="line">mlx_compat             30364  17 rdma_ucm,ib_ucm,rdma_cm,iw_cm,ib_ipoib,ib_cm,ib_uverbs,ib_umad,mlx5_ib,mlx5_core,mlx4_en,mlx4_ib,ib_sa,ib_mad,ib_core,ib_addr,mlx4_core</span><br></pre></td></tr></table></figure>
+
+<p>Then use <code>ibv_devices</code> to show the available RDMA devices in the local machine.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">jcf@node1:~&gt; ibv_devices</span><br><span class="line">    device          	   node GUID</span><br><span class="line">    ------          	----------------</span><br><span class="line">    mlx4_0          	10d2c91000006bd0</span><br></pre></td></tr></table></figure>
+
+<p>Use <code>ibv_devinfo</code> to check for more information about the IB device.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">jcf@node1:~&gt; ibv_devinfo -d mlx4_0</span><br><span class="line">hca_id:	mlx4_0</span><br><span class="line">	transport:			InfiniBand (0)</span><br><span class="line">	fw_ver:				2.9.1000</span><br><span class="line">	node_guid:			10d2:c910:0000:6bd0</span><br><span class="line">	sys_image_guid:			10d2:c910:0000:6bd3</span><br><span class="line">	vendor_id:			0x02c9</span><br><span class="line">	vendor_part_id:			26428</span><br><span class="line">	hw_ver:				0xB0</span><br><span class="line">	board_id:			MT_0D90110009</span><br><span class="line">	phys_port_cnt:			1</span><br><span class="line">	Device ports:</span><br><span class="line">		port:	1</span><br><span class="line">			state:			PORT_ACTIVE (4)</span><br><span class="line">			max_mtu:		4096 (5)</span><br><span class="line">			active_mtu:		4096 (5)</span><br><span class="line">			sm_lid:			1</span><br><span class="line">			port_lid:		1</span><br><span class="line">			port_lmc:		0x00</span><br><span class="line">			link_layer:		InfiniBand</span><br></pre></td></tr></table></figure>
+
+<p>Make sure at least one port is in <strong>PORT_ACTIVE</strong> state, which means that the port is available for working.</p>
+<p>Next, use <code>ibv_*_pingpong</code> to test the connection between machines. There have to be a server process and a client process.</p>
+<p>Server:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">jcf@node1:~&gt; ibv_rc_pingpong -g 0 -d mlx4_0 -i 1</span><br><span class="line">  local address:  LID 0x0001, QPN 0x000241, PSN 0x20e9d5, GID fe80::10d2:c910:0:6bd1</span><br><span class="line">  remote address: LID 0x0001, QPN 0x000242, PSN 0x3bef44, GID fe80::10d2:c910:0:6bd1</span><br><span class="line">8192000 bytes in 0.01 seconds &#x3D; 8998.49 Mbit&#x2F;sec</span><br><span class="line">1000 iters in 0.01 seconds &#x3D; 7.28 usec&#x2F;iter</span><br></pre></td></tr></table></figure>
+
+<p>&amp; Client:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">jcf@node1:~&gt; ibv_rc_pingpong -g 0 -d mlx4_0 -i 1 localhost</span><br><span class="line">  local address:  LID 0x0001, QPN 0x000242, PSN 0x3bef44, GID fe80::10d2:c910:0:6bd1</span><br><span class="line">  remote address: LID 0x0001, QPN 0x000241, PSN 0x20e9d5, GID fe80::10d2:c910:0:6bd1</span><br><span class="line">8192000 bytes in 0.01 seconds &#x3D; 9322.33 Mbit&#x2F;sec</span><br><span class="line">1000 iters in 0.01 seconds &#x3D; 7.03 usec&#x2F;iter</span><br></pre></td></tr></table></figure>
+
+<p>Two nodes,</p>
+<p>Server:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">jcf@node1:~&gt; ibv_rc_pingpong -g 0 -d mlx4_0 -i 1</span><br><span class="line">  local address:  LID 0x0001, QPN 0x000240, PSN 0x490d6c, GID fe80::10d2:c910:0:6bd1</span><br><span class="line">  remote address: LID 0x0009, QPN 0x00006a, PSN 0xf5086d, GID fe80::10d2:c910:0:6c61</span><br><span class="line">8192000 bytes in 0.01 seconds &#x3D; 7793.55 Mbit&#x2F;sec</span><br><span class="line">1000 iters in 0.01 seconds &#x3D; 8.41 usec&#x2F;iter</span><br></pre></td></tr></table></figure>
+
+<p>&amp; Client:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">jcf@node4:~&gt; ibv_rc_pingpong -g 0 -d mlx4_0 -i 1 node1</span><br><span class="line">  local address:  LID 0x0009, QPN 0x00006a, PSN 0xf5086d, GID fe80::10d2:c910:0:6c61</span><br><span class="line">  remote address: LID 0x0001, QPN 0x000240, PSN 0x490d6c, GID fe80::10d2:c910:0:6bd1</span><br><span class="line">8192000 bytes in 0.01 seconds &#x3D; 7809.34 Mbit&#x2F;sec</span><br><span class="line">1000 iters in 0.01 seconds &#x3D; 8.39 usec&#x2F;iter</span><br></pre></td></tr></table></figure>
+
+<p>Besides <code>ibv_*_pingpong</code>, <code>rping</code> can be used to test the connection too.</p>
+<p>Server:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">jcf@node1:~&gt; rping -s -v -C 20</span><br><span class="line">server ping data: rdma-ping-0: ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqr</span><br><span class="line">server ping data: rdma-ping-1: BCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrs</span><br><span class="line">server ping data: rdma-ping-2: CDEFGHIJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrst</span><br><span class="line">server ping data: rdma-ping-3: DEFGHIJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstu</span><br><span class="line">server ping data: rdma-ping-4: EFGHIJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuv</span><br><span class="line">server ping data: rdma-ping-5: FGHIJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvw</span><br><span class="line">server ping data: rdma-ping-6: GHIJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwx</span><br><span class="line">server ping data: rdma-ping-7: HIJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxy</span><br><span class="line">server ping data: rdma-ping-8: IJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyz</span><br><span class="line">server ping data: rdma-ping-9: JKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzA</span><br><span class="line">server ping data: rdma-ping-10: KLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzA</span><br><span class="line">server ping data: rdma-ping-11: LMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzAB</span><br><span class="line">server ping data: rdma-ping-12: MNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzABC</span><br><span class="line">server ping data: rdma-ping-13: NOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzABCD</span><br><span class="line">server ping data: rdma-ping-14: OPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzABCDE</span><br><span class="line">server ping data: rdma-ping-15: PQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzABCDEF</span><br><span class="line">server ping data: rdma-ping-16: QRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzABCDEFG</span><br><span class="line">server ping data: rdma-ping-17: RSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzABCDEFGH</span><br><span class="line">server ping data: rdma-ping-18: STUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzABCDEFGHI</span><br><span class="line">server ping data: rdma-ping-19: TUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzABCDEFGHIJ</span><br><span class="line">server DISCONNECT EVENT...</span><br><span class="line">wait for RDMA_READ_ADV state 10</span><br></pre></td></tr></table></figure>
+
+<p>&amp; Client:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">jcf@node4:~&gt; rping -c -v -a 10.0.0.1 -C 20</span><br><span class="line">ping data: rdma-ping-0: ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqr</span><br><span class="line">ping data: rdma-ping-1: BCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrs</span><br><span class="line">ping data: rdma-ping-2: CDEFGHIJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrst</span><br><span class="line">ping data: rdma-ping-3: DEFGHIJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstu</span><br><span class="line">ping data: rdma-ping-4: EFGHIJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuv</span><br><span class="line">ping data: rdma-ping-5: FGHIJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvw</span><br><span class="line">ping data: rdma-ping-6: GHIJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwx</span><br><span class="line">ping data: rdma-ping-7: HIJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxy</span><br><span class="line">ping data: rdma-ping-8: IJKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyz</span><br><span class="line">ping data: rdma-ping-9: JKLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzA</span><br><span class="line">ping data: rdma-ping-10: KLMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzA</span><br><span class="line">ping data: rdma-ping-11: LMNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzAB</span><br><span class="line">ping data: rdma-ping-12: MNOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzABC</span><br><span class="line">ping data: rdma-ping-13: NOPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzABCD</span><br><span class="line">ping data: rdma-ping-14: OPQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzABCDE</span><br><span class="line">ping data: rdma-ping-15: PQRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzABCDEF</span><br><span class="line">ping data: rdma-ping-16: QRSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzABCDEFG</span><br><span class="line">ping data: rdma-ping-17: RSTUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzABCDEFGH</span><br><span class="line">ping data: rdma-ping-18: STUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzABCDEFGHI</span><br><span class="line">ping data: rdma-ping-19: TUVWXYZ[\]^_&#96;abcdefghijklmnopqrstuvwxyzABCDEFGHIJ</span><br><span class="line">client DISCONNECT EVENT...</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>To be continued at <a href="/2016/09/07/2016-09-07-rdmaibv">Simple usage of RDMA ibv</a></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/09/07/2016-09-07-rdmaibv/" rel="bookmark">Simple usage of RDMA ibv</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/09/18/2017-09-18-rdmalib/" rel="bookmark">写着玩之 RDMA 轮子</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/RDMA/" rel="tag"># RDMA</a>
+              <a href="/tags/InfiniBand/" rel="tag"># InfiniBand</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/05/16/2016-05-16-qinghai/" rel="prev" title="五分之三的青海">
+      <i class="fa fa-chevron-left"></i> 五分之三的青海
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/07/09/2016-07-09-adarkroom/" rel="next" title="A Dark Room">
+      A Dark Room <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Basic"><span class="nav-text">Basic</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Advantages"><span class="nav-text">Advantages</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Infiniband"><span class="nav-text">Infiniband</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Test"><span class="nav-text">Test</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'f9cef1e2b74ff7982d0d6317beb753be',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

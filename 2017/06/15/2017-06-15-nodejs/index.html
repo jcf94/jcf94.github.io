@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Node.js 现在已经发展成一个很强大的框架了，像 Hexo 这样的博客系统、Visual Studio Code 这样的文本编辑器、甚至Steam客户端（？）等等都是用这个写的。还有一堆，哪哪都是 Node。 很早就想学一下这玩意，结果各种事情一直拖着。 考完试终于有时间可以瞎折腾了。 记一下学 Node 的时候遇到的一些坑点。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Node.js 踩坑">
+<meta property="og:url" content="https://jcf94.com/2017/06/15/2017-06-15-nodejs/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="Node.js 现在已经发展成一个很强大的框架了，像 Hexo 这样的博客系统、Visual Studio Code 这样的文本编辑器、甚至Steam客户端（？）等等都是用这个写的。还有一堆，哪哪都是 Node。 很早就想学一下这玩意，结果各种事情一直拖着。 考完试终于有时间可以瞎折腾了。 记一下学 Node 的时候遇到的一些坑点。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2017-06-15-nodejs-node.png">
+<meta property="og:image" content="http://jcf94.com/download/2017-06-15-nodejs-arch.jpeg">
+<meta property="og:image" content="http://jcf94.com/download/2017-06-15-nodejs-event.jpg">
+<meta property="article:published_time" content="2017-06-15T02:04:25.000Z">
+<meta property="article:modified_time" content="2018-10-04T02:46:34.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="Node.js">
+<meta property="article:tag" content="JavaScript">
+<meta property="article:tag" content="Typescript">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2017-06-15-nodejs-node.png">
+
+<link rel="canonical" href="https://jcf94.com/2017/06/15/2017-06-15-nodejs/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Node.js 踩坑 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2017/06/15/2017-06-15-nodejs/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Node.js 踩坑
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2017-06-15 10:04:25" itemprop="dateCreated datePublished" datetime="2017-06-15T10:04:25+08:00">2017-06-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-10-04 10:46:34" itemprop="dateModified" datetime="2018-10-04T10:46:34+08:00">2018-10-04</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <img data-src="http://jcf94.com/download/2017-06-15-nodejs-node.png" class="full-image"/>
+
+<p>Node.js 现在已经发展成一个很强大的框架了，像 Hexo 这样的博客系统、Visual Studio Code 这样的文本编辑器、甚至Steam客户端（？）等等都是用这个写的。还有一堆，哪哪都是 Node。</p>
+<p>很早就想学一下这玩意，结果各种事情一直拖着。</p>
+<p>考完试终于有时间可以瞎折腾了。</p>
+<p>记一下学 Node 的时候遇到的一些坑点。</p>
+<a id="more"></a>
+
+<hr>
+<h1 id="Learning"><a href="#Learning" class="headerlink" title="Learning"></a>Learning</h1><hr>
+<p>我的学习路线大概是这样，找个 Node.js 写的爬虫的示例照着写，写完就学会了怎么写爬虫，顺便就把 JavaScript 和 TypeScript 的基本用法学会了。（<strong>理想情况</strong>）</p>
+<p>实际情况大概是其中会遇到一些问题，那么再针对性地解决好了。（例如 Node.js 里面的异步逻辑）</p>
+<p>然后，被异步这块绕的不行，所以干脆找了个对 Node.js 底层实现的分析。了解整个运行原理之后应该就好了。</p>
+<p>参考资料：</p>
+<ul>
+<li><p><a href="https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html" target="_blank" rel="noopener">TypeScript in 5 minutes</a></p>
+</li>
+<li><p><a href="https://segmentfault.com/a/1190000007326795" target="_blank" rel="noopener">用TypeScript开发爬虫程序</a></p>
+</li>
+<li><p><a href="https://github.com/yjhjstz/deep-into-node" target="_blank" rel="noopener">深入理解Node.js：核心思想与源码分析</a></p>
+</li>
+</ul>
+<p>下面记的好多东西都来源于上面的 <strong>深入理解Node.js</strong>。</p>
+<hr>
+<p>Node.js 的整体架构：</p>
+<img data-src="http://jcf94.com/download/2017-06-15-nodejs-arch.jpeg" class="full-image"/>
+
+<p>底层是 C/C++ 写的，所以 Node.js 的代码跑起来会比 Python 这样的脚本语言要快很多。</p>
+<hr>
+<h1 id="异步"><a href="#异步" class="headerlink" title="异步"></a>异步</h1><hr>
+<img data-src="http://jcf94.com/download/2017-06-15-nodejs-event.jpg" class="full-image"/>
+
+<p>Node.js 是一个<strong>单线程</strong>的<strong>事件驱动</strong>的<strong>异步</strong>系统。</p>
+<p>Node.js 本身的 API 里面有同步函数也有异步函数，简单地说整个调度过程是这样的：</p>
+<ol>
+<li>JavaScript 线程启动，宿主环境创建<strong>堆</strong>和<strong>栈</strong>。堆用于存储 JavaScript 对象，栈用于存储执行上下文，当然每个异步函数都有一个对应的执行上下文，可以理解成一个函数要执行就要进栈。</li>
+<li>栈内执行任务的顺序是<strong>同步</strong>的，跟 C/C++ 等等其他非异步的完全一样，自顶向下按顺序来，执行完退栈。当异步任务要执行时，异步任务不入栈，而是把相关消息通知线程（大概是把自己的信息注册到线程上去），然后进入等待状态。</li>
+<li>当（前面注册过的异步任务对应的）事件被触发或者异步响应返回时，线程向消息队列插入一条事件消息。</li>
+<li>栈内的同步任务先全部执行完，然后线程从消息队列取出一个事件消息，事件消息对应的异步任务入栈，如果消息上面绑了回调函数那就执行它。</li>
+<li>当执行栈空了，就再从消息队列取出下一个事件消息，然后继续执行。这个就是<strong>事件循环</strong>。</li>
+</ol>
+<p>关于单线程，从 <strong>深入理解Node.js</strong> 里面对事件部分的源码分析也可以很清楚地看到，事件循环的核心部分代码就是个简单的 do-while 循环。</p>
+<p>异步则是因为 Node.js 底层用了 libuv，下面的事件消息通知是异步驱动的。（所以相当于整个调度是单线程的，而每个异步IO实际上是多线程进行的？）Linux 下用了 epoll。</p>
+<p>举个栗子：（发现各种教程里面举异步的例子都喜欢用 setTimeout …）</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.log(<span class="string">"start"</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i=<span class="number">0</span>;i&lt;=<span class="number">5</span>;i++)</span><br><span class="line">&#123;</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(i);</span><br><span class="line">    &#125;, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"end"</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这段代码除了 setTimeout 这个函数，其他的 API 包括这个 for 循环都是同步的，所以同步的部分先执行了。</p>
+<p>6 个 setTimeout 任务进入等待状态。</p>
+<p>在执行同步任务的过程中，setTimeout 的计数器到时间了（因为本身就设的是 0），消息队列里面会插进去 6 条事件，分别是触发对应的那条 setTimeout。</p>
+<p>然后同步部分执行完毕，<code>start</code> 和 <code>end</code> 都输出了。开始从消息队列中取消息，每取一条 setTimeout，就执行它的回调函数 <code>console.log(i)</code>。</p>
+<p>！！然后要注意这里的 i 是个全局变量，i 在 for 循环执行完毕的时候变成了 6，所以后面每一次输出的 i 都是 6。</p>
+<p>实际执行的结果是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">start</span><br><span class="line">end</span><br><span class="line">6</span><br><span class="line">6</span><br><span class="line">6</span><br><span class="line">6</span><br><span class="line">6</span><br><span class="line">6</span><br></pre></td></tr></table></figure>
+
+<p>这里如果把 for 循环中的 <code>var</code> 换成 <code>let</code>，最后得到会是这样的结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">start</span><br><span class="line">end</span><br><span class="line">0</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">5</span><br></pre></td></tr></table></figure>
+
+<p>再改一下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"123"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"start"</span>)</span><br><span class="line"></span><br><span class="line">test();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> i=<span class="number">0</span>;i&lt;=<span class="number">5</span>;i++)</span><br><span class="line">&#123;</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(i);</span><br><span class="line">        &#125;, <span class="number">0</span>);</span><br><span class="line">        <span class="built_in">console</span>.log(i);</span><br><span class="line">    &#125;, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"end"</span>);</span><br></pre></td></tr></table></figure>
+
+<p>输出结果是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">start</span><br><span class="line">123</span><br><span class="line">end</span><br><span class="line">0</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">0</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td></tr></table></figure>
+
+<p>从上面可以看出来的是：</p>
+<ol>
+<li>普通的函数是同步的！…… 之前一直以为这里面的函数全是异步的，看来只要不涉及到异步的 API 就都是同步的</li>
+<li>因为消息队列是个队列，所以 <code>i=0</code> 那条触发的 setTimeout 中增加的 setTimeout 事件只会被插到队列的再后面去。</li>
+</ol>
+<hr>
+<h1 id="爬虫"><a href="#爬虫" class="headerlink" title="爬虫"></a>爬虫</h1><hr>
+<p>爬虫的基本思路就是，把页面的 html 拿下来，然后用解析的工具从里面匹配出需要的信息来。</p>
+<p>最简单的两个包是 <code>superagent</code> 和 <code>cheerio</code>，<code>superagent</code> 用于获取网页的 html 源码，<code>cheerio</code> 用于解析 html 信息。</p>
+<p>这段代码是简单地抓了一下博客首页：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> cheerio = <span class="built_in">require</span>(<span class="string">'cheerio'</span>);</span><br><span class="line"><span class="keyword">let</span> superagent = <span class="built_in">require</span>(<span class="string">'superagent'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> doit = <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  superagent.get(<span class="string">'http://jcf94.com'</span>)</span><br><span class="line">    .end(<span class="function"><span class="keyword">function</span> (<span class="params">err, sres</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> (err) &#123;</span><br><span class="line">        <span class="keyword">return</span> err;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">let</span> $ = cheerio.load(sres.text);</span><br><span class="line">      <span class="keyword">let</span> items = [];</span><br><span class="line">      $(<span class="string">'#posts .post-title-link'</span>).each(<span class="function"><span class="keyword">function</span> (<span class="params">idx, element</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">let</span> $element = $(element);</span><br><span class="line">        <span class="comment">//console.log($element);</span></span><br><span class="line">        items.push(&#123;</span><br><span class="line">          title: $element.text(),</span><br><span class="line">          href: $element.attr(<span class="string">'href'</span>)</span><br><span class="line">        &#125;);</span><br><span class="line">      &#125;);</span><br><span class="line">      <span class="built_in">console</span>.log(items);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">let</span> pics = [];</span><br><span class="line">      $(<span class="string">'#posts img'</span>).each(<span class="function"><span class="keyword">function</span> (<span class="params">idx, element</span>) </span>&#123;</span><br><span class="line">          <span class="keyword">let</span> $element = $(element);</span><br><span class="line">          pics.push(&#123;</span><br><span class="line">              src: $element.attr(<span class="string">'src'</span>)</span><br><span class="line">          &#125;);</span><br><span class="line">      &#125;);</span><br><span class="line">      <span class="built_in">console</span>.log(pics);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后是 <code>request</code> 包，比 <code>superagent</code> 更常用一些，用于请求网页等等各种资源。</p>
+<p>简单的爬虫学会了，然后我就想试试能不能把网易云上歌曲的评论数抓下来，，这里遇到个坑点。</p>
+<p>网易云音乐的页面用了 iframe 框架来动态加载内容，打开页面之后直接获取 html 的源码会发现抓下来的只有框架，没有内容。</p>
+<p>这就抓瞎了。。。</p>
+<hr>
+<p>然后就上了 <code>selenium-webdriver</code> 这个包。</p>
+<p>selenium 原本是用于页面的自动化测试的，具体使用起来就是 Node.js 代码会控制一个浏览器完成点击、输入等等操作（按键精灵有木有？）。</p>
+<p>简单的抓页面的代码是这样，这里关键在于这个 <code>driver.switchTo().frame(&#39;contentFrame&#39;)</code>，用于切换到 iframe 加载出来之后的页面。</p>
+<p>切过去之后才能正常抓到页面内容。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> webdriver = <span class="built_in">require</span>(<span class="string">'selenium-webdriver'</span>),</span><br><span class="line">    By = webdriver.By,</span><br><span class="line">    until = webdriver.until;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> driver = <span class="keyword">new</span> webdriver.Builder()</span><br><span class="line">    .forBrowser(<span class="string">'chrome'</span>)</span><br><span class="line">    .build();</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> getComments = <span class="keyword">async</span> (url: string) =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> promise = <span class="keyword">new</span> <span class="built_in">Promise</span>&lt;number&gt;<span class="function">(<span class="params">(resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">        driver.get(url);</span><br><span class="line">        driver.switchTo().frame(<span class="string">'contentFrame'</span>);</span><br><span class="line">        driver.findElement(By.xpath(<span class="string">'//*/div[1]/span/span'</span>)).getAttribute(<span class="string">'innerHTML'</span>).then(<span class="function"><span class="params">result</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (result) resolve(result);</span><br><span class="line">            <span class="keyword">else</span> reject(<span class="number">0</span>);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> promise;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> doit = <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">    driver.get(<span class="string">'http://music.163.com/#/discover/toplist?id=3778678'</span>);</span><br><span class="line"></span><br><span class="line">    driver.switchTo().frame(<span class="string">'contentFrame'</span>);</span><br><span class="line">    <span class="comment">//driver.getPageSource().then(res=&gt;console.log(res));</span></span><br><span class="line">    <span class="keyword">let</span> urls = <span class="keyword">await</span> driver.findElements(By.xpath(<span class="string">'//*/td[2]/div/div/div/span/a'</span>));</span><br><span class="line">    <span class="keyword">let</span> titles = <span class="keyword">await</span> driver.findElements(By.xpath(<span class="string">'//*/td[2]/div/div/div/span/a/b'</span>));</span><br><span class="line">    <span class="keyword">let</span> total = urls.length;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"Total "</span> + total + <span class="string">" Songs find."</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> list = [];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i=<span class="number">0</span>; i&lt;total; i++) &#123;</span><br><span class="line">        <span class="keyword">let</span> ur:string = <span class="keyword">await</span> urls[i].getAttribute(<span class="string">'href'</span>);</span><br><span class="line">        <span class="keyword">let</span> ti:string = <span class="keyword">await</span> titles[i].getAttribute(<span class="string">'title'</span>);</span><br><span class="line">        list.push(&#123;</span><br><span class="line">            no: i,</span><br><span class="line">            title: ti,</span><br><span class="line">            url: ur,</span><br><span class="line">            comments: <span class="number">0</span></span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i=<span class="number">0</span>;i&lt;total;i++) &#123;</span><br><span class="line">        <span class="keyword">let</span> co:number = <span class="keyword">await</span> getComments(list[i].url);</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"Get song "</span> + i + <span class="string">" ."</span>);</span><br><span class="line">        list[i].comments = co;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    driver.quit();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//------------------</span></span><br><span class="line"></span><br><span class="line">    fs.writeFileSync(<span class="string">'netease.json'</span>, <span class="built_in">JSON</span>.stringify(list));</span><br><span class="line"></span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"Finish"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/07/10/2017-07-10-libuv/" rel="bookmark">向 Node.js 的底层再走一步</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/18/2018-01-18-vizgraph/" rel="bookmark">写了一个画框图的轮子</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2019/01/01/2019-01-01-vizgraph/" rel="bookmark">Release 了一个新的 VizGraph</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Node-js/" rel="tag"># Node.js</a>
+              <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+              <a href="/tags/Typescript/" rel="tag"># Typescript</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/04/19/2017-04-19-memorypool/" rel="prev" title="内存池">
+      <i class="fa fa-chevron-left"></i> 内存池
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/06/21/2017-06-21-3dct/" rel="next" title="医学影像 & AI">
+      医学影像 & AI <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Learning"><span class="nav-text">Learning</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#异步"><span class="nav-text">异步</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#爬虫"><span class="nav-text">爬虫</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '7e4e827ee1a2513754ec2416de4d3cbe',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

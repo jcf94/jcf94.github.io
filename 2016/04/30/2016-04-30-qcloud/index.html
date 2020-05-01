@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="果然经常跟着实验室的师兄混，总能发现点好东西。 以前玩Ingress的时候其实就想买一台自己的VPS了，因为平时用的一些简易的梯子不太稳，很想自己搭一个用，还能往上面挂博客什么的。 后来忙了，Ingress上的也比较少了，平时对科学上网的需求也少了，博客还直接用Hexo+Github搞定了，于是就再也没想过买台VPS能用来干嘛了。  来到科大以后，我发现我们自己实验室里的服务器就多得都没人用了">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VPS 的折腾之路">
+<meta property="og:url" content="https://jcf94.com/2016/04/30/2016-04-30-qcloud/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="果然经常跟着实验室的师兄混，总能发现点好东西。 以前玩Ingress的时候其实就想买一台自己的VPS了，因为平时用的一些简易的梯子不太稳，很想自己搭一个用，还能往上面挂博客什么的。 后来忙了，Ingress上的也比较少了，平时对科学上网的需求也少了，博客还直接用Hexo+Github搞定了，于是就再也没想过买台VPS能用来干嘛了。  来到科大以后，我发现我们自己实验室里的服务器就多得都没人用了">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.vultr.com/media/badge_onwhite.svg">
+<meta property="article:published_time" content="2016-04-30T04:23:13.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="云服务">
+<meta property="article:tag" content="腾讯云">
+<meta property="article:tag" content="qcloud">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.vultr.com/media/badge_onwhite.svg">
+
+<link rel="canonical" href="https://jcf94.com/2016/04/30/2016-04-30-qcloud/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>VPS 的折腾之路 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2016/04/30/2016-04-30-qcloud/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          VPS 的折腾之路
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-04-30 12:23:13" itemprop="dateCreated datePublished" datetime="2016-04-30T12:23:13+08:00">2016-04-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Web/" itemprop="url" rel="index"><span itemprop="name">Web</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <img data-src=http://jcf94.com/download/2016-04-30-qcloud-logo.jpg />
+
+<p>果然经常跟着实验室的师兄混，总能发现点好东西。</p>
+<p>以前玩<a href="https://www.ingress.com/" target="_blank" rel="noopener">Ingress</a>的时候其实就想买一台自己的VPS了，因为平时用的一些简易的梯子不太稳，很想自己搭一个用，还能往上面挂博客什么的。</p>
+<p>后来忙了，Ingress上的也比较少了，平时对科学上网的需求也少了，博客还直接用Hexo+Github搞定了，于是就再也没想过买台VPS能用来干嘛了。</p>
+<blockquote>
+<p>来到科大以后，我发现我们自己实验室里的服务器就多得都没人用了，然后貌似等正式入学之后还能拿学号在科大的学校云上申请服务器空间用╮(╯_╰)╭，巨大的幸福感袭来。</p>
+</blockquote>
+<p>Anyway，今天的主题是这个：</p>
+<ul>
+<li><a href="http://bbs.qcloud.com/thread-9953-1-1.html" target="_blank" rel="noopener">【云+校园计划】 1元=免费域名+专享服务器</a></li>
+</ul>
+<a id="more"></a>
+
+<hr>
+<h1 id="VPS"><a href="#VPS" class="headerlink" title="VPS"></a>VPS</h1><p>腾讯在15年10月启动的这个校园优惠计划，简单来讲就是在腾讯云上面创建最低配置的VPS是65元/月，通过腾讯校园认证之后，腾讯云会每个月发一张64块钱的优惠券，这样就相当于能每月1元使用云主机了。</p>
+<p>另外还会每年送一张38元的域名优惠券，应该是在腾讯云上申请域名也是每年38元，这样就相当于白送了个域名。</p>
+<p>认证需要通过学信网来完成，优惠只在大学生在校期间有效。</p>
+<hr>
+<p>其实国内的VPS服务感觉相对国外来说还是偏贵的，从下面这个知乎提问的回答上来看：</p>
+<ul>
+<li><a href="https://www.zhihu.com/question/20800554" target="_blank" rel="noopener">有哪些便宜稳定，速度也不错的Linux VPS 推荐？</a></li>
+</ul>
+<p>国外好多VPS动辄5$一个月，19.99$一年的价格，相比<a href="http://www.qcloud.com/" target="_blank" rel="noopener">腾讯云</a>最便宜的也要65元/月，<a href="https://www.aliyun.com/" target="_blank" rel="noopener">阿里云</a>我看了下也不比腾讯便宜。相较国外的有的差不多能有10倍的差价了。</p>
+<blockquote>
+<p>更重要的是国内的VPS不止贵，而且节点还在墙内。。拿来搭梯子都不行。。-_-</p>
+<p>额，写到这里突然发现BAT三家里面两家都做了云服务，没听说过百度的不太应该啊。查了一下果然百度也有个<a href="https://bce.baidu.com/index.html" target="_blank" rel="noopener">开放云</a>，不过似乎知名度不高的样子，以前我都没怎么听说过这个。</p>
+</blockquote>
+<p>也真是坑啊~~</p>
+<p>不过从另一个角度来看，国外的服务毕竟远，说不定什么时候倒掉了也不一定，流量还有被大墙杀掉的危险性。国内的VPS至少在访问上还是相当稳定的，速度也比较快，而且如果是用来搭网站，经过备案之后还可以开CDN加速，个人感觉体验上会更好一点。</p>
+<h2 id="校园计划"><a href="#校园计划" class="headerlink" title="校园计划"></a>校园计划</h2><p>阿里云也针对在校大学生推出过<a href="https://www.aliyun.com/act/aliyun/campus.html" target="_blank" rel="noopener">校园计划</a>，9.9元/月的价格，可惜想要得到这个资格貌似需要抢购？每天只有限量30台的样子。</p>
+<p>腾讯云的1元服务器还送域名已经是非常良心了，我之前注册域名的地方是<a href="https://www.dnspod.cn/" target="_blank" rel="noopener">DNSPOD</a>，在14年8月已经直接并入腾讯云了，从域名的解析体验上来看，还是相当不错的，这也让我对腾讯云的服务有着不错的信心。</p>
+<blockquote class="blockquote-center">
+这份安利我吃了！！
+</blockquote>
+
+<hr>
+<h1 id="开始折腾"><a href="#开始折腾" class="headerlink" title="开始折腾"></a>开始折腾</h1><p>昨天在腾讯云上完成了注册和学生认证（现在用的还是本科的身份认证的，下半年应该需要拿研究生的身份重新认证一次），今天早上就收到了发过来的优惠券，然后果断开始动手了。</p>
+<p>搭站的过程其实没什么可说的，整个流程非常简单。</p>
+<p>选好服务器节点的位置、配置、操作系统等等参数，再选上优惠券刷个一元钱，就能在腾讯云的管理界面上看到VPS正在生成了。</p>
+<p>创建完成的VPS会分配一个公网的IP，可以用之前设定的密钥来登录，如果有多台VPS选在同一个服务器大区里面的话，还能通过内网地址来互相访问。</p>
+<hr>
+<p>由于实验室里面的服务器用CentOS的比较多，也相对稳定一些，在师兄的建议下我还是选装了CentOS7.1。</p>
+<p>装一些基本的软件，创建个非root账户，然后再配一下自己常用的环境，之后就可以把LAMP环境给搭起来用了。MySql和Php我暂时还没想好要用来做什么，所以准备先装个Apache，考虑可以把Github上的静态博客迁移到腾讯云上去。</p>
+<h2 id="Apache"><a href="#Apache" class="headerlink" title="Apache"></a>Apache</h2><p>比较神奇的是，Apache在CentOS软件库里面不叫Apache，叫httpd。除了Ubuntu Server我没在其他发行版下装过这个，不知道别的是不是也这样。</p>
+<p>简单地使用<code>yum</code>指令装上即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ yum install httpd</span><br></pre></td></tr></table></figure>
+
+<p>然后启动httpd的服务，并添加开机启动。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ systemctl start httpd</span><br><span class="line">$ systemctl <span class="built_in">enable</span> httpd</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以了。Apache会自动把<code>/var/www/html/</code>目录映射给80端口，访问服务器的IP地址即可看到其中的页面。</p>
+<p>然后要在腾讯云的管理台上打开这台VPS的80端口，我在创建时默认只打开了用来ssh登录的22端口。</p>
+<p>在安全组里面添加一个80端口的配置文件，然后把这台VPS的安全组加上即可。</p>
+<p>可以直接在浏览器里面输入服务器IP来测试Apache是否生效。</p>
+<h2 id="Swap空间"><a href="#Swap空间" class="headerlink" title="Swap空间"></a>Swap空间</h2><p>云服务器给的1G内存有可能会不够用，例如要在上面跑某些大内存需求的服务时。</p>
+<p>配置swap分区/swap文件可以防止当内存用满时操作系统强杀进程的情况。</p>
+<p>这里有一篇写得不错的教程：</p>
+<ul>
+<li><a href="https://www.digitalocean.com/community/tutorials/how-to-add-swap-on-centos-7" target="_blank" rel="noopener">How To Add Swap on CentOS 7</a></li>
+</ul>
+<p>使用这两个命令可以查看当前系统中的Swap空间和内存情况：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ swapon -s</span><br><span class="line">$</span><br><span class="line">$ free -m</span><br></pre></td></tr></table></figure>
+
+<p>不想额外分一个Swap区的话，就简单地创建Swap文件好了。</p>
+<p>首先创建一个文件空间：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo fallocate -l 2G /swapfile</span><br></pre></td></tr></table></figure>
+
+<p><code>fallocate</code>命令用于在硬盘上预留一部分空间，正常情况下命令运行完了会在根目录生成一个名为swapfile的文件夹，使用<code>ls -lh</code>命令可以查看。</p>
+<p>我在服务器上运行的时候不知道是什么问题给我报错了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ fallocate: /swapfile: fallocate failed: Operation not supported</span><br></pre></td></tr></table></figure>
+
+<p>google了好久也没有搞明白原因，只好换个方法：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo dd <span class="keyword">if</span>=/dev/zero of=/swapfile bs=512M count=4</span><br></pre></td></tr></table></figure>
+
+<p><code>dd</code>命令是用于直接按照物理参数来复制文件，<code>if</code>是输入，<code>of</code>是输出，<code>bs</code>参数表示每次写入的大小，<code>count</code>参数表示写入的次数。</p>
+<p>创建完成之后改一下权限：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo chmod 600 /swapfile</span><br><span class="line">$ ls -lh /swapfile</span><br><span class="line">-rw------- 1 root root 2.0G May  4 18:12 /swapfile</span><br></pre></td></tr></table></figure>
+
+<p>然后就可以设定Swap空间了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mkswap /swapfile</span><br><span class="line">$ sudo swapon /swapfile</span><br></pre></td></tr></table></figure>
+
+<p>再使用<code>swapon -s</code>和<code>free -m</code>命令查看，swapfile文件应该已经生效了。</p>
+<p>要使swapfile永久生效还需要把这个写进fstab挂载文件中，在fstab最后加上：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/swapfile	swap	swap	sw	0	0</span><br></pre></td></tr></table></figure>
+
+<p>重启机器即可。</p>
+<h2 id="Gitlab"><a href="#Gitlab" class="headerlink" title="Gitlab"></a>Gitlab</h2><p>咳咳，上面搞Swap空间主要是为了弄这个。Gitlab要求安装需要2G内存，以支持至少100个用户同时协作。如果内存不足的话，可以用Swap空间来补充，但是性能应该会比较受影响，当然我目前是准备自己一个人用着玩，应该还是可以承受的。</p>
+<p>Gitlab是一个开源的git服务器软件，提供完整的网站页面和git托管功能，简单地说就是个私人定制的Github。</p>
+<p>官网上的<a href="https://about.gitlab.com/downloads/#centos7" target="_blank" rel="noopener">安装教程</a>非常简单，Gitlab已经集成好了rpm包，只需要添加一下Gitlab的源站网址，然后<code>yum install gitlab-ce</code>即可。</p>
+<p>Gitlab的CE版意思为Community Edition，免费但功能不完全，Enterprise Edition则支持得更为完整，例如像Github一样的静态pages功能都有。</p>
+<p>如果是手动编译安装的话，可以指定数据库使用MySQL或者PostgreSQL，网页服务器也可以选择Apache或者Nginx，但是直接用rpm包安装的话就没有办法自己定制了，默认使用的是PostgreSQL+Nginx。</p>
+<p>Nginx默认用的也是80端口，安装Gitlab的时候需要把Apache（在这里也就是httpd服务）关掉，不然可能影响到成功安装和测试。</p>
+<p>不出意外的话，输入地址就能成功打开页面了。首次登录需要设置root的密码。</p>
+<hr>
+<p>为了使Apache服务能正常使用（毕竟我还是想把博客移上去），我选择改掉Nginx的服务端口。</p>
+<p>找到<code>/etc/gitlab/gitlab.rb</code>文件，其中记录了gitlab的配置信息。需要修改的地方有两个：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">external_url <span class="string">'http://localhost:16666'</span></span><br><span class="line"></span><br><span class="line">unicorn[<span class="string">'port'</span>] = 16667</span><br></pre></td></tr></table></figure>
+
+<p>第一个是Gitlab对外服务的地址，默认是80，也就是Nginx的地址；第二个是Gitlab后台使用的Unicorn的服务地址，默认是8080。</p>
+<p>重新配置所有Gitlab服务<code>gitlab-ctl reconfigure</code>即可。在腾讯云的安全组上打开16666端口，应该就可以看到配置成功生效了。</p>
+<hr>
+<p>其实我原本的想要的结果是多个域名都解析到一台VPS的不同服务上去。比如gitlab.jcf94.com解析给Gitlba，blog.jcf94.com或者jcf94.com解析给博客。</p>
+<p>在网址后面加端口号这事看上去就让人觉得不爽，尤其是DNS解析的时候，后面的主机记录没有办法只解析某个ip的端口。DNSPOD倒是提供了一种隐性url的解析方式，可以把gitlab.jcf94.com这样的地址解析给另外一个带端口号的ip，不过这个功能是要收费的。</p>
+<p>Google了一下，看来要继续从Nginx和Apache上面下手了。</p>
+<p>我用<code>Nginx Apache 共存</code>、<code>Nginx 多域名</code>、<code>Nginx 转发 Apache</code>这样的关键字去找，搜出来一些还算有用的结果，然后综合了一下，最终想出了这样的方法：</p>
+<blockquote>
+<p>Nginx监听80端口，httpd监听16666端口，Nginx发现80端口的目标地址是qcloud.jcf94.com时就把服务转发给16666端口，交给Apache来处理，如果80端口的目标地址是gitlab.jcf94.com，那么就自己解决。</p>
+</blockquote>
+<p>好，首先是改端口，Nginx的端口修改方法在上面已经写了，Nginx改成80，unicorn还是16667吧，改完<code>gitlab-ctl reconfigure</code>一下，会重新生成包括Nginx在内的配置文件。</p>
+<p>然后是Apache的端口，修改<code>/etc/httpd/conf/httpd.conf</code>文件，找到<code>Listen 80</code>改成<code>Listen 16666</code>即可。</p>
+<p>然后在<code>/var/opt/gitlab/nginx/conf</code>下新增一个配置文件<code>apache.conf</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">  listen *:80;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  server_name qcloud.jcf94.com;</span><br><span class="line">  server_tokens off;</span><br><span class="line"></span><br><span class="line">  location / &#123;</span><br><span class="line">    proxy_read_timeout      300;</span><br><span class="line">    proxy_connect_timeout   300;</span><br><span class="line"></span><br><span class="line">    proxy_http_version 1.1;</span><br><span class="line"></span><br><span class="line">    proxy_set_header Host <span class="variable">$http_host</span>;</span><br><span class="line">    proxy_set_header X-Real-IP <span class="variable">$remote_addr</span>;</span><br><span class="line">    proxy_set_header X-Forwarded-For <span class="variable">$proxy_add_x_forwarded_for</span>;</span><br><span class="line">    proxy_set_header X-Forwarded-Proto http;</span><br><span class="line"></span><br><span class="line">    proxy_pass http://localhost:16666/;</span><br><span class="line">    proxy_redirect default;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主体是我直接拷的原来的<code>gitlab-http.conf</code>然后改的，关键的内容在于<code>server_name</code>和后面的<code>proxy_</code>转发配置上。</p>
+<p>然后对<code>gitlab-http.conf</code>也需要作一下修改，找到<code>server_name</code>加上<code>gitlab.jcf94.com</code>即可。</p>
+<p>我直接重启了Nginx服务，发现没有生效…</p>
+<p>原来Nginx加载时其实读的是这个目录下的<code>nginx.conf</code>，在这个配置文件中有一句引用<code>gitlab-http.conf</code>的话，那么在下面仿照这个样子把新创建的<code>apache.conf</code>也引用进去就好了。</p>
+<p><code>gitlab-ctl restart nginx</code>单独重启Nginx的服务，然后测试<code>gitlab.jcf94.com</code>和<code>qcloud.jcf94.com</code>的情况。</p>
+<blockquote class="blockquote-center">
+完美！！
+</blockquote>
+
+<blockquote>
+<p>注：每次<code>gitlab-ctl reconfigure</code>之后，<code>gitlab-http.conf</code>和<code>nginx.conf</code>都会重写，这里修改的内容都要重新改一遍。想要永久生效应该是需要改掉<code>/etc/gitlab/gitlab.rb</code>里面的某些东西，不过我还没找到合适的修改方法。</p>
+<p>话说其实没事一般也不会<code>reconfigure</code>，所以这个问题应该不会成为太大的困扰吧。</p>
+</blockquote>
+<h2 id="转移博客"><a href="#转移博客" class="headerlink" title="转移博客"></a>转移博客</h2><p>开始着手把博客移到VPS上。</p>
+<p>其实想了一下，只用Nginx已经足够支持我原来的静态博客了，非要上Apache主要是为了以后能往上面放一点php的东西上去。（至于未来到底会不会真的去折腾php就要以后再看啦~）。</p>
+<p>网上推荐的教程都是在服务器上创一个git的用户，然后在git用户下建立远程库地址，但是我这台VPS由于前面装过Gitlab，结果git帐号已经被改掉了，我也不知道这玩意默认的密码是什么，于是决定直接放到我自己的用户目录下好了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ~</span><br><span class="line">$ mkdir blog.git</span><br><span class="line">$ <span class="built_in">cd</span> blog.git</span><br><span class="line">$ git init --bare</span><br></pre></td></tr></table></figure>
+
+<p>后面的<code>--bare</code>选项必须要加上，否则创建的不是远端仓库的格式，没有办法接受客户端传上来的数据。</p>
+<p>然后可以测试一下上传是否成功，打开hexo的站点配置文件<code>_config.yml</code>，把服务器的仓库地址加到depoly列表里面去：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gitlab: jcf@qcloud.jcf94.com:blog.git,master</span><br></pre></td></tr></table></figure>
+
+<p><code>hexo d</code>上传成功即可。</p>
+<p>然后由于这只是在我的用户目录下，接下来要做的是把上传上去的文件复制到Apache的网页目录下，这个可以交给Git Hooks来自动完成。Git Hooks是一些运行脚本，可以设定在git服务器和客户端交互的多个阶段自动执行。</p>
+<p>打开<code>~/blog.git/hooks</code>目录，里面应该有一些写好的sample，不过对我们来说暂时没什么用，创建一个名为<code>post-receive</code>的文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/bin/bash -l</span></span><br><span class="line"></span><br><span class="line">GIT_REPO=/home/jcf/blog.git</span><br><span class="line">TMP_GIT_CLONE=/tmp/blog</span><br><span class="line">WWW=/var/www/html</span><br><span class="line"></span><br><span class="line">rm -rf <span class="variable">$&#123;TMP_GIT_CLONE&#125;</span></span><br><span class="line">git <span class="built_in">clone</span> <span class="variable">$&#123;GIT_REPO&#125;</span> <span class="variable">$&#123;TMP_GIT_CLONE&#125;</span></span><br><span class="line">rm -rf <span class="variable">$&#123;WWW&#125;</span>/*</span><br><span class="line">cp -rf <span class="variable">$&#123;TMP_GIT_CLONE&#125;</span>/* <span class="variable">$&#123;WWW&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>脚本的内容非常简单，即首先从<code>blog.git</code>中clone出能够正常读写的文件，然后把文件复制到Apache的网页目录下。</p>
+<p>处理一下权限问题：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ chmod +x post-receive</span><br><span class="line">$</span><br><span class="line">$ sudo chmod 777 -R /var/www/html</span><br></pre></td></tr></table></figure>
+
+<p>一个是<code>post-receive</code>这个文件的运行权限，另外就是对html目录的读写权限，为了省事我直接777了。。。简单粗暴。这样就完成了全部的设置。</p>
+<p>可以<code>sh post-receive</code>测试一下脚本是否可用，之后每次<code>hexo d</code>上传成功之后，都会执行这个脚本的内容。</p>
+<hr>
+<p>当然，博客移到VPS之后，后面还需要处理一下域名解析等等其他的小问题，这个就不详细记录了。</p>
+<p>例如做一下<a href="/2015/10/24/2015-10-24-dnsswitch/">博客站双机备份切换</a>，原来用的是Github+Gitcafe，现在用VPS作主站，Github Pages仍然可以作为备份站来使用。</p>
+<h2 id="VPN跳板"><a href="#VPN跳板" class="headerlink" title="VPN跳板"></a>VPN跳板</h2><p>有时候需要在校外远程vpn到实验室的机器上，实验室本来是有搭好了vpn可以直接用的，但是坑爹的是当地的网络可能会出现各种问题：例如路由器没开vpn穿透、本地存在重名ip等等。然后就连不上。</p>
+<p>试了下腾讯云跟实验室之间是通的。</p>
+<p>最后想到个办法就是ssh连到腾讯云上去，腾讯云连实验室vpn，然后再ssh到机器上工作，相当于把腾讯云做了个跳板。</p>
+<p>首先确定软件都已经装上了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum install pptp pptp-setup</span><br></pre></td></tr></table></figure>
+
+<p>需要用到的主要是这个<code>pptpsetup</code>，设置的方式很简单：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo pptpsetup --create VPN_Name --server VPN_IP --username VPN_Username --password VPN_Password --encrypt --start</span><br></pre></td></tr></table></figure>
+
+<p>最后两个选项<code>--encrypt</code>是采用加密，<code>--start</code>是立即启动，只是创建配置文件的话可以不加<code>--start</code>。</p>
+<p>创建好文件之后用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo pppd call ACSA</span><br></pre></td></tr></table></figure>
+
+<p>即可开启vpn，然后可以用<code>ifconfig</code>看看出现了ppp0就连接成功了。</p>
+<p>不过这样还不能直接用，因为路由没走vpn，虽然连上了但是流量还是按照原来的路由走，需要手动加上路由。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo ip route add xxx.xxx.xxx.xxx dev ppp0</span><br></pre></td></tr></table></figure>
+
+<p>把实验室那几台机器的ip加上即可。</p>
+<blockquote>
+<p>添加default和0.0.0.0的话就是全局用vpn，我测试的时候发现全局转完之后我电脑和腾讯云的ssh就断了，还好在腾讯云网页上的终端还能进，赶紧把网络重置了，差点就悲剧了</p>
+</blockquote>
+<p>顺手写了两个用于开关VPN的脚本：</p>
+<ul>
+<li>开</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#! /bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Start The VPN</span></span><br><span class="line"></span><br><span class="line">VPN=`ifconfig|grep ppp0`</span><br><span class="line"><span class="keyword">if</span> [ -z <span class="string">"<span class="variable">$VPN</span>"</span> ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">        sudo pppd call ACSA</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">VPN=`ifconfig|grep ppp0`</span><br><span class="line"><span class="keyword">while</span> [ -z <span class="string">"<span class="variable">$VPN</span>"</span> ]</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">VPN=`ifconfig|grep ppp0`</span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># NODE 7</span></span><br><span class="line"></span><br><span class="line">sudo ip route add 114.214.166.246 dev ppp0</span><br><span class="line"></span><br><span class="line"><span class="comment"># SUGON</span></span><br><span class="line"></span><br><span class="line">sudo ip route add 202.38.79.157 dev ppp0</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>关</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#! /bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Stop The VPN</span></span><br><span class="line"></span><br><span class="line">sudo killall pppd</span><br><span class="line"></span><br><span class="line"><span class="comment"># Reset The Network</span></span><br><span class="line"></span><br><span class="line">sudo systemctl restart network</span><br></pre></td></tr></table></figure>
+
+<h1 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h1><p>从ping值上来看，腾讯云的地址响应速度比Github的地址要快上很多：</p>
+<img data-src=http://jcf94.com/download/2016-04-30-qcloud-ping.jpg title="Ping值测试"/>
+
+<blockquote>
+<p>这张图是在我迁移博客之前截的。</p>
+</blockquote>
+<h2 id="腾讯域名解析"><a href="#腾讯域名解析" class="headerlink" title="腾讯域名解析"></a>腾讯域名解析</h2><p>虽然我原来已经在DNSPOD上面买过域名了，本着不用白不用的原则，迅速建了个域名。</p>
+<p>腾讯云上的域名解析虽然写着说是基于DNSPOD，但是感觉这个功能特别简陋，几乎没有任何进阶的设置功能。然后解析能够支持的记录类型也不如DNSPOD多。</p>
+<p>不知道是不是这个域名的实名审核还没结束的问题，添加一条CNAME记录之后一直没有生效。在DNSPOD上面加完几乎是刷新几遍的时间就能正常使用了。</p>
+<blockquote>
+<p>似乎腾讯云上面注册的域名不备案真的解析不了…完成实名审核之后还是没有生效。只好把这个域名放到DNSPOD里面去解析了。所有权还是在腾讯云上，解析交给DNSPOD来完成，完美解决。</p>
+</blockquote>
+<hr>
+<p>如果这台VPS只是拿来挂个博客，感觉确实是有点没意思哈哈。</p>
+<ul>
+<li><a href="https://www.zhihu.com/question/24284566" target="_blank" rel="noopener">VPS有什么有趣的用途？</a></li>
+</ul>
+<hr>
+<h1 id="再后话"><a href="#再后话" class="headerlink" title="再后话"></a>再后话</h1><p>本科毕业前夕，我问过客服升学之后能不能继续，他们说到时候重新验证一下就行了。所以我在中间补上了2个月的费用，结果后来系统上就更新了，升学不能重新认证。</p>
+<p>然后就呵呵了。</p>
+<p>最后觉得，有需求还是花点钱上个国外的 VPS 吧，现在拿了 Github 的学生优惠，在 DigitalOcean 上开了一个。</p>
+<h1 id="再再后话"><a href="#再再后话" class="headerlink" title="再再后话"></a>再再后话</h1><blockquote>
+<p>2017 年更新</p>
+</blockquote>
+<p><a href="https://cloud.google.com/" target="_blank" rel="noopener">Google Cloud Platform</a> 上面提供一个一年期 300 刀的试用服务，在控制台的 Compute Engine 里面，貌似每个新的谷歌账号都能享受。</p>
+<blockquote>
+<p>嗯，上面那个 Google 云的控制台地址在国内是被墙了的。</p>
+</blockquote>
+<p>east-asia 的台湾机房速度快的飞起！！！</p>
+<p>目前我的服务已经全面迁移到这个上面。</p>
+<h2 id="Apache-单-ip-多域名"><a href="#Apache-单-ip-多域名" class="headerlink" title="Apache 单 ip 多域名"></a>Apache 单 ip 多域名</h2><p>除了这个博客以外，还放了其他的一些页面在 VPS 上，幸好 Apache 本身就是支持这种多域名的解析的，而且配置起来很方便，这个功能在 Apache 里面叫 VirtualHost。</p>
+<p>在<code>/etc/httpd/</code> 目录下面新建一个 conf.vhost.d 的目录，里面就用来放不同域名的 VirtualHost 配置文件。</p>
+<p>在<code>/etc/httpd/conf/httpd.conf</code>末尾加上：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">IncludeOptional conf.vhost.d/*.conf</span><br></pre></td></tr></table></figure>
+
+<p>这样 conf.vhost.d 目录下的所有配置文件就能起效了。</p>
+<p>然后对每个域名写个配置文件就好了，例如<code>jcf94.conf</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;VirtualHost *:80&gt;</span><br><span class="line">    Serveradmin jcf94@outlook.com</span><br><span class="line">    ServerName jcf94.com</span><br><span class="line">    DocumentRoot /var/www/html</span><br><span class="line"></span><br><span class="line">    &lt;Directory <span class="string">"/var/www/html"</span>&gt;</span><br><span class="line">          Options FollowSymLinks</span><br><span class="line">          AllowOverride All</span><br><span class="line">          <span class="comment">#Require all denied</span></span><br><span class="line">          Require all granted</span><br><span class="line">    &lt;/Directory&gt;</span><br><span class="line">&lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure>
+
+<p>别的域名：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;VirtualHost *:80&gt;</span><br><span class="line">    ServerName www.xxxx.com</span><br><span class="line">    DocumentRoot /var/www/xxxx</span><br><span class="line"></span><br><span class="line">    &lt;Directory <span class="string">"/var/www/xxxx"</span>&gt;</span><br><span class="line">          Options FollowSymLinks</span><br><span class="line">          AllowOverride All</span><br><span class="line">          <span class="comment">#Require all denied</span></span><br><span class="line">          Require all granted</span><br><span class="line">    &lt;/Directory&gt;</span><br><span class="line">&lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure>
+
+<h1 id="再再再后话"><a href="#再再再后话" class="headerlink" title="再再再后话"></a>再再再后话</h1><blockquote>
+<p>2018-03-04 更新</p>
+</blockquote>
+<p>Google 云快到期了，所以最近正在着手找下家。</p>
+<p>DigitalOcean 以前用了倒是还不错啦，但是以前开过的旧金山 1 号机房没货了，据传 SFO2 速度不太好，于是现在在尝试 Vultr 的日本机房。</p>
+<p>话说 Google 云的台湾机房真的是很满意的，ping 值低的飞起，网速快的飞起，就是流量要单独收费，算下来一个月平均要 7、8 刀左右了，稍微多用点可能就要 10 刀了，想想还是算了。</p>
+<hr>
+<p>现在开了 Vultr 的东京机房，比较坑爹的是日本 ip 好像没了，刷了几次刷出来的都是加拿大的，解析的时候要绕一圈，不过速度上测了一下还是要比其他地方稍微好点。</p>
+<p>准备之后长期用了。</p>
+<p>每月 5 刀，25G 的 SSD，1G 内存，1 T 流量，还是挺便宜的了。部分地区能买到 2.5 刀每月的机器。（这时候只有纽约和迈阿密机房有货，但是试了下这两个地方给我的 ip 似乎都被墙了）</p>
+<ul>
+<li><a href="https://www.vultr.com/?ref=7130277" target="_blank" rel="noopener">最后扔个注册的推广链接好了</a></li>
+</ul>
+<h2 id="Seafile"><a href="#Seafile" class="headerlink" title="Seafile"></a>Seafile</h2><p>从 Google Cloud 移出来之后其实还有个好处，1 T 流量啊！1 T 流量！</p>
+<p>平时很少看 YTB，科学上网对我来说主要还是在 Google 上搜搜资料，Google Play 更新一下软件，然后科学领个 Steam 游戏什么的，基本上流量用的特别少。</p>
+<p>于是顺手用 Seafile 建个网盘，平时稍微传传东西。</p>
+<p>官方的中文手册写的有的地方不太清楚，不过基本上搭这个还算容易。</p>
+<hr>
+<img data-src="https://www.vultr.com/media/badge_onwhite.svg" class="full-image">
+    </div>
+
+    
+    
+    
+      
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BA%91%E6%9C%8D%E5%8A%A1/" rel="tag"># 云服务</a>
+              <a href="/tags/%E8%85%BE%E8%AE%AF%E4%BA%91/" rel="tag"># 腾讯云</a>
+              <a href="/tags/qcloud/" rel="tag"># qcloud</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/04/25/2016-04-25-msys2/" rel="prev" title="MSYS2-Windows下的类Unix环境">
+      <i class="fa fa-chevron-left"></i> MSYS2-Windows下的类Unix环境
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/05/01/2016-05-01-jvectormap/" rel="next" title="JS地图插件jvectormap">
+      JS地图插件jvectormap <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#VPS"><span class="nav-text">VPS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#校园计划"><span class="nav-text">校园计划</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#开始折腾"><span class="nav-text">开始折腾</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Apache"><span class="nav-text">Apache</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Swap空间"><span class="nav-text">Swap空间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gitlab"><span class="nav-text">Gitlab</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#转移博客"><span class="nav-text">转移博客</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VPN跳板"><span class="nav-text">VPN跳板</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#后话"><span class="nav-text">后话</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#腾讯域名解析"><span class="nav-text">腾讯域名解析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#再后话"><span class="nav-text">再后话</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#再再后话"><span class="nav-text">再再后话</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Apache-单-ip-多域名"><span class="nav-text">Apache 单 ip 多域名</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#再再再后话"><span class="nav-text">再再再后话</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Seafile"><span class="nav-text">Seafile</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '2ab69b8de0135d27255cd44355d80e48',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

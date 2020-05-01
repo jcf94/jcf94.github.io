@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="信号系列是通信工程的重点内容，以复变函数与积分变换作为基础的数学课程，主要包含信号与系统、升级版数字信号处理、然后是以概率论与数理统计为数学基础课的信息论作为通信方面数学上的理论基础、最后得到通信原理、应用方面有移动通信。 复变函数与积分变换  欧拉公式：  二维平面中点的坐标：$(r\cos\theta,r\sin\theta)$ $$x&#x3D;r\cos\theta$$ $$y&#x3D;r\sin\thet">
+<meta property="og:type" content="article">
+<meta property="og:title" content="信号相关专业复习">
+<meta property="og:url" content="https://jcf94.com/2015/07/01/2015-07-01-xinhaoxiangguan/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="信号系列是通信工程的重点内容，以复变函数与积分变换作为基础的数学课程，主要包含信号与系统、升级版数字信号处理、然后是以概率论与数理统计为数学基础课的信息论作为通信方面数学上的理论基础、最后得到通信原理、应用方面有移动通信。 复变函数与积分变换  欧拉公式：  二维平面中点的坐标：$(r\cos\theta,r\sin\theta)$ $$x&#x3D;r\cos\theta$$ $$y&#x3D;r\sin\thet">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-07-01T12:36:56.000Z">
+<meta property="article:modified_time" content="2019-09-25T15:27:26.067Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="复习笔记">
+<meta property="article:tag" content="信号处理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2015/07/01/2015-07-01-xinhaoxiangguan/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>信号相关专业复习 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2015/07/01/2015-07-01-xinhaoxiangguan/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          信号相关专业复习
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-07-01 20:36:56" itemprop="dateCreated datePublished" datetime="2015-07-01T20:36:56+08:00">2015-07-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2019-09-25 23:27:26" itemprop="dateModified" datetime="2019-09-25T23:27:26+08:00">2019-09-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Bachelor-of-Engineering/" itemprop="url" rel="index"><span itemprop="name">Bachelor-of-Engineering</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>信号系列是通信工程的重点内容，以<strong>复变函数与积分变换</strong>作为基础的数学课程，主要包含<strong>信号与系统</strong>、升级版<strong>数字信号处理</strong>、然后是以<strong>概率论与数理统计</strong>为数学基础课的<strong>信息论</strong>作为通信方面数学上的理论基础、最后得到<strong>通信原理</strong>、应用方面有<strong>移动通信</strong>。</p>
+<h1 id="复变函数与积分变换"><a href="#复变函数与积分变换" class="headerlink" title="复变函数与积分变换"></a>复变函数与积分变换</h1><hr>
+<ul>
+<li>欧拉公式：</li>
+</ul>
+<p>二维平面中点的坐标：$(r\cos\theta,r\sin\theta)$</p>
+<p>$$x=r\cos\theta$$</p>
+<p>$$y=r\sin\theta$$</p>
+<p>$$z=r(\cos\theta+i\sin\theta)=re^{i\theta}$$</p>
+<a id="more"></a>
+
+<ul>
+<li>傅里叶变换</li>
+</ul>
+<p>$$\mathscr{F}[f(t)]=F(w)=\int_{-\infty}^{+\infty}f(t)e^{-jwt}dt$$</p>
+<p>$$\mathscr{F}^{-1}[F(w)]=f(t)=\frac{1}{2\pi}\int_{-\infty}^{+\infty}F(w)e^{jwt}dw$$</p>
+<ul>
+<li>冲激函数$\delta(t)$</li>
+</ul>
+<p>定义：</p>
+<p>$$\delta(t)=\begin{cases}\infty,&amp;t=0\\0,&amp;t\neq0\end{cases}$$</p>
+<p>$$\int_{-\infty}^{+\infty}\delta(t)dt=1$$</p>
+<p>性质：</p>
+<p>$$\int_{-\infty}^{+\infty}\delta(t-t_0)f(t)dt=f(t_0)$$</p>
+<p>$$\mathscr{F}[\delta(t)]=1$$</p>
+<p>$$\mathscr{F}[1]=2\pi\delta(w)$$</p>
+<ul>
+<li>卷积积分</li>
+</ul>
+<p>$$f_1(t)*f_2(t)=\int_{-\infty}^{+\infty}f_1(\tau)f_2(t-\tau)d\tau$$</p>
+<p>$$\mathscr{F}[f_1(t)*f_2(t)]=F_1(w)F_2(w)$$</p>
+<p>$$\mathscr{F}[f_1(t)f_2(t)]=\frac{1}{2\pi}F_1(w)*F_2(w)$$</p>
+<ul>
+<li>帕塞瓦尔等式</li>
+</ul>
+<p>又作能量积分公式。</p>
+<p>$$\int_{-\infty}^{+\infty}[f(t)]^2dt=\frac{1}{2\pi}|F(w)|^2dw$$</p>
+<ul>
+<li>拉普拉斯变换</li>
+</ul>
+<p>$$\mathscr{L}[f(t)]=F(s)=\int_0^{+\infty}f(t)e^{-st}dt$$</p>
+<p>$$\mathscr{L}^{-1}[F(s)]=f(t)$$</p>
+<ul>
+<li>Z变换</li>
+</ul>
+<p>$$\mathscr{Z}[f(n)]=F(z)=\sum_{i=0}^nf(n)z^{-n}$$</p>
+<h1 id="信号与系统"><a href="#信号与系统" class="headerlink" title="信号与系统"></a>信号与系统</h1><hr>
+<ul>
+<li>阶跃函数$\epsilon(t)$</li>
+</ul>
+<p>定义：</p>
+<p>$$\epsilon(t)=\begin{cases}0,&amp;t&lt;0\\frac{1}{2},&amp;t=0\1,&amp;t&gt;0\end{cases}$$</p>
+<p>$$\delta(t)=\frac{d\epsilon(t)}{dt}$$</p>
+<p>$$\epsilon(t)=\int_{-\infty}^{t}\delta(x)dx$$</p>
+<ul>
+<li><p>系统的数学模型：描述连续系统的数学模型是微分方程，描述离散系统的数学模型是差分方程。</p>
+</li>
+<li><p>一个既具有分解特性、又具有零状态线性和零输入线性的系统称为线性系统。</p>
+</li>
+<li><p>如果系统的参数都是常数，不随时间变化，则称该系统为时不变系统。</p>
+</li>
+<li><p>线性时不变系统（LTI系统）用常系数微分方程和差分方程来描述。</p>
+</li>
+</ul>
+<p>微分：</p>
+<p>$$y^{(n)}(t)+a_{n-1}y^{(n-1)}(t)+…+a_1y^{(1)}(t)+a_0y(t)=b_mf^{(m)}(t)+b_{m-1}f^{(m-1)}(t)+…+b_1f^{(1)}(t)+b_0f(t)$$</p>
+<p>或写为：</p>
+<p>$$\sum_{j=0}^na_jy^{(j)}(t)=\sum_{i=0}^mb_if^{(i)}(t)$$</p>
+<p>差分：</p>
+<p>$$y(k)+a_{n-1}y(k-1)+…+a_0y(k-n)=b_mf(k)+b_{m-1}f(k-1)+…+b_0f(k-m)$$</p>
+<p>或写为：</p>
+<p>$$\sum_{j=0}^na_{n-j}y(k-j)=\sum_{i=0}^mb_{m-i}f(k-i)$$</p>
+<ul>
+<li>微分方程的齐次解和特解</li>
+</ul>
+<p>|||函数形式|系数|<br>|-|<br>|齐次解|自由响应、瞬态响应|系统本身|激励<br>|特解|强迫响应、稳态响应|激励|激励</p>
+<ul>
+<li>零输入响应：激励为零时，仅有系统初始状态引起的响应</li>
+</ul>
+<p>零输入条件下，微分方程右端为零：</p>
+<p>$$\sum_{j=0}^na_jy_{zi}^{(j)}(t)=0$$</p>
+<ul>
+<li><p>零状态响应：系统初始状态为零时，仅由输入信号引起的响应</p>
+</li>
+<li><p>全响应：初始状态不为零时LTI系统的响应</p>
+</li>
+</ul>
+<p>$$\overbrace{y(t)}^{全响应}=\rlap{\overbrace{\phantom{\sum_{j=1}^nC_{zij}e^{\lambda jt}}}^{零输入响应}}\underbrace{\sum_{j=1}^nC_{zij}e^{\lambda jt}+\rlap{\overbrace{\phantom{\sum_{j=1}^nC_{zsj}e^{\lambda jt}+y_p(t)}}^{零状态响应}}\sum_{j=1}^nC_{zsj}e^{\lambda jt}}_{自由响应}+\underbrace{y_p(t)}_{强迫响应}$$</p>
+<ul>
+<li>冲激响应：是激励为单位冲激函数$\delta(t)$时，系统的零状态响应。</li>
+</ul>
+<p>$$h(t)=T[{0},\delta(t)]$$</p>
+<p>激励信号$\delta(t)$的作用是<strong>在$t=0$的瞬间给系统输入了若干能量，储存在系统中</strong>，而<strong>在$t&gt;0$时系统的激励为零，只有冲激引入的那些储能在起作用</strong>，因而系统的冲激响应应由上述储能唯一地确定，因此系统的冲激响应在$t&gt;0$时与该系统的零输入响应具有相同的函数形式。</p>
+<ul>
+<li>阶跃响应：是激励为单位阶跃函数$\epsilon(t)$时，系统的零状态响应。</li>
+</ul>
+<p>$$g(t)=T[{0},\epsilon(t)]$$</p>
+<p>$$h(t)=\frac{dg(t)}{dt}$$</p>
+<p>$$g(t)=\int_{-\infty}^th(x)dx$$</p>
+<ul>
+<li>卷积积分</li>
+</ul>
+<p><strong><u>由于LTI系统的线性性质，可将输入信号分解为一系列的冲激函数之和（或积分），利用冲激函数对LTI系统的冲激响应，求解LTI系统任意激励的零状态响应。</u></strong></p>
+<p>$$f(t-t_1)*\delta(t-t_2)=f(t-t_2)*\delta(t-t_1)=f(t-t1-t2)$$</p>
+<p>$$f_1(t-t_1)*f_2(t-t_2)=f_1(t-t_2)*f_2(t-t_1)=f(t-t1-t2)$$</p>
+<p>$$f^{(i)}(t)=f_1^{(j)}(t)*f_2^{(i-j)}(t)$$</p>
+<ul>
+<li>卷积的物理意义</li>
+</ul>
+<p>从数学上来说卷积就是定义两个函数的一种乘法。</p>
+<p>对离散序列来说就是两个多项式的<strong>乘法</strong>。</p>
+<p>物理意义就是冲激响应的线性叠加，所谓冲激响应可以看作是两个函数，另一个函数按冲激信号正交展开。</p>
+<p>详见知乎：<a href="http://www.zhihu.com/question/21686447" target="_blank" rel="noopener">卷积的物理意义是什么？</a></p>
+<ul>
+<li>信号的分解</li>
+</ul>
+<p>在信号空间中可以找到若干个相互正交的信号作为基本信号，使得信号空间中任一信号均可表示成它们的线性组合。</p>
+<ul>
+<li>周期信号的傅里叶级数</li>
+</ul>
+<p>对周期信号进行分解：</p>
+<p>$$f(t)=\frac{1}{2}\sum_{n=-\infty}^{\infty}A_ne^{j\psi_n}e^{jn\Omega t}=\sum_{n=-\infty}^{\infty}F_ne^{jn\Omega t}$$</p>
+<p>傅里叶系数：</p>
+<p>$$F_n=\frac{1}{T}\int_{-\frac{2}{T}}^{\frac{2}{T}}f(t)e^{jn\Omega t}dt,n=0,\pm1,\pm2$$</p>
+<p>表明任意周期信号$f(t)$可分解为许多不同频率的虚指数信号$e^{jn\Omega t}$之和，其各分量的复数幅度为$F_n$</p>
+<ul>
+<li>帕塞瓦尔方程：</li>
+</ul>
+<p>$$\int_{t_1}^{t_2}f^2(t)dt=\sum_{j=1}^{\infty}C_j^2K_j$$</p>
+<p>表明在区间$t_1$和$t_2$之间信号所含有的能量恒等于此信号在完备正交函数集中各正交分量能量的总和</p>
+<ul>
+<li>频谱密度与傅里叶变换</li>
+</ul>
+<p>定义频谱密度函数为：</p>
+<p>$$F(j\omega)=\lim_{T\to\infty}F_nT=\int_{-\infty}^{\infty}f(t)e^{-j\omega t}dt$$</p>
+<p>上式称为傅里叶变换。</p>
+<p>$$f(t)=\frac{1}{2\pi}\int_{-\infty}^{\infty}F(j\omega)e^{j\omega t}d\omega$$</p>
+<p>$$F(j\omega)=|F(j\omega)|e^{j\psi(\omega)}=R(\omega)+jX(\omega)$$</p>
+<ul>
+<li>狄里赫利条件</li>
+</ul>
+<p>傅里叶变换存在的<strong>充分条件</strong>：在无限区间内$f(t)$绝对可积，即：</p>
+<p>$$\int_{-\infty}^{\infty}|f(t)|dt&lt;\infty$$</p>
+<ul>
+<li>变换</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>时域</th>
+<th>频域</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>连续</td>
+<td>非周期</td>
+</tr>
+<tr>
+<td>离散</td>
+<td>周期</td>
+</tr>
+<tr>
+<td>周期</td>
+<td>离散</td>
+</tr>
+<tr>
+<td>非周期</td>
+<td>连续</td>
+</tr>
+</tbody></table>
+<ul>
+<li>频移特性/调制特性</li>
+</ul>
+<p>若：</p>
+<p>$$f(t)\leftrightarrow F(j\omega)$$</p>
+<p>且$\omega_0$为常数，则：</p>
+<p>$$f(t)e^{\pm j\omega_0t}\leftrightarrow F[j(\omega\pm\omega_0)]$$</p>
+<ul>
+<li><p>信号的能量谱与其自相关函数是一对傅里叶变换</p>
+</li>
+<li><p>正余弦函数的傅里叶变换</p>
+</li>
+</ul>
+<p>已知常数1的傅里叶变换：</p>
+<p>$$\mathscr{F}[1]=2\pi\delta(w)$$</p>
+<p>根据频移特性：</p>
+<p>$$\mathscr{F}[e^{j\omega_0t}]=2\pi\delta(\omega-\omega_0)$$</p>
+<p>$$\mathscr{F}[e^{-j\omega_0t}]=2\pi\delta(\omega+\omega_0)$$</p>
+<p>则：</p>
+<p>$$\mathscr{F}[cos(\omega_0t)]=\mathscr{F}[\frac{1}{2}(e^{j\omega_0t}+e^{-j\omega_0t})]=\pi[\delta(\omega-\omega_0)+\delta(\omega+\omega_0)]$$</p>
+<p>$$\mathscr{F}[sin(\omega_0t)]=\mathscr{F}[\frac{1}{2j}(e^{j\omega_0t}-e^{-j\omega_0t})]=j\pi[\delta(\omega+\omega_0)-\delta(\omega-\omega_0)]$$</p>
+<ul>
+<li>冲激串序列的傅里叶变换</li>
+</ul>
+<p>$$\mathscr{F}[\delta_T(t)]=\mathscr{F}[\sum_{m=-\infty}^{\infty}\delta(t-mT)]=\Omega\sum_{n=-\infty}^{\infty}\delta(\omega-n\Omega)=\Omega\delta_{\Omega}(\omega)$$</p>
+<ul>
+<li>LTI系统的频率响应</li>
+</ul>
+<p>$$\begin{matrix}f(t)&amp;*&amp;h(t)&amp;=&amp;y(t)\\ \updownarrow&amp;&amp;\updownarrow&amp;&amp;\updownarrow\\ F(j\omega)&amp;\cdot&amp;H(j\omega)&amp;=&amp;Y(j\omega)\end{matrix}$$</p>
+<ul>
+<li>奈奎斯特采样定理</li>
+</ul>
+<p>采样：</p>
+<p>$$f(t)\times\delta_{T_s}(t)=f_s(t)$$</p>
+<p>$$F(j\omega)*\omega_s\delta_{T_s}(\omega)=F_s(j\omega)$$</p>
+<blockquote>
+</blockquote>
+<p>频域上，相当于对原信号进行了无数次搬移，为了防止信号发生混叠，搬移之后的频谱不能重叠。故$\omega_s\geq2\omega_m$。</p>
+<p><strong>但这只是充分条件。</strong></p>
+<p>压缩采样：<br>1.原始信号在某正交基底上是稀疏的；<br>2.利用观测矩阵对该正交基底进行观测，得到观测值；（也可理解为一种采样，但是采样率可以不受奈奎斯特定理约束）<br>3.传输观测之后的数据；<br>4.恢复原始信号。</p>
+<p>类似。。小波变换</p>
+<p>知乎上<a href="http://www.zhihu.com/question/24913651" target="_blank" rel="noopener">对于压缩感知的问题</a></p>
+<ul>
+<li>拉普拉斯变换与Z变换</li>
+</ul>
+<p>都是傅里叶变换的几种特殊形式。</p>
+<p>拉普拉斯变换-处理连续系统</p>
+<p>Z变换-处理离散系统</p>
+<h1 id="数字信号处理"><a href="#数字信号处理" class="headerlink" title="数字信号处理"></a>数字信号处理</h1><hr>
+<ul>
+<li>CTFT</li>
+</ul>
+<p>假设有原始信号：$x(t)$</p>
+<p>频率：$f_0$</p>
+<p>周期：$T_0=\frac{1}{f_0}$</p>
+<p>$\Omega_0=2\pi f_0=\frac{2\pi}{T_0}$</p>
+<p>定义连续傅里叶变换：</p>
+<p>$$X(j\Omega)=\int_{-\infty}^{\infty}x(t)e^{-j\Omega t}dt$$</p>
+<ul>
+<li>DTFT</li>
+</ul>
+<p>令：$x[n]=x(nT_s)$</p>
+<p>采样频率：$f_s$</p>
+<p>采样周期：$T_s=\frac{1}{f_s}$</p>
+<p>$\omega_s=2\pi f_s=\frac{2\pi}{f_s}$</p>
+<p>定义离散时间傅里叶变换：</p>
+<p>$$X(j\omega)=\sum_{n=-\infty}^{\infty}x[n]e^{-j\omega n}$$</p>
+<blockquote>
+<p>不是CTFT乘上冲激串序列采样得到的！！！！DTFT直接是函数值，而$f(t)$乘上冲激串序列后变成了一个冲激串序列和函数</p>
+</blockquote>
+<ul>
+<li>DFT</li>
+</ul>
+<p>把有限长序列看成是周期序列的一个周期，则作N点DFT：</p>
+<p>$$X[K]=\sum_{n=0}^{N-1}x[n]e^{-j\frac{2\pi k}{N}n}$$</p>
+<p>$$\omega=\frac{2\pi K}{N}$$</p>
+<p>$$K=\frac{\omega N}{2\pi}$$</p>
+<ul>
+<li>IDFT</li>
+</ul>
+<p>离散傅里叶变换的逆变换：</p>
+<p>$$x[N]=\frac{1}{N}\sum_{k=0}^{N-1}X[k]e^{j\frac{2\pi n}{K}k}$$</p>
+<p>形式上其实跟正变换基本一致，就是差了个$\frac{1}{N}$的系数，和$\omega$指数中的正负号。</p>
+<ul>
+<li>FFT</li>
+</ul>
+<p>参见 <a href="/2015/07/05/2015-07-05-fft/">快速傅里叶变换FFT算法的用途</a></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/10/26/2015-10-26-suiji/" rel="bookmark">随机信号 复习笔记</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/05/28/2015-05-28-xiandaijiaohuan/" rel="bookmark">现代交换原理 复习笔记 部分</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/05/30/2015-05-30-shuzishipin/" rel="bookmark">数字视频 复习笔记</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/06/19/2015-06-19-zhuanye/" rel="bookmark">专业知识整理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/06/27/2015-06-27-weibojishuyutianxian/" rel="bookmark">微波技术与天线 复习笔记</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%A4%8D%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 复习笔记</a>
+              <a href="/tags/%E4%BF%A1%E5%8F%B7%E5%A4%84%E7%90%86/" rel="tag"># 信号处理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/07/01/2015-07-01-oj-hexo/" rel="prev" title="长大OJ诞生记（三）用HEXO作为主页">
+      <i class="fa fa-chevron-left"></i> 长大OJ诞生记（三）用HEXO作为主页
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/07/05/2015-07-05-fft/" rel="next" title="快速傅里叶变换FFT算法的用途">
+      快速傅里叶变换FFT算法的用途 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#复变函数与积分变换"><span class="nav-text">复变函数与积分变换</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#信号与系统"><span class="nav-text">信号与系统</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数字信号处理"><span class="nav-text">数字信号处理</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '40c3ae66e77783cdcfd1fba2fe6611db',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

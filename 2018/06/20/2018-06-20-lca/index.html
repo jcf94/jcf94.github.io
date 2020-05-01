@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="工作累了头昏脑涨，刷个题冷静一下。 顺手来理一下 LCA 的板子。  Tarjan 离线 LCA前面在 【Tarjan 大佬的算法们】 中提到过他的离线 LCA 算法，就从这里开始。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="理一个 LCA 模版">
+<meta property="og:url" content="https://jcf94.com/2018/06/20/2018-06-20-lca/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="工作累了头昏脑涨，刷个题冷静一下。 顺手来理一下 LCA 的板子。  Tarjan 离线 LCA前面在 【Tarjan 大佬的算法们】 中提到过他的离线 LCA 算法，就从这里开始。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2018-06-20T13:19:07.000Z">
+<meta property="article:modified_time" content="2018-07-10T14:54:00.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="Tarjan">
+<meta property="article:tag" content="LCA">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2018/06/20/2018-06-20-lca/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>理一个 LCA 模版 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2018/06/20/2018-06-20-lca/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          理一个 LCA 模版
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-06-20 21:19:07" itemprop="dateCreated datePublished" datetime="2018-06-20T21:19:07+08:00">2018-06-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-07-10 22:54:00" itemprop="dateModified" datetime="2018-07-10T22:54:00+08:00">2018-07-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">算法学习</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>工作累了头昏脑涨，刷个题冷静一下。</p>
+<p>顺手来理一下 LCA 的板子。</p>
+<hr>
+<h1 id="Tarjan-离线-LCA"><a href="#Tarjan-离线-LCA" class="headerlink" title="Tarjan 离线 LCA"></a>Tarjan 离线 LCA</h1><p>前面在 <a href="/2017/09/27/2017-09-27-tarjan/">【Tarjan 大佬的算法们】</a> 中提到过他的离线 LCA 算法，就从这里开始。</p>
+<a id="more"></a>
+
+<p>原始算法具体见前文吧，还引用了别人的一个链接，里面有个动画演示的挺清楚的。</p>
+<p>离线 LCA 的关键在于 dfs 遍历整个树的过程中，对于被询问的点对 <code>(v, w)</code>，要求其中一个点要先被访问过，然后再遍历到另一个点则可以通过查询前一个点所属的并查集来找到它们的 LCA，例如 v 先被访问，接下来遍历到 w，则它们的 LCA 是 <code>getfather(v)</code>，反正若 w 先被访问，接下来遍历到 v，则它们的 LCA 是 <code>getfather(w)</code>。查询结束再将 v 和 w 合并到同一个集合中（向树上父节点的方向合并）。</p>
+<p>Tarjan 论文中的原始算法的树节点应该是保证有序的，然后通过先处理每一对 <code>(vi, wi)</code>，使得 <code>vi &lt; wi</code> 来保证每次访问到 wi 时，它对应的 vi 都被访问过。</p>
+<p>在通用的树中就只能在每一层 dfs 中询问跟当前层搜的父节点相关的边来查找这种对应关系了。</p>
+<p>记两道模版题：</p>
+<h2 id="HDU-2586"><a href="#HDU-2586" class="headerlink" title="HDU 2586"></a>HDU 2586</h2><p>【题意】</p>
+<p>给出一棵树，询问树上的两个点，要求回答两个点之间的最近距离。</p>
+<p>【分析】</p>
+<p>树首先是任意给的，假定我们建出来的树根是 R，则对于一次询问的点对 <code>(a, b)</code>，可以在这棵树上找到它们的 LCA，记为 c。则 a 和 b 之间的距离就是：</p>
+<p>$$Dis(R, a) - Dis(R, c) + Dis(R, b) - Dis(R, c) = Dis(R, a) + Dis(R, b) - 2*Dis(R, c)$$</p>
+<p>在找 LCA 的 dfs 过程中顺手把每个节点到根节点的距离记出来即可。</p>
+<h2 id="HDU-2874"><a href="#HDU-2874" class="headerlink" title="HDU 2874"></a>HDU 2874</h2><p>【题意】</p>
+<p>跟前面类似，加了个条件是可能有多棵树。</p>
+<p>【分析】</p>
+<p>每对点对是否在同一棵树上可以在读取数据的时候直接用并查集判断联通性记下来，之后对所有未访问过的点做 Tarjan LCA 即可。</p>
+<p>【模版】</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID	: Chen Fan</span></span><br><span class="line"><span class="comment">LANG	: G++</span></span><br><span class="line"><span class="comment">PROG	: hdu2874</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> father[<span class="number">10010</span>];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">getfather</span><span class="params">(<span class="keyword">int</span> x)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (father[x] != x) father[x] = getfather(father[x]);</span><br><span class="line">    <span class="keyword">return</span> father[x];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">link</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    father[getfather(x)] = getfather(y);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">nod</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">int</span> a, b, c;</span><br><span class="line">&#125; node;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">op</span><span class="params">(node a, node b)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (a.a == b.a) <span class="keyword">return</span> a.b &lt; b.b;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">return</span> a.a &lt; b.a;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">node edge[<span class="number">20010</span>];</span><br><span class="line"><span class="keyword">int</span> start[<span class="number">10010</span>], num[<span class="number">10010</span>], dist[<span class="number">10010</span>];</span><br><span class="line"><span class="keyword">bool</span> flag[<span class="number">10010</span>];</span><br><span class="line"></span><br><span class="line">node q[<span class="number">2000010</span>];</span><br><span class="line"><span class="keyword">int</span> qstart[<span class="number">10010</span>], qnum[<span class="number">10010</span>];</span><br><span class="line"><span class="keyword">int</span> res[<span class="number">1000010</span>];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">tarjan</span><span class="params">(<span class="keyword">int</span> now)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    father[now] = now;</span><br><span class="line">    flag[now] = <span class="literal">true</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;num[now];i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> next = edge[start[now]+i].b;</span><br><span class="line">        <span class="keyword">if</span> (!flag[next])</span><br><span class="line">        &#123;</span><br><span class="line">            dist[next] = dist[now]+edge[start[now]+i].c;</span><br><span class="line">            tarjan(next);</span><br><span class="line">            link(next, now);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;qnum[now];i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> next = q[qstart[now]+i].b;</span><br><span class="line">        <span class="keyword">if</span> (res[q[qstart[now]+i].c] != <span class="number">-1</span> &amp;&amp; flag[next])</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> lca = getfather(next);</span><br><span class="line">            res[q[qstart[now]+i].c] = dist[now]+dist[next]<span class="number">-2</span>*dist[lca];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    freopen(<span class="string">"in.txt"</span>, <span class="string">"r"</span>, <span class="built_in">stdin</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> n, m, c;</span><br><span class="line">    <span class="keyword">while</span> (<span class="built_in">scanf</span>(<span class="string">"%d %d %d"</span>, &amp;n, &amp;m, &amp;c) != EOF)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=n;i++) father[i] = i;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;m;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> index = i &lt;&lt; <span class="number">1</span>;</span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">"%d %d %d"</span>, &amp;edge[index].a, &amp;edge[index].b, &amp;edge[index].c);</span><br><span class="line">            edge[index+<span class="number">1</span>].b = edge[index].a;</span><br><span class="line">            edge[index+<span class="number">1</span>].a = edge[index].b;</span><br><span class="line">            edge[index+<span class="number">1</span>].c = edge[index].c;</span><br><span class="line">            link(edge[index].a, edge[index].b);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">memset</span>(start, <span class="number">0</span>, <span class="keyword">sizeof</span>(start));</span><br><span class="line">        <span class="built_in">memset</span>(num, <span class="number">0</span>, <span class="keyword">sizeof</span>(num));</span><br><span class="line">        m = m &lt;&lt; <span class="number">1</span>;</span><br><span class="line">        sort(&amp;edge[<span class="number">0</span>], &amp;edge[m], op);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>,o=<span class="number">-1</span>;i&lt;m;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (o!=edge[i].a)</span><br><span class="line">            &#123;</span><br><span class="line">                o = edge[i].a;</span><br><span class="line">                start[o] = i;</span><br><span class="line">            &#125;</span><br><span class="line">            num[o]++;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">memset</span>(res, <span class="number">0</span>, <span class="keyword">sizeof</span>(res));</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;c;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> index = i &lt;&lt; <span class="number">1</span>;</span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">"%d %d"</span>, &amp;q[index].a, &amp;q[index].b);</span><br><span class="line">            q[index+<span class="number">1</span>].a = q[index].b;</span><br><span class="line">            q[index+<span class="number">1</span>].b = q[index].a;</span><br><span class="line">            q[index].c = i;</span><br><span class="line">            q[index+<span class="number">1</span>].c = i;</span><br><span class="line">            <span class="keyword">if</span> (getfather(q[index].a) != getfather(q[index].b)) res[i] = <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">memset</span>(qstart, <span class="number">0</span>, <span class="keyword">sizeof</span>(qstart));</span><br><span class="line">        <span class="built_in">memset</span>(qnum, <span class="number">0</span>, <span class="keyword">sizeof</span>(qnum));</span><br><span class="line">        c = c &lt;&lt; <span class="number">1</span>;</span><br><span class="line">        sort(&amp;q[<span class="number">0</span>], &amp;q[c], op);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>,o=<span class="number">-1</span>;i&lt;c;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (o != q[i].a)</span><br><span class="line">            &#123;</span><br><span class="line">                o = q[i].a;</span><br><span class="line">                qstart[o] = i;</span><br><span class="line">            &#125;</span><br><span class="line">            qnum[o]++;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">memset</span>(flag, <span class="number">0</span>, <span class="keyword">sizeof</span>(flag));</span><br><span class="line">        <span class="built_in">memset</span>(dist, <span class="number">0</span>, <span class="keyword">sizeof</span>(dist));</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=n;i++)</span><br><span class="line">        <span class="keyword">if</span> (!flag[i]) tarjan(i);</span><br><span class="line"></span><br><span class="line">        c = c &gt;&gt; <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;c;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (res[i] == <span class="number">-1</span>) <span class="built_in">printf</span>(<span class="string">"Not connected\n"</span>);</span><br><span class="line">            <span class="keyword">else</span> <span class="built_in">printf</span>(<span class="string">"%d\n"</span>, res[i]);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>dfs 过程中是先询问边还是先进行下一层的 dfs 不影响结果。</p>
+<blockquote>
+<p>话说虽然前向星写习惯了，不过看人家写的数组邻接链表也挺好看的。</p>
+</blockquote>
+<h1 id="动态树（LCT）"><a href="#动态树（LCT）" class="headerlink" title="动态树（LCT）"></a>动态树（LCT）</h1><p>前面 <a href="/2015/04/27/2015-04-27-HDU-3966/">【HDU 3966】</a> 用过一次 LCT 和树链剖分来维护树上一条路径上的点值，翻回去看的时候……妈呀，以前题解怎么都没好好写，自己都看不懂了，顺便拿到这里重新理一下思路。</p>
+<p>LCT 的核心思路是用 splay 森林来维护 Preferred Path，核心操作是调整 Preferred Path 的 Access 操作，对于 LCT 来说，找 a、b 两点的 LCA 只需要两步：</p>
+<ol>
+<li>首先 <code>Access(a)</code> ，此时 a 所在的 splay 树即为从根节点到 a 点所构成的 Preferred Path；</li>
+<li>之后 <code>Access(b)</code>，找到从根节点到 b 点所构成的 Preferred Path 之后，此时 Splay 的根即为 a 和 b 的 LCA。</li>
+</ol>
+<p>当然也有可能两次 Access 操作之后的 Preferred Path 的根不是同一个，那就意味着这两个点是分属于两棵不同的树，不存在 LCA，特判一下就好了。</p>
+<p>所以上面那题的 LCT 模版是：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID	: Chen Fan</span></span><br><span class="line"><span class="comment">LANG	: G++</span></span><br><span class="line"><span class="comment">PROG	: HDU2874-LCT</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;queue&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">nod</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">int</span> a, b, c;</span><br><span class="line">&#125; node;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">op</span><span class="params">(node a, node b)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (a.a == b.a) <span class="keyword">return</span> a.b &lt; b.b;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">return</span> a.a &lt; b.a;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">node edge[<span class="number">20010</span>];</span><br><span class="line"><span class="keyword">int</span> start[<span class="number">10010</span>], num[<span class="number">10010</span>], dist[<span class="number">10010</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> sons[<span class="number">10010</span>][<span class="number">2</span>];</span><br><span class="line"><span class="keyword">int</span> father[<span class="number">10010</span>];</span><br><span class="line"><span class="keyword">bool</span> root[<span class="number">10010</span>];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">bfs</span><span class="params">(<span class="keyword">int</span> s)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">queue</span>&lt;<span class="keyword">int</span>&gt; q;</span><br><span class="line">    q.push(s);</span><br><span class="line">    root[s] = <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">while</span> (!q.empty())</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> now = q.front();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;num[now];i++)</span><br><span class="line">        <span class="keyword">if</span> (!root[edge[start[now]+i].b])</span><br><span class="line">        &#123;</span><br><span class="line">            father[edge[start[now]+i].b] = now;</span><br><span class="line">            dist[edge[start[now]+i].b] = dist[now] + edge[start[now]+i].c;</span><br><span class="line">            root[edge[start[now]+i].b] = <span class="literal">true</span>;</span><br><span class="line">            q.push(edge[start[now]+i].b);</span><br><span class="line">        &#125;</span><br><span class="line">        q.pop();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">rotate</span><span class="params">(<span class="keyword">int</span> x,<span class="keyword">int</span> w)</span> <span class="comment">//rotate(node,0/1)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> y=father[x];</span><br><span class="line"></span><br><span class="line">    sons[y][!w]=sons[x][w];</span><br><span class="line">    <span class="keyword">if</span> (sons[x][w]) father[sons[x][w]]=y;</span><br><span class="line">    father[x]=father[y];</span><br><span class="line">    <span class="keyword">if</span> (father[y]&amp;&amp;(!root[y])) sons[father[y]][y==sons[father[y]][<span class="number">1</span>]]=x;</span><br><span class="line">    sons[x][w]=y;</span><br><span class="line">    father[y]=x;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (root[y])</span><br><span class="line">    &#123;</span><br><span class="line">        root[x]=<span class="literal">true</span>;</span><br><span class="line">        root[y]=<span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">splay</span><span class="params">(<span class="keyword">int</span> x)</span> <span class="comment">//splay(node)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">while</span>(!root[x])</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (root[father[x]]) rotate(x,x==sons[father[x]][<span class="number">0</span>]);</span><br><span class="line">        <span class="keyword">else</span> </span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> t=father[x];</span><br><span class="line">            <span class="keyword">int</span> w=(sons[father[t]][<span class="number">0</span>]==t);</span><br><span class="line">            <span class="keyword">if</span> (sons[t][w]==x)</span><br><span class="line">            &#123;</span><br><span class="line">                rotate(x,!w);</span><br><span class="line">                rotate(x,w);</span><br><span class="line">            &#125; <span class="keyword">else</span> </span><br><span class="line">            &#123;</span><br><span class="line">                rotate(t,w);</span><br><span class="line">                rotate(x,w);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">access</span><span class="params">(<span class="keyword">int</span> v)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> u=v;</span><br><span class="line">    v=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span>(u)</span><br><span class="line">    &#123;</span><br><span class="line">        splay(u);</span><br><span class="line">        root[sons[u][<span class="number">1</span>]]=<span class="literal">true</span>;</span><br><span class="line">        sons[u][<span class="number">1</span>]=v;</span><br><span class="line">        root[v]=<span class="literal">false</span>;</span><br><span class="line">        v=u;</span><br><span class="line">        u=father[u];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">check</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    access(x);</span><br><span class="line">    <span class="keyword">int</span> root_x = x;</span><br><span class="line">    <span class="keyword">while</span> (father[root_x]) root_x = father[root_x];</span><br><span class="line">    <span class="keyword">while</span> (sons[root_x][<span class="number">0</span>]) root_x = sons[root_x][<span class="number">0</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> u = y, v = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span>(u)</span><br><span class="line">    &#123;</span><br><span class="line">        splay(u);</span><br><span class="line">        root[sons[u][<span class="number">1</span>]] = <span class="literal">true</span>;</span><br><span class="line">        sons[u][<span class="number">1</span>] = v;</span><br><span class="line">        root[v] = <span class="literal">false</span>;</span><br><span class="line">        v = u;</span><br><span class="line">        u = father[u];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">int</span> root_y = v;</span><br><span class="line">    <span class="keyword">while</span> (sons[root_y][<span class="number">0</span>]) root_y = sons[root_y][<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">if</span> (root_x != root_y) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">return</span> dist[x] + dist[y] - <span class="number">2</span>*dist[v];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    freopen(<span class="string">"in.txt"</span>, <span class="string">"r"</span>, <span class="built_in">stdin</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> n, m, c;</span><br><span class="line">    <span class="keyword">while</span> (<span class="built_in">scanf</span>(<span class="string">"%d %d %d"</span>, &amp;n, &amp;m, &amp;c) != EOF)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;m;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> index = i &lt;&lt; <span class="number">1</span>;</span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">"%d %d %d"</span>, &amp;edge[index].a, &amp;edge[index].b, &amp;edge[index].c);</span><br><span class="line">            edge[index+<span class="number">1</span>].b = edge[index].a;</span><br><span class="line">            edge[index+<span class="number">1</span>].a = edge[index].b;</span><br><span class="line">            edge[index+<span class="number">1</span>].c = edge[index].c;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">memset</span>(start, <span class="number">0</span>, <span class="keyword">sizeof</span>(start));</span><br><span class="line">        <span class="built_in">memset</span>(num, <span class="number">0</span>, <span class="keyword">sizeof</span>(num));</span><br><span class="line">        m = m &lt;&lt; <span class="number">1</span>;</span><br><span class="line">        sort(&amp;edge[<span class="number">0</span>], &amp;edge[m], op);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>,o=<span class="number">-1</span>;i&lt;m;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (o!=edge[i].a)</span><br><span class="line">            &#123;</span><br><span class="line">                o = edge[i].a;</span><br><span class="line">                start[o] = i;</span><br><span class="line">            &#125;</span><br><span class="line">            num[o]++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">memset</span>(root, <span class="number">0</span>, <span class="keyword">sizeof</span>(root));</span><br><span class="line">        <span class="built_in">memset</span>(dist, <span class="number">0</span>, <span class="keyword">sizeof</span>(dist));</span><br><span class="line">        <span class="built_in">memset</span>(father, <span class="number">0</span>, <span class="keyword">sizeof</span>(father));</span><br><span class="line">        <span class="built_in">memset</span>(sons, <span class="number">0</span>, <span class="keyword">sizeof</span>(sons));</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=n;i++)</span><br><span class="line">        <span class="keyword">if</span> (!root[i]) bfs(i);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;c;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> x, y;</span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">"%d %d"</span>, &amp;x, &amp;y);</span><br><span class="line">            <span class="keyword">int</span> res = check(x, y);</span><br><span class="line">            <span class="keyword">if</span> (res == <span class="number">-1</span>) <span class="built_in">printf</span>(<span class="string">"Not connected\n"</span>);</span><br><span class="line">            <span class="keyword">else</span> <span class="built_in">printf</span>(<span class="string">"%d\n"</span>, res);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从最后的求解过程上来看，应该比离线的要更顺一点，毕竟在线算法不用多考虑记录输出顺序什么的。</p>
+<h1 id="树链剖分"><a href="#树链剖分" class="headerlink" title="树链剖分"></a>树链剖分</h1><p>还是看前面 <a href="/2015/04/27/2015-04-27-HDU-3966/">【HDU 3966】</a> 的时候……发现树链剖分忘得差不多了，顺手再补一个树剖找 LCA 的模版吧。</p>
+<p>树链剖分的原理是把整棵树按照一条一条树边组成的链划开，每条链相当于一个区间，那对树上的某条路径的操作就成了对树上的<strong>一条或者多条树链</strong>的操作了，具体维护区间的部分可以用树状数组啊、线段树啊什么的来做。</p>
+<p>划分树链的基本思路是对整棵树进行轻重边划分，定义 <code>size(x)</code> 是以 x 为根的子树的节点个数，这里的重边就是 x 和它节点数更多的一个子节点（size 更大的一个子节点）组成的边。</p>
+<p>这里会有两个性质：</p>
+<ol>
+<li>若 <code>(father, son)</code> 是一条轻边，则 <code>size(son) &lt;= size(father)/2</code></li>
+<li>从树根到某一个点的路径上的轻边的个数不会超过 <code>O(logn)</code></li>
+</ol>
+<p>划分好轻重边之后，从根节点开始把所有连着的重边连起来，就成了一条重链，重链就是前面说的需要从树上剖出来的树链啦。</p>
+<p>这个过程可以用一次 bfs 加两次队列遍历来完成：</p>
+<ol>
+<li>首先 bfs 构图，把所有节点的父节点 father 和距离根节点的层数 level 标记好；</li>
+<li>根据前面 bfs 过程中记录下来的队列顺序，反向遍历一遍，自底向上维护好每个节点的 size，标记重边也是在这里完成；</li>
+<li>根据前面 bfs 过程中记录下来的队列顺序，正向遍历一遍，自顶向下对每条重边进行剖分，大概是一个切下来一条链放好，再切下一条链放好这样的过程。</li>
+</ol>
+<p>那么 LCA 要怎么找呢？</p>
+<p>在树链结构上找 a、b 两点的 LCA 即走完各自所在的树链，沿着它的轻边向上找，直到找到各自路径上的两个点在同一条树链上，那么深度较浅的那个点就是 a、b 两点的 LCA 了。</p>
+<p>由于从树根到某一个点的路径上的轻边的个数不会超过 <code>O(logn)</code> 这个性质，每次找 LCA 的复杂度是 <code>O(logn)</code>。</p>
+<p>模版如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID	: Chen Fan</span></span><br><span class="line"><span class="comment">LANG	: G++</span></span><br><span class="line"><span class="comment">PROG	: HDU2874-TreeCut</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;queue&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">nod</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">int</span> a, b, c;</span><br><span class="line">&#125; node;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">op</span><span class="params">(node a, node b)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (a.a == b.a) <span class="keyword">return</span> a.b &lt; b.b;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">return</span> a.a &lt; b.a;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">node edge[<span class="number">20010</span>];</span><br><span class="line"><span class="keyword">int</span> start[<span class="number">10010</span>], num[<span class="number">10010</span>], dist[<span class="number">10010</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> son[<span class="number">10010</span>], father[<span class="number">10010</span>], level[<span class="number">10010</span>], size[<span class="number">10010</span>], top[<span class="number">10010</span>], pos[<span class="number">10010</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> q[<span class="number">10010</span>];</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">bfs</span><span class="params">(<span class="keyword">int</span> n)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> head = <span class="number">0</span>, tail = <span class="number">0</span>;</span><br><span class="line">    <span class="built_in">memset</span>(level, <span class="number">0</span>, <span class="keyword">sizeof</span>(level));</span><br><span class="line">    <span class="built_in">memset</span>(father, <span class="number">0</span>, <span class="keyword">sizeof</span>(father));</span><br><span class="line">    <span class="built_in">memset</span>(dist, <span class="number">0</span>, <span class="keyword">sizeof</span>(dist));</span><br><span class="line">    <span class="built_in">memset</span>(son, <span class="number">0</span>, <span class="keyword">sizeof</span>(son));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> x=<span class="number">1</span>;x&lt;=n;x++)</span><br><span class="line">    <span class="keyword">if</span> (!level[x])</span><br><span class="line">    &#123;</span><br><span class="line">        q[head] = x;</span><br><span class="line">        level[x] = <span class="number">1</span>;</span><br><span class="line">        tail = head;</span><br><span class="line">        <span class="keyword">while</span> (head &lt;= tail)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> now = q[head];</span><br><span class="line">            size[now] = <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;num[now];i++)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">int</span> next = edge[start[now]+i].b;</span><br><span class="line">                <span class="keyword">if</span> (next != father[now])</span><br><span class="line">                &#123;</span><br><span class="line">                    father[next] = now;</span><br><span class="line">                    dist[next] = dist[now]+edge[start[now]+i].c;</span><br><span class="line">                    level[next] = level[now]+<span class="number">1</span>;</span><br><span class="line">                    tail++;</span><br><span class="line">                    q[tail] = next;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            head ++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=n<span class="number">-1</span>;i&gt;=<span class="number">0</span>;i--)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> now = q[i];</span><br><span class="line">        <span class="keyword">if</span> (father[now])</span><br><span class="line">        &#123;</span><br><span class="line">            size[father[now]]+=size[now];</span><br><span class="line">            <span class="keyword">if</span> (son[father[now]]==<span class="number">0</span> || size[now]&gt;size[son[father[now]]])</span><br><span class="line">            son[father[now]] = now;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">int</span> tot = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;n;i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> now = q[i];</span><br><span class="line">        <span class="keyword">if</span> (son[father[now]] == now) top[now] = top[father[now]];</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            top[now] = now;</span><br><span class="line">            <span class="keyword">while</span> (now)</span><br><span class="line">            &#123;</span><br><span class="line">                pos[now] = tot++;</span><br><span class="line">                now = son[now];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">lca</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (top[x] != top[y])</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (level[top[x]] &lt; level[top[y]]) swap(x, y);</span><br><span class="line">        x = father[top[x]];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (x==<span class="number">0</span> &amp;&amp; y==<span class="number">0</span>) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">if</span> (level[x] &gt; level[y]) swap(x, y);</span><br><span class="line">    <span class="keyword">return</span> x;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    freopen(<span class="string">"in.txt"</span>, <span class="string">"r"</span>, <span class="built_in">stdin</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> n, m, c;</span><br><span class="line">    <span class="keyword">while</span> (<span class="built_in">scanf</span>(<span class="string">"%d %d %d"</span>, &amp;n, &amp;m, &amp;c) != EOF)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;m;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> index = i &lt;&lt; <span class="number">1</span>;</span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">"%d %d %d"</span>, &amp;edge[index].a, &amp;edge[index].b, &amp;edge[index].c);</span><br><span class="line">            edge[index+<span class="number">1</span>].b = edge[index].a;</span><br><span class="line">            edge[index+<span class="number">1</span>].a = edge[index].b;</span><br><span class="line">            edge[index+<span class="number">1</span>].c = edge[index].c;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">memset</span>(start, <span class="number">0</span>, <span class="keyword">sizeof</span>(start));</span><br><span class="line">        <span class="built_in">memset</span>(num, <span class="number">0</span>, <span class="keyword">sizeof</span>(num));</span><br><span class="line">        m = m &lt;&lt; <span class="number">1</span>;</span><br><span class="line">        sort(&amp;edge[<span class="number">0</span>], &amp;edge[m], op);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>,o=<span class="number">-1</span>;i&lt;m;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (o!=edge[i].a)</span><br><span class="line">            &#123;</span><br><span class="line">                o = edge[i].a;</span><br><span class="line">                start[o] = i;</span><br><span class="line">            &#125;</span><br><span class="line">            num[o]++;</span><br><span class="line">        &#125;</span><br><span class="line">        bfs(n);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;c;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> x, y;</span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">"%d %d"</span>, &amp;x, &amp;y);</span><br><span class="line">            <span class="keyword">int</span> res = lca(x, y);</span><br><span class="line">            <span class="keyword">if</span> (res == <span class="number">-1</span>) <span class="built_in">printf</span>(<span class="string">"Not connected\n"</span>);</span><br><span class="line">            <span class="keyword">else</span> <span class="built_in">printf</span>(<span class="string">"%d\n"</span>, dist[x] + dist[y] - <span class="number">2</span>*dist[res]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>话说从 HDU 提交的结果上来看，树链剖分是最快的，LCT 次之，Tarjan 离线最慢。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/09/27/2017-09-27-tarjan/" rel="bookmark">Tarjan 大佬的算法们</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Tarjan/" rel="tag"># Tarjan</a>
+              <a href="/tags/LCA/" rel="tag"># LCA</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/06/11/2018-06-11-tfunpacking8/" rel="prev" title="TensorFlow 拆包（八）：Dynamic Control Flow in Large-Scale Machine Learning">
+      <i class="fa fa-chevron-left"></i> TensorFlow 拆包（八）：Dynamic Control Flow in Large-Scale Machine Learning
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/09/04/2018-09-04-cache/" rel="next" title="（试图）深入理解 Cache">
+      （试图）深入理解 Cache <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Tarjan-离线-LCA"><span class="nav-text">Tarjan 离线 LCA</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HDU-2586"><span class="nav-text">HDU 2586</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HDU-2874"><span class="nav-text">HDU 2874</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#动态树（LCT）"><span class="nav-text">动态树（LCT）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#树链剖分"><span class="nav-text">树链剖分</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'ad16a3a9ade054b8c8cf70afbc8ce5c0',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

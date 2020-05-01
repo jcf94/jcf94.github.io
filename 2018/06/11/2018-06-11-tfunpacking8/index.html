@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前篇：  TensorFlow 拆包（一）：Session.Run() TensorFlow 拆包（二）：TF 的数据流模型实现 TensorFlow 拆包（三）：Graph 和 Node TensorFlow 拆包（四）：Device TensorFlow 拆包（五）：Distributed TensorFlow 拆包（六）：RDMA TensorFlow 拆包（七）：Profiling 踩坑">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TensorFlow 拆包（八）：Dynamic Control Flow in Large-Scale Machine Learning">
+<meta property="og:url" content="https://jcf94.com/2018/06/11/2018-06-11-tfunpacking8/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="前篇：  TensorFlow 拆包（一）：Session.Run() TensorFlow 拆包（二）：TF 的数据流模型实现 TensorFlow 拆包（三）：Graph 和 Node TensorFlow 拆包（四）：Device TensorFlow 拆包（五）：Distributed TensorFlow 拆包（六）：RDMA TensorFlow 拆包（七）：Profiling 踩坑">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2018-06-11-tfunpacking8-p12.png">
+<meta property="article:published_time" content="2018-06-11T00:44:45.000Z">
+<meta property="article:modified_time" content="2018-10-21T02:28:36.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="TensorFlow">
+<meta property="article:tag" content="Dataflow">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2018-06-11-tfunpacking8-p12.png">
+
+<link rel="canonical" href="https://jcf94.com/2018/06/11/2018-06-11-tfunpacking8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>TensorFlow 拆包（八）：Dynamic Control Flow in Large-Scale Machine Learning | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2018/06/11/2018-06-11-tfunpacking8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TensorFlow 拆包（八）：Dynamic Control Flow in Large-Scale Machine Learning
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-06-11 08:44:45" itemprop="dateCreated datePublished" datetime="2018-06-11T08:44:45+08:00">2018-06-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-10-21 10:28:36" itemprop="dateModified" datetime="2018-10-21T10:28:36+08:00">2018-10-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Project/" itemprop="url" rel="index"><span itemprop="name">Project</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>前篇：</p>
+<ul>
+<li><a href="/2018/01/13/2018-01-13-tfunpacking/">TensorFlow 拆包（一）：Session.Run()</a></li>
+<li><a href="/2018/01/23/2018-01-23-tfunpacking2/">TensorFlow 拆包（二）：TF 的数据流模型实现</a></li>
+<li><a href="/2018/02/28/2018-02-28-tfunpacking3/">TensorFlow 拆包（三）：Graph 和 Node</a></li>
+<li><a href="/2018/03/07/2018-03-07-tfunpacking4/">TensorFlow 拆包（四）：Device</a></li>
+<li><a href="/2018/03/09/2018-03-09-tfunpacking5/">TensorFlow 拆包（五）：Distributed</a></li>
+<li><a href="/2018/03/12/2018-03-12-tfunpacking6/">TensorFlow 拆包（六）：RDMA</a></li>
+<li><a href="/2018/04/10/2018-04-10-tfunpacking7/">TensorFlow 拆包（七）：Profiling 踩坑 &amp; Benchmark</a></li>
+</ul>
+<p>严格上来说本篇不应该算在拆包里面，因为记的是 TF 团队最近发的一篇论文里面的东西。</p>
+<p>前面拆包的第二篇记过关于 TensorFlow 中的数据流模型实现，实际上这套数据流模型已经是非常完备的，只是目前大家用 Python 搭出来的简单网络形式还很难把它的真正潜力发挥出来。</p>
+<blockquote>
+<p>正当我们往这个方向做的时候，得，Google 发论文了。</p>
+</blockquote>
+<a id="more"></a>
+
+<hr>
+<p>这篇 <a href="https://dl.acm.org/citation.cfm?id=3190551" target="_blank" rel="noopener">Dynamic Control Flow in Large-Scale Machine Learning</a> 发表在 EuroSys 18 上，系统结构方向的 B 类会议。</p>
+<p>其实文中所提到的几乎所有内容都是 <strong>TensorFlow 原有</strong>的，或者说 TensorFlow 当初设计架构的时候就已经考虑到了未来这种使用方式的需求，这篇文章只是整理了一下这部分的设计思路（内容大部分跟以前发的控制流白皮书是一致的，见 TF 拆包第二篇），然后做了一定的测试，从实践上证明给大家看这样做是有效的。</p>
+<h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1><p>首先提了一下深度学习中对控制流的需求，主要是像 RNN、MoEs 这样的任务中会明确地需要一些控制流的支持。但从更宏观的角度来看，使用动态控制流对任何应用都是有用的，理论上可以比较好地地把计算和通信部分给 overlap 开，尤其对提高<strong>异构系统</strong>（CPU、GPU、TPU等等）的计算效率是有很大的好处的。</p>
+<p>目前常见的一些机器学习框架基本上都是用数据流图的方式来组织计算。</p>
+<p>关于如何实现数据流的控制部分，主要有两种方式：</p>
+<ol>
+<li>in-graph 方式：例如 TensorFlow 和 Theano，控制流部分可以作为一个 op 嵌入到计算图中；</li>
+<li>out-of-graph 方式：这也是大多数框架的常规方式，包括 MxNet、torch、Caffe 以及 TensorFlow 的常规用法，控制流部分由更上层的 host 语言来完成（主要指 Python）</li>
+</ol>
+<blockquote>
+<p>除了 TensorFlow 以外，别的框架似乎都很少用数据流这个词来指代自己的设计，可能原因就在这里？其他框架虽然整体计算还是以数据流图的形式做的，但并不是真正用一套数据流的运行时去支撑的。</p>
+</blockquote>
+<p>用 TensorFlow 来举例，方式 2 的写法通常是：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">python <span class="keyword">for</span> i <span class="keyword">in</span> range(xxx):</span><br><span class="line">    xxx</span><br><span class="line">    sess.run(train_step)</span><br><span class="line">    xxx</span><br></pre></td></tr></table></figure>
+
+<p>多轮控制是写在 Python 层的代码中，每一次循环只跑训练的一步。</p>
+<blockquote>
+<p>恐怕我们见到的大部分 TF 代码都是这个样子的吧。</p>
+</blockquote>
+<p>方式 1 则是控制部分已经是图的一部分了，那最后我们只要 <code>sess.run(total_train_step)</code> 一次，就能够达到跟前面一样的训练效果。</p>
+<p>单一的计算图更便于进行全图的优化，且这种实现能保证整个计算过程都停留在运行时里面（而不是像原先那样，跑一轮进退一次运行时，再跑一轮再进退一次运行时），减少很多不必要的开销。</p>
+<p>数据流运行时的特性是<strong>一旦某个 op 的依赖都满足了，它就马上可以被调度执行了</strong>，在 out-of-graph 方式中，这种数据流的调度粒度只限定在一次 step 中，而 in-graph 方式甚至能把并行性扩展到多次 step 间，这样就能够最大程度地挖掘<strong>数据流异步、并行的能力</strong>了。</p>
+<p>最初的 TensorFlow 白皮书中也有介绍过关于数据流部分的实现，但是并没有给出详细的设计方案以及测试结果，这篇文章就是把这部分补上。</p>
+<p>总的来说，本文的内容包括：</p>
+<ul>
+<li>In-graph 动态控制流的设计，包括自动求导部分</li>
+<li>In-graph 动态控制流在 TensorFlow 中的具体实现，包括在多种异构设备上分发的能力</li>
+<li>对动态控制流性能的测试，并且分析多种不同选择带来的影响</li>
+<li>关于如何用好动态控制流的使用经验</li>
+</ul>
+<blockquote>
+<p>话说前两部分都是 TensorFlow 原有的。。。。。。</p>
+</blockquote>
+<h1 id="Design-and-Implementation"><a href="#Design-and-Implementation" class="headerlink" title="Design and Implementation"></a>Design and Implementation</h1><p>2、3、4、5 章的大部分内容与 <a href="/2018/01/23/2018-01-23-tfunpacking2/">TensorFlow 拆包（二）：TF 的数据流模型实现</a> 中记录的类似，就不多重复了。</p>
+<p>需要额外提一下的是，由于跨 step 的 op 有可能被并行执行，这也就意味着可能要用上更多的内存。TensorFlow 的控制流中也考虑了内存的问题，建立在 GPU 上的 frame 如果使用的显存超过某个上限则会自动做与 CPU 的内存切换的动作，把不用的部分数据换出去，把接下来要用的数据换进来。</p>
+<p>例如 <code>tf.while_loop()</code> 的函数接口中就有个 <code>swap_memory</code> 的参数。</p>
+<blockquote>
+<p>6666666666….</p>
+</blockquote>
+<h1 id="Evaluation"><a href="#Evaluation" class="headerlink" title="Evaluation"></a>Evaluation</h1><p>说实话，这篇文章的测试结果部分我觉得写的有点乱。</p>
+<blockquote>
+<p>前面都是搬以前原有的内容，然后在本文的重点部分又写的这么乱，Google 的大佬们你们是认真的吗？</p>
+</blockquote>
+<p>测试的系统配置是 Intel 服务器配上 K40 和以太网，每个节点一块卡，某些例子中用到了 8 卡的 DGX-1 V100。</p>
+<hr>
+<p>一开始的两个测试用的是构造出来的模拟算例。</p>
+<p>图 11 的结果感觉有点迷。</p>
+<p>图 12 是模拟 RNN 的结构，把一个类似 8 层的 RNN 计算分布在 8 块卡上，把 <code>tf.while_loop()</code> 支持的并行 iteration 数从 1 调到 32，可以发现并行性发挥出来之后效果确实是挺好的，最高大约有 5 倍左右的性能提升。并行 iteration 数为 1 的时候其实就相当于跟 out-of-graph 一样。</p>
+<p><img data-src="http://jcf94.com/download/2018-06-11-tfunpacking8-p12.png" alt="图12"></p>
+<p>后面模型并行的测试是把一个实际的 8 层 LSTM 分布在 8 块卡上，具体的并行方式与图 12 的测试类似。在 1~8 块卡上分别测试，加速比也还可以。</p>
+<hr>
+<p>接下来对一个单层 LSTM 的测试是对比是否开启内存交换。不开内存交换时，序列长度加到 600 就出现超内存的现象了，而开启内存交换则可以在保证能跑的前提下还不会损失性能。</p>
+<p>从追踪出来的 profiling 结果中也能看到，在这种计算模式下内存拷贝和 GPU 计算 overlap 得比较好，这也是性能不受影响的重要原因。</p>
+<hr>
+<p>再下一个测试是固定 LSTM 的序列长度为 200，调整 Batch Size 的大小来对比动态 RNN 和手动循环展开的效果。动态 RNN 稍微损失了一点点性能，但是差距不大。</p>
+<p>另一方面动态 RNN 比手动做循环展开在内存方面有更大的优势，类似上一个测试，动态 RNN 开了内存交换之后可以跑更大的 Batch Size。</p>
+<hr>
+<p>最后是对 DQN 强化学习网络的测试，尽管 DQN 现在已经不用了被其他更好的方法替代了（？？？），还是希望能从它的测试中展现一下动态控制流的效果。</p>
+<p>DQN 中包含了多个网络，根据不同的情况需要做出许多不同的操作。使用动态控制流的方法把所有的操作都包含在一个计算图中之后，最终能够比原始情况得到 21% 的性能提升。</p>
+<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>总结来看，这篇文章重新整理了有关 TensorFlow 中控制流部分的实现思路，证明 in-graph 方式的纯数据流实现是有意义的。但是我对它的测试部分并不太满意，用到的是模拟的 workload，说服力不够，并且感觉测试的内容还是偏少。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/02/04/2017-02-04-tensorflow/" rel="bookmark">TensorFlow</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/04/04/2017-04-04-alexnet/" rel="bookmark">AlexNet</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/13/2018-01-13-tfunpacking/" rel="bookmark">TensorFlow 拆包（一）：Session.Run()</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/23/2018-01-23-tfunpacking2/" rel="bookmark">TensorFlow 拆包（二）：TF 的数据流模型实现以及自动求导</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/03/07/2018-03-07-tfunpacking4/" rel="bookmark">TensorFlow 拆包（四）：Device</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/TensorFlow/" rel="tag"># TensorFlow</a>
+              <a href="/tags/Dataflow/" rel="tag"># Dataflow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/04/10/2018-04-10-tfunpacking7/" rel="prev" title="TensorFlow 拆包（七）：Profiling 踩坑 & Benchmark">
+      <i class="fa fa-chevron-left"></i> TensorFlow 拆包（七）：Profiling 踩坑 & Benchmark
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/06/20/2018-06-20-lca/" rel="next" title="理一个 LCA 模版">
+      理一个 LCA 模版 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Introduction"><span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Design-and-Implementation"><span class="nav-text">Design and Implementation</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Evaluation"><span class="nav-text">Evaluation</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Summary"><span class="nav-text">Summary</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '31161355690ec2570322659aa291f6f9',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

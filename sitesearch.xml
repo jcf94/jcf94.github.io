@@ -1,0 +1,7 @@
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+<InputEncoding>utf-8</InputEncoding>
+<ShortName>Chenfan Blog</ShortName>
+<Description>To live is to change the world.</Description>
+<Image height="16" width="16" type="image/x-icon">https://jcf94.com/favicon.ico</Image>
+<Url type="text/html" template="https://jcf94.com/search?search={searchTerms}"/>
+</OpenSearchDescription>

@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="重新理了一下，把内容分开，其实大部分内容都是以前记的，接上篇：  计算机组成与设计.硬件&#x2F;软件接口 学习笔记（一）  本篇为第四、五章开始。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机组成与设计.硬件&#x2F;软件接口 学习笔记（二）">
+<meta property="og:url" content="https://jcf94.com/2018/02/06/2018-02-06-cod2/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="重新理了一下，把内容分开，其实大部分内容都是以前记的，接上篇：  计算机组成与设计.硬件&#x2F;软件接口 学习笔记（一）  本篇为第四、五章开始。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-06-cod2-abstra.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-06-cod2-rtype.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-06-cod2-total.png">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-4.4.1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-4.4.2.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-4.5.1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-4.5.2.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-4.6.1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-4.6.2.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-06-cod2-multi-clock-cycle.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-06-cod2-single-clock-cycle.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-06-cod2-controlpath.png">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-4.7.1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-4.7.2.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-4.7.3.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-4.7.4.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-4.7.5.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-4.8.1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-06-cod2-exception.png">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-4.10.1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-06-cod2-a8.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-06-cod2-i7.png">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-5.1.1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-5.3.1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-5.3.2.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-5.4.1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-5.4.2.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-5.9.1.jpg">
+<meta property="article:published_time" content="2018-02-06T06:12:41.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="体系结构">
+<meta property="article:tag" content="组成与设计.硬软件接口">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2018-02-06-cod2-abstra.png">
+
+<link rel="canonical" href="https://jcf94.com/2018/02/06/2018-02-06-cod2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>计算机组成与设计.硬件/软件接口 学习笔记（二） | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2018/02/06/2018-02-06-cod2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机组成与设计.硬件/软件接口 学习笔记（二）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-02-06 14:12:41" itemprop="dateCreated datePublished" datetime="2018-02-06T14:12:41+08:00">2018-02-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Architecture/" itemprop="url" rel="index"><span itemprop="name">Computer Architecture</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>重新理了一下，把内容分开，其实大部分内容都是以前记的，接上篇：</p>
+<ul>
+<li><a href="/2015/09/09/2015-09-09-cod/">计算机组成与设计.硬件/软件接口 学习笔记（一）</a></li>
+</ul>
+<p>本篇为第四、五章开始。</p>
+<a id="more"></a>
+
+<h1 id="CHAPTER-4-The-Processor"><a href="#CHAPTER-4-The-Processor" class="headerlink" title="CHAPTER 4. The Processor"></a>CHAPTER 4. The Processor</h1><p>从这一章开始就是讲处理器里面的设计了，还是以 MIPS 为例展开。</p>
+<h2 id="4-1-Instruction"><a href="#4-1-Instruction" class="headerlink" title="4.1. Instruction"></a>4.1. Instruction</h2><p>指令实现 overview：</p>
+<ul>
+<li>首先所有指令都存在内存里面，向内存发送 PC（program counter）来获取（fetch）下一条指令</li>
+<li>根据指令具体要做的事情，读取一个或者两个寄存器的数据。</li>
+</ul>
+<p>前面两步是所有指令都要做的，再之后就是根据指令做具体的操作了。</p>
+<p><img data-src="http://jcf94.com/download/2018-02-06-cod2-abstra.png" alt=""></p>
+<h2 id="4-2-Logic-Design-Conventions"><a href="#4-2-Logic-Design-Conventions" class="headerlink" title="4.2. Logic Design Conventions"></a>4.2. Logic Design Conventions</h2><p>这里把 MIPS 实现的数据通路上的逻辑元素分成两类：结合性元素（combinational element）和状态元素（state element）。</p>
+<p>结合性元素指的是执行操作的元素，输出只与输入有关，任何时候，只要给一样的输入，就会有一样的输出结果，例如 ALU。</p>
+<p>另外一些元素不是结合性的，而是可能包含运行状态，即带有内部存储结构，例如指令存储器、寄存器等。</p>
+<p>触发电平用于控制各个元素的执行。这里假定都用边沿触发。</p>
+<h2 id="4-3-Building-a-Datapath"><a href="#4-3-Building-a-Datapath" class="headerlink" title="4.3. Building a Datapath"></a>4.3. Building a Datapath</h2><p>数据通路的具体实现，首先是处理指令需要的几个基本元素：</p>
+<ol>
+<li>指令存储器<br>用于存储所有的程序指令，并且给它们编上地址</li>
+<li>PC<br>一个地址寄存器，用于存放指令地址，即指向指令存储器中当前正在执行的指令</li>
+<li>加法器<br>用于改变PC的值，指向下一条指令，以使程序可以继续向后执行</li>
+</ol>
+<p>对于寄存器的操作：</p>
+<ol>
+<li>读寄存器<br>输入1个寄存器号，输出该寄存器的内容。可随时读取。</li>
+<li>写寄存器<br>输入1个寄存器号，以及要写入写寄存器的值。需要给寄存器文件一个写信号才能写入。</li>
+</ol>
+<p>以R-format指令为例：<br>一般需要读取2个寄存器的内容，经过ALU运算，写入另一个寄存器。<br>结合上面的寄存器操作，则寄存器访问需要<strong>4个输入</strong>（2个要读的寄存器号，1个要写的寄存器号，1个要写入的寄存器值），<strong>2个输出</strong>（分别是输出2个要读的寄存器的内容），以及一个写信号脉冲。<br>寄存器号的3个口需要<strong>5位</strong>的数据宽度（第二章中rs、rt、rd的长度都是5位），写入与读出的3个口则分别需要<strong>32位</strong>的数据宽度。</p>
+<p>再看I-format指令：<br><code>lw $t1,offset($t2)</code><br>存储地址是将<code>$t2</code>中的内容（32位基地址）加上offset（16位偏移地址）作为目标地址，然后将内容写入寄存器<code>$t1</code>。<br>这里需要的是一个<strong>地址加法器（加16位和32位的数）</strong>以及<strong>数据存储器</strong>。<br><code>beq $t1,$t2,offset</code><br>首先读取<code>$t1</code>和<code>$t2</code>的内容到ALU进行对比，若通过，则将offset（16位偏移地址）加到PC上作为下一次的目标地址。</p>
+<blockquote>
+<p>需要注意的是：lw中目标地址是<strong>直接把offset和$2中的内容相加</strong>，而beq中offset指的是按4字节寻址的地址，PC中存的是完整的地址，<strong>offset要作2位偏移之后再加到PC中去</strong></p>
+</blockquote>
+<p><img data-src="http://jcf94.com/download/2018-02-06-cod2-rtype.png" alt=""></p>
+<p>上图中进行R-format指令操作时：<br>多路选择器ALUSrc选0，输入两个寄存器的内容到ALU中；多路选择器MemtoReg选0，将运算结果输出至寄存器文件的写入数据端，写入寄存器。</p>
+<p>进行I-format指令操作时：<br>多路选择器ALUSrc选1，输入一个寄存器的内容以及将offset从16位符号扩展至32位之后的值到ALU中；多路选择器MemtoReg选1，将数据存储器中读到的内容输出至寄存器文件的写入数据端，写入寄存器。</p>
+<p>在上图的基础上把PC以及指令寄存器的内容加上去就是一个比较完整的数据通路了。</p>
+<p><img data-src="http://jcf94.com/download/2018-02-06-cod2-total.png" alt=""></p>
+<p>PC后的两个加法器用于改变PC的地址。将offset从16位符号扩展至32位之后的值作2位左移与地址累加是完成beq这一类的跳转，用PCSrc进行数据选择。</p>
+<h2 id="4-4-A-Simple-Implementation-Scheme"><a href="#4-4-A-Simple-Implementation-Scheme" class="headerlink" title="4.4. A Simple Implementation Scheme"></a>4.4. A Simple Implementation Scheme</h2><p>然后来模拟实现<strong>一个简单的</strong>的指令集，包含：</p>
+<ul>
+<li>load word (lw)</li>
+<li>store word (sw)</li>
+<li>branch equal (beq)</li>
+<li>算数逻辑运算：add, sub, AND, OR</li>
+<li>set on less than</li>
+</ul>
+<p>要实现上面的这些功能，操作数只需要2位：</p>
+<ul>
+<li>00表示lw或者sw，这里对于ALU来说只需要作地址的相加即可。</li>
+<li>01表示beq，需要用ALU对两个寄存器相减。</li>
+<li>10表示R-format操作，需要配合6位的Funct再进行各种情况的选择。</li>
+<li>根据上述的2位ALUOp和6位Funct，生成出真正的4位ALU操作码</li>
+</ul>
+<p>结合第二章表格里面每一种类型的指令的格式，再加上控制单元部分，可以把数据通路图进一步画成：</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-4.4.1.jpg" title="标明了所有控制信号与控制单元的数据通路">
+
+<p>多路选择器RegDst用于区分R-format和I-format中目标寄存器在操作数中的位置（rt在20:16，rd在15:11）</p>
+<p>单独有一个ALUOp用来根据最后的Funct（5:0）来产生真正的ALU控制码，这里其实只是一个真值表的处理。</p>
+<p>指令的31:26位用一个单独的控制器处理，来完成各种控制信号的产生。</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-4.4.2.jpg" title="最后加上一个跳转">
+
+<p>跳转的指令是6位操作数和26位地址，这个地址也是按4字节寻址的。</p>
+<p>则加上跳转就是将原来PC+4的高4位，以及26位地址偏移2位组成新的PC地址，完成跳转。</p>
+<p>至此，单指令周期的数据通路构造完成。</p>
+<p>而由于指令数的庞大，单周期指令实际运行时非常慢，必须等到一条指令运行完毕之后才能跑下一条，而每一条指令其实只占用了数据通路的一部分（这里只是实现了几条简单的指令集，完整的可以想象是更加庞大的），剩下的部分都是空闲没用的。</p>
+<p>因此要用到下一节之后的流水线技术来处理这个矛盾。</p>
+<h2 id="4-5-An-Overview-of-Pipelining"><a href="#4-5-An-Overview-of-Pipelining" class="headerlink" title="4.5. An Overview of Pipelining"></a>4.5. An Overview of Pipelining</h2><p>流水线思想是为了提高吞吐量，其实最简单的理解就是把每个不同部分错开同时执行，其本身并不能提升单个指令的执行速度，但是当指令数量<strong>达到一定量级</strong>，且<strong>每级流水线的工作时间设置的比较合适时</strong>，使用流水线比不使用流水线要快大约<strong>流水线级数</strong>倍。</p>
+<p>处理1条 MIPS 指令包含5个步骤：</p>
+<ol>
+<li>从指令存储器中读取指令（Instruction Fetch）</li>
+<li>指令译码，并且同时读取寄存器的内容（Instruction Decode）</li>
+<li>执行操作或者计算地址（Execute）</li>
+<li>从数据存储器中读取操作数（Memory Access）</li>
+<li>将结果写回寄存器（Write Back）</li>
+</ol>
+<p>本章讨论的流水线也是分成5个部分。</p>
+<p>当然，前面说的能加速流水线级数倍的前提是所有指令都能够用流水的方式执行，事实上在实际情况下这是有问题的，下一条指令可能需要依赖于上一条执行完毕之后才能执行，这里就有个流水线冒险的问题：</p>
+<ol>
+<li><p>结构冒险：由于硬件结构导致的冒险，两条指令没办法同时使用一块相同的硬件，比如两条指令在不同的阶段需要同时访问相同的寄存器。</p>
+<p>这个需要从硬件结构上来解决。</p>
+</li>
+<li><p>数据冒险：下一条指令需要的数据，上一条指令还在计算中。</p>
+<p>例如这两条指令按顺序进入流水线时：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">add   $s0, $t0, $t1</span><br><span class="line">sub   $t2, $s0, $t3</span><br></pre></td></tr></table></figure>
+
+<p>当<code>sub</code>指令需要读取<code>$s0</code>的数据时，<code>add</code>只执行到第三个阶段，还要等到第五个阶段才能把结果写回到<code>$s0</code>中去。</p>
+<p>数据冒险是特别常见的情况，编译器可以通过改变指令顺序处理掉一部分的数据冒险，另外的就需要通过增加额外的硬件结构来完成<strong>转发（forward）</strong>和<strong>旁路（bypass）</strong>。</p>
+<p>转发指的是下一条指令读取寄存器数据时直接把上一条 ALU 计算的结果拿过来。</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-4.5.1.jpg" title="两条指令间的转发/旁路">
+对于某些特别的指令，比如读取数据，就需要给流水线暂停一个时钟周期再转发，相当于插入一条气泡指令。
+<img data-src="http://jcf94.com/download/2015-09-09-cod-4.5.2.jpg" title="插入流水线气泡的转发">
+可以通过指令重排，往气泡的位置插入一条跟这两条无依赖关系的指令来避免浪费。
+</li>
+<li><p>控制冒险/分支冒险：遇到例如beq这类指令时，指令正在译码，但是流水线就要紧接着读入下一条指令，而此时下一条指令的PC还没有确定，因此产生矛盾。<br>比较简单的解决方案是<strong>随便预测一个方向先执行</strong>，如果不对再忽略前面执行的指令转去执行正确的指令，这样如果预测是正确的，则流水线任然是全速运行，如果是错误的那么与原来不采用预测的方式耗时一样。</p>
+<p><strong>使用额外的硬件预测器</strong>可以把准确率提高到90%以上。另外在MIPS中还有一种方案是<strong>将一条不影响分支的指令放到分支之后</strong>。</p>
+</li>
+</ol>
+<h2 id="4-6-Pipelined-Datapath-and-Control"><a href="#4-6-Pipelined-Datapath-and-Control" class="headerlink" title="4.6. Pipelined Datapath and Control"></a>4.6. Pipelined Datapath and Control</h2><p>流水线中的数据通路和控制</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-4.6.1.jpg" title="将单周期数据通路按照上一节的要求进行划分">
+
+<ul>
+<li>IF：Instruction fetch<br>指令预取</li>
+<li>ID：Instruction decode and register file read<br>指令译码并读取寄存器</li>
+<li>EX：Execution or address calculation<br>执行指令或者计算地址</li>
+<li>MEM：Data memory access<br>访问数据存储器</li>
+<li>WB：Write back<br>寄存器回写</li>
+</ul>
+<p>数据流是从数据通路的左端开始，一直向右进行。图中仅有的两条反向流动通路是PC和寄存器的回写，这两个反向流也就是后面需要<strong>解决冒险</strong>的地方。</p>
+<p>为了使得一个数据通路里面的五个部分之间相互不影响，解决方法就是在两个相邻的部分之间使用额外的寄存器来传递数据，保证上一条指令的结果能够保存下来传给下一个部分来执行，同时能继续执行下一条指令的该部分。</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-4.6.2.jpg" title="修正之后的数据通路">
+
+<p>考虑一条<code>lw $dest, offset($addr)</code>指令：</p>
+<ol>
+<li>IF：根据 PC 的值，从指令存储器中获取到这条指令，存到 IF/ID 寄存器中。PC 自增 4 并写回，等待下一个时钟周期来读下一条指令，同时这个时候的 PC 值也存到 IF/ID 寄存器中，以备以后使用。</li>
+<li>ID：分拆指令的各个部分，读寄存器，把读到的寄存器值（这里只有一个）以及 32 位扩展后的偏移值存入 ID/EX，自增过的 PC 也存入 ID/EX。</li>
+<li>EX：把 32 位扩展值以及寄存器 1 的内容用 ALU 加起来，就是需要访问的最终目标地址，算出目标地址之后存入 EX/MEM。</li>
+<li>MEM：用目标地址去访问内存，把读到的数据存入 MEM/WB。</li>
+<li>WB：把读到的数据写回到寄存器中。</li>
+</ol>
+<p>分析完 lw 和 sw 中数据流动的特点之后会发现，这里可能会存在一个 bug：即写寄存器这一步发生在整个数据流的最后一步，要写入寄存器的内容和要写的寄存器号其实都是在最后一步 WB 中给出的。<br>因此在第二步 ID 中得到的要写的寄存器号在这一步中没有用到，而是需要随着整个数据通路一直向后传递，直到最后一步，然后传回来。<br>上图中蓝色的线就是对这个问题的修改。</p>
+<p>这里先不考虑发生冒险的情况，以下面这段程序为例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">lw  <span class="variable">$10</span>,20(<span class="variable">$1</span>)</span><br><span class="line">sub <span class="variable">$11</span>,<span class="variable">$2</span>,<span class="variable">$3</span></span><br><span class="line">add <span class="variable">$12</span>,<span class="variable">$3</span>,<span class="variable">$4</span></span><br><span class="line">lw  <span class="variable">$13</span>,24(<span class="variable">$1</span>)</span><br><span class="line">add <span class="variable">$14</span>,<span class="variable">$5</span>,<span class="variable">$6</span></span><br></pre></td></tr></table></figure>
+
+<p>运行过程中流水线中的内容：</p>
+<img data-src="http://jcf94.com/download/2018-02-06-cod2-multi-clock-cycle.png" title="多时钟周期流水线图">
+
+<p>把上图中第五个时钟周期中每个部分执行的内容连起来看：</p>
+<img data-src="http://jcf94.com/download/2018-02-06-cod2-single-clock-cycle.png" title="第5个时钟周期中流水线的物理表现">
+
+<p>流水线每一级能够独立工作就是完全靠了每一级之间的这些流水线寄存器。</p>
+<p>控制部分与前面的单周期数据通路类似，这里主要强调控制指令也是逐级往后传递，在本级没有用到的控制字直接传递给下一级的状态寄存器，给数据通路中的每一个组件加上控制信号等等即可。</p>
+<img data-src="http://jcf94.com/download/2018-02-06-cod2-controlpath.png" title="加上了控制部分的完整流水线数据通路">
+
+<h2 id="4-7-Data-Hazards-Forwarding-versus-Stalling"><a href="#4-7-Data-Hazards-Forwarding-versus-Stalling" class="headerlink" title="4.7. Data Hazards: Forwarding versus Stalling"></a>4.7. Data Hazards: Forwarding versus Stalling</h2><p>然后来看看数据冒险的解决。</p>
+<p>以下面这段代码为例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sub $2, $1,$3</span><br><span class="line">and $12,$2,$5</span><br><span class="line">or  $13,$6,$2</span><br><span class="line">and $14,$2,$2</span><br><span class="line">sw  $15,100($2)</span><br></pre></td></tr></table></figure>
+
+<p>将上述代码画在图中即：</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-4.7.1.jpg" title="流水线中发生的数据冒险">
+
+<p>后面四条指令均用到了第一条指令的结果：<br>其中第二条$2作为rs，第三条作为rt，第一条的结果还没来得及写入寄存器即马上要被调用，发生数据冒险<br>虽然第三条的读取寄存器与第一条的写入寄存器发生在同一个时钟周期内，但是可以认为写入发生在前半个时钟周期内，读取发生在后半个时钟周期内，无冲突<br>第四条读取寄存器时，数据已完成写入寄存器，无冲突</p>
+<p>这里的解决方案是作数据转发，上图是从寄存器角度来看这个过程，如果从状态寄存器上看：</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-4.7.2.jpg" title="状态寄存器之间的数据关系">
+
+<p>第二条指令的ALU需要输入时实际上答案已经算出来了，存在第一条的EX/MEM状态寄存器中，只要作一下<strong>转发</strong>即可避免冲突的产生。</p>
+<p>转发这个操作从图上很好理解，但是发生在一个流水线通路中，那么从硬件实现上面就是增加多路选择器以及额外的控制模块（Forwarding Unit）来实现：</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-4.7.3.jpg" title="数据选择/寄存器转发控制">
+
+<p>但是，另外仍然有一个无法用转发避免的数据冒险，发生在 lw 这样读取数据存储器的指令后：</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-4.7.4.jpg" title="lw中的数据冒险">
+
+<p>这里正确的结果出现在MEM/WB状态寄存器中，解决方案只有将后面的指令作一个时钟周期的延时，以完成转发：</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-4.7.5.jpg" title="延时和转发">
+
+<p>“气泡指令”即输入一条空指令，将所有控制状态字都置为0，则整个数据通路中状态寄存器不发生改变，相当于保持原状延时1个时钟周期。</p>
+<h2 id="4-8-Control-Hazards"><a href="#4-8-Control-Hazards" class="headerlink" title="4.8. Control Hazards"></a>4.8. Control Hazards</h2><p>接下来来看一下控制冒险的问题。</p>
+<p>碰到条件跳转等等情况，我们根本确定不了下一条指令是什么，那要怎么往流水线里面放指令呢？答案就是先默认选一条（比如默认先不跳转，直接把下一条指令放进来），然后把本来要在 EXE 级完成的比较计算提前。</p>
+<p>通过增加额外的硬件，可以把 beq 判断的结果和转移地址的计算都控制在 ID 级完成，并默认先顺序读取下一条指令。当结果判断完毕时，转移的地址也同时被计算出来了。若分支未发生，则不需要改变，流水线任然可以看做是全速运行的；若分支发生，则因为此时是在 ID 级结束，只需要在给 IF/ID 一个 IF.Flush 信号删掉之前读入的指令，并读入正确的指令即可，相当于一次“气泡”延时。</p>
+<p>另外考虑到 beq 指令之前，还可能出现数据冒险的情况：<br>若 beq 前为 add、sub 这类的计算执行指令，结果将在 EX 级之后被计算得到，则需要将 beq 指令延迟一个时钟周期，等待数据转发；<br>若 beq 前为 lw 这类的数据存储指令，结果将在 MEM 级之后得到，需要将 beq 指令延迟两个时钟周期，等待数据转发。</p>
+<p>比默认选择一条路径更优的是利用“历史记录”等等进行动态对分支方向进行选择。</p>
+<blockquote>
+<p>分支预测和指令预取这块深入下去还有很多人研究，也是一个很大的研究点，貌似这几年已经能达到80~90%的准确率了。</p>
+</blockquote>
+<ul>
+<li><a href="https://www.zhihu.com/question/23973128" target="_blank" rel="noopener">CPU 的分支預測器是怎樣工作的？</a></li>
+</ul>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-4.8.1.jpg" title="修改了beq优化之后的数据通路">
+
+<h2 id="4-9-Exceptions"><a href="#4-9-Exceptions" class="headerlink" title="4.9. Exceptions"></a>4.9. Exceptions</h2><p>最影响流水线性能的是<strong>异常</strong>和<strong>中断</strong>，因为这类情况的发生是不可预知的，而发生时则需要暂停当前正在运行的程序，跳转执行至异常处理程序中。</p>
+<p>在MIPS异常发生时，需要保存下当前的指令地址 EPC 以及错误发生的原因 Cause。</p>
+<p>到这里为止，基本上完整的流水线数据通路已经完成了：</p>
+<p><img data-src="http://jcf94.com/download/2018-02-06-cod2-exception.png" alt=""></p>
+<h2 id="4-10-Parallelism-via-Instructions"><a href="#4-10-Parallelism-via-Instructions" class="headerlink" title="4.10. Parallelism via Instructions"></a>4.10. Parallelism via Instructions</h2><p>流水线技术其实表现的是计算机执行指令时的并行潜力，这里有个专门的词就叫指令级并行（ILP，Instruction Level Parallelism）。</p>
+<p>本书中关于指令级并行的内容只有13页，基本上只是个概览，关于详细的要去看《量化分析方法》。</p>
+<blockquote>
+<p>大汗……把这里的 13 页扩展到 200 多页。</p>
+</blockquote>
+<p>进一步增强流水线的潜力一般有两种思路：</p>
+<ol>
+<li>增加流水线的深度，这样流水线中就能够同时容纳更多的指令。当然，要修改流水线级数还需要考虑到重新把每一级的执行时间调整到差不多相同的程度（作为一个时钟周期）；</li>
+<li>复制流水线中每一级的部件，让流水线在相同的周期内能同时运行多条指令（也是一种解决结构冒险的思路），这个通常叫做<strong>指令多发射</strong>，也即<strong>单周期多指令并行</strong>。</li>
+</ol>
+<p>第一章中提到过 <a href="/2015/09/09/2015-09-09-cod/#1-6-Performance">CPI</a> 这个概念，如果单个时钟周期内可以处理多条指令，那么 CPI 的值就能做到小于 1，或者要改用 IPC（Instruction per clock cycle）来做性能指标了。工艺上提升主频，再从设计上提高 IPC，那么一个 4 GHz 的 4 路多发射处理器就能每秒处理 16 G 条指令。</p>
+<p>然鹅理想很美好，要做到指令的多发射虽然能够显著地提升速度，但是随之而来的也有很多的问题：</p>
+<ol>
+<li>怎么同时跑多条指令？这里有个发射槽的概念，那么就是说如何合理地将指令分配到不同的发射槽中，使得指令能够做到多发射？有多少条指令，哪些指令可以在一个指令周期内一起发射？</li>
+<li>指令多发射之后，数据冒险与控制冒险的情况就更为严重了。</li>
+</ol>
+<p>第一个问题的解决方案基本上还是要靠前面的分支预测技术，只不过要考虑的方面要更复杂了，单独有个单词来特指这个部分的工作：<strong>推测（Speculation）</strong>。</p>
+<p>多发射通常采用两种思路：</p>
+<ol>
+<li><p><strong>静态多发射</strong>：简单地说就是将前几节的数据通路作进一步拓展，每一级流水线中都有多套设备，或者干脆就是把一条数据通路复制几份，这样就能一次读取多条指令，一次同时执行多条指令了。主要依靠<strong>编译器</strong>来帮助把指令打包在一起以及处理各种冒险，编译器需要针对特定结构的CPU作优化，如果要移植到不同的设备上，需要作重新编译。这种思路最开始的实现叫<strong>超长指令字（VLIW）</strong>，即这种实现结构中指令特别长，单条指令中有多个操作数，定义了一组相互独立的操作。</p>
+<blockquote>
+<p>为了保证高效，就需要尽可能地让每条流水线都跑满，这个想想就是一个特别复杂的问题。</p>
+</blockquote>
+</li>
+<li><p><strong>动态多发射，又叫超标量（Superscalar）</strong>：扩展了基本的多发射思路，在编译器排好指令顺序之后，处理器按顺序读取指令，然后由处理器来决定能不能同时发射多条指令进去跑，核心是要依靠<strong>动态流水线调度技术</strong>，流水线结构相对前面几节的数据通路来说应该已经完全改变了。程序经编译器优化后得到的代码应该始终是正确的，编好的代码放到不同结构的超标量处理器里面都应该能够得到相同的结果。</p>
+</li>
+</ol>
+<p>超标量流水线的结构已经不同于前面的简单数据通路了，而是分成了 3 个部分，一个<strong>指令发射单元</strong>，多个<strong>功能单元</strong>，一个<strong>提交单元</strong>，<strong>顺序发射指令</strong>，<strong>乱序执行指令</strong>， 最后<strong>顺序提交指令</strong>：<br><img data-src="http://jcf94.com/download/2015-09-09-cod-4.10.1.jpg" title="超标量流水线"></p>
+<p>每个功能单元里面都有个<strong>保留站（Reservation Station）</strong>用于存储当前指令的操作数和操作码，只要功能单元硬件就绪，并且所有操作数就绪，它就可以执行了，当计算已经执行完毕，结果就会被马上转发到其他正在等待的保留站，同时存入提交单元的<strong>重排缓存（Reorder Buffer）</strong>中，经过提交后写入寄存器或者存储进内存等等。</p>
+<ol>
+<li>发射单元按顺序取指令并译码，将操作码、操作数发送给合适的功能单元去执行，存入对应功能单元的保留站，任何在寄存器或者重排缓存中就绪的数据也会直接被拷贝进来。一旦指令被发射出去，数据完成了到保留站的拷贝，则原寄存器的数据锁定也可以解除了，若此时有写寄存器的操作发生，可以直接覆盖，因为正确的内容已经被功能单元保存下来了；</li>
+<li>若保留站中的数据没有准备好，则该单元需要等待至数据就绪（数据完成转发）之后再进行计算。</li>
+</ol>
+<blockquote>
+<p>这个地方的处理思路，就是数据流啊！！！</p>
+</blockquote>
+<p>为了使整个过程看上去像是与顺序流水线一样，取指与提交都要是顺序的：取指和译码单元顺序发射指令，并同时记录程序中的依赖关系。而提交单元也需要按照顺序将结果写回寄存器和存储器。当异常发生时，处理器可以找到最后执行的那一条指令。</p>
+<h2 id="4-11-Real-Stuff-The-ARM-Cortex-A8-and-Intel-Core-i7-Pipelines"><a href="#4-11-Real-Stuff-The-ARM-Cortex-A8-and-Intel-Core-i7-Pipelines" class="headerlink" title="4.11. Real Stuff: The ARM Cortex-A8 and Intel Core i7 Pipelines"></a>4.11. Real Stuff: The ARM Cortex-A8 and Intel Core i7 Pipelines</h2><p>这里简单介绍了 ARM Cortex-A8 和 Intel Core i7 920 这两块现代处理器的流水线结构。</p>
+<table>
+<thead>
+<tr>
+<th>Processor</th>
+<th>ARM A8</th>
+<th>Intel Core i7 920</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TDP( Thermal design power)</td>
+<td>2W</td>
+<td>130W</td>
+</tr>
+<tr>
+<td>Clock rate</td>
+<td>1GHz</td>
+<td>2.66GHz</td>
+</tr>
+<tr>
+<td>Cores/Chip</td>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Floating Point?</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Multiple Issue?</td>
+<td>Dynamic</td>
+<td>Dynamic</td>
+</tr>
+<tr>
+<td>Peak instructions/clock cycle( IPC)</td>
+<td>2</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Pipeline Stages</td>
+<td>14</td>
+<td>14</td>
+</tr>
+<tr>
+<td>Pipeline schedule</td>
+<td>Static In-order</td>
+<td>Dynamic Out-of-order<br>with Speculation</td>
+</tr>
+<tr>
+<td>Branch prediction</td>
+<td>2-level</td>
+<td>2-level</td>
+</tr>
+<tr>
+<td>1st level caches/core</td>
+<td>32KB I, 32 KB D</td>
+<td>32 KB I, 32 KB D</td>
+</tr>
+<tr>
+<td>2nd level caches/core</td>
+<td>128 - 1024 KB</td>
+<td>256 KB</td>
+</tr>
+<tr>
+<td>3rd level cache(shared)</td>
+<td>-</td>
+<td>2 - 8 MB</td>
+</tr>
+</tbody></table>
+<p>ARM A8 的流水线是动态多发射，但是静态顺序运行，其 14 级流水线结构如下：</p>
+<p><img data-src="http://jcf94.com/download/2018-02-06-cod2-a8.png" alt="ARM Cortex-A8 的流水线结构"></p>
+<ol>
+<li>前三级能同时取出 2 条指令，并维护一个 12 条指令的预取缓存。两级分支预测，但是没有在这里做额外的预测判断，所以如果预测错了就要等 13 个时钟周期之后才能知道。</li>
+<li>接下来是把一对（2条指令）进行五级指令译码，这里也负责判断数据依赖等等。</li>
+<li>之后是六级指令运行流水线。</li>
+</ol>
+<p>SPEC2000 测试集跑下来的结果是，CPI 最好的情况 1.4，最差 5.2，跟理想的 0.5 还是有一定差距的。平均情况 80% 的停顿是源于流水线冒险（分支预测错了、结构冒险、数据依赖）。这种流水线结构基本上是要完全依靠编译器的指令重排来解决结构冒险和数据依赖的问题。</p>
+<p>x86 处理器的流水线结构就要复杂多了：</p>
+<p><img data-src="http://jcf94.com/download/2018-02-06-cod2-i7.png" alt="Intel Core i7 920 的流水线结构"></p>
+<p>x86 是一种复杂指令集，一条指令在译码的时候会先转换成一种类 MIPS 结构的指令（微操作，micro-operations）。配合动态多发射，动态调度，乱序执行，分支预测等等，最高可以达到单指令周期 6 个微操作的速度。</p>
+<ol>
+<li>指令读取：多级分支预测、涉及 cache 等等一堆复杂的部分，最终从指令 cache 中得到 16 个字节的指令数据。预测错误需要浪费大约 15 个指令周期。</li>
+<li>指令预译码：16 个字节的指令数据预译码后变成微操作码（micro-op code），放入指令队列。</li>
+<li>微操作译码：由于 x86 指令集的复杂性，这里还分不同的微操作译码器，译码完成后按照原本指令的顺序放入微操作 buffer。</li>
+<li>循环流检测：如果找到了特定条件的一系列循环操作，就能直接发射这些微操作了，而不必再经过指令读取和指令译码（？？？）。</li>
+<li>开始进行基本的指令发射：在寄存器表中查找寄存器位置、寄存器重命名、分配重排缓存入口、从寄存器或者重排缓存中提取结果等等。</li>
+<li>保留站发送操作给功能单元进行执行，6个功能单元最多同时支持6个操作的执行。</li>
+<li>功能单元执行操作，把计算完的结果转发给其他要用的保留站，同时发给寄存器回收单元来更新寄存器。重排缓存中的对应内容标记成完成。</li>
+<li>当重排缓存中的一条或多条指令标记为已完成，则可以执行寄存器更新等等操作了。</li>
+</ol>
+<h2 id="4-12-Going-Faster-Instruction-Level-Parallelism-and-Matrix-Multiply"><a href="#4-12-Going-Faster-Instruction-Level-Parallelism-and-Matrix-Multiply" class="headerlink" title="4.12. Going Faster: Instruction-Level Parallelism and Matrix Multiply"></a>4.12. Going Faster: Instruction-Level Parallelism and Matrix Multiply</h2><p>循环展开加上AVX指令的SIMD，直接把性能提高了 8.8 倍。</p>
+<blockquote>
+<p>6666666666666</p>
+</blockquote>
+<h2 id="4-13-Advanced-Topic-An-Introduction-to-Digital-Design-Using-a-Hardware-Design-Language-to-Describe-and-Model-a-Pipeline-and-More-Pipelining-Illustrations"><a href="#4-13-Advanced-Topic-An-Introduction-to-Digital-Design-Using-a-Hardware-Design-Language-to-Describe-and-Model-a-Pipeline-and-More-Pipelining-Illustrations" class="headerlink" title="4.13. Advanced Topic: An Introduction to Digital Design Using a Hardware Design Language to Describe and Model a Pipeline and More Pipelining Illustrations"></a>4.13. Advanced Topic: An Introduction to Digital Design Using a Hardware Design Language to Describe and Model a Pipeline and More Pipelining Illustrations</h2><p>提升主题：介绍如何使用一种硬件设计语言来描述和模拟流水线</p>
+<p><a href="http://booksite.elsevier.com/9780124077263/downloads/advance_contents_and_appendices/section_4.13.pdf" target="_blank" rel="noopener">PDF材料</a></p>
+<h2 id="4-14-Fallacies-and-Pitfalls"><a href="#4-14-Fallacies-and-Pitfalls" class="headerlink" title="4.14. Fallacies and Pitfalls"></a>4.14. Fallacies and Pitfalls</h2><p>谬误：流水线很简单</p>
+<blockquote>
+<p>呵呵。。。动态多发射乱序执行的这个想想就可怕，看了 i7 的流水线结构就知道这玩意有多复杂了。</p>
+</blockquote>
+<p>谬误：流水线思想可以与工艺无关</p>
+<p>陷阱：没有考虑到指令集的设计会反过来影响流水线</p>
+<h2 id="4-15-CondudingRemarks"><a href="#4-15-CondudingRemarks" class="headerlink" title="4.15. CondudingRemarks"></a>4.15. CondudingRemarks</h2><h2 id="4-16-Historical-Perspective-and-Further-Reading"><a href="#4-16-Historical-Perspective-and-Further-Reading" class="headerlink" title="4.16. Historical Perspective and Further Reading"></a>4.16. Historical Perspective and Further Reading</h2><p><a href="http://booksite.elsevier.com/9780124077263/downloads/historial%20perspectives/section_4.16.pdf" target="_blank" rel="noopener">PDF材料</a></p>
+<h2 id="4-17-Exercises"><a href="#4-17-Exercises" class="headerlink" title="4.17. Exercises"></a>4.17. Exercises</h2><p><a href="http://jcf94.com/download/2015-09-09-cod-CH04_Solution.pdf">答案</a></p>
+<hr>
+<h1 id="CHAPTER-5-Large-and-Fast-Exploiting-Memory-Hierarchy"><a href="#CHAPTER-5-Large-and-Fast-Exploiting-Memory-Hierarchy" class="headerlink" title="CHAPTER 5. Large and Fast: Exploiting Memory Hierarchy"></a>CHAPTER 5. Large and Fast: Exploiting Memory Hierarchy</h1><p>这章的内容主要是存储器结构层次，大部分篇幅在 cache 上。</p>
+<h2 id="5-1-Introduction"><a href="#5-1-Introduction" class="headerlink" title="5.1. Introduction"></a>5.1. Introduction</h2><img data-src="http://jcf94.com/download/2015-09-09-cod-5.1.1.jpg" title="存储器层次结构">
+
+<p>越靠近CPU，速度越快，容量越小，价格越高。</p>
+<p>越远离CPU，速度越慢，容量越大，价格越低。</p>
+<h2 id="5-2-Memory-Technologies"><a href="#5-2-Memory-Technologies" class="headerlink" title="5.2. Memory Technologies"></a>5.2. Memory Technologies</h2><p>一般常见的几种存储器技术：</p>
+<p>|存储器技术|典型访问时间|价格/GB|特点|<br>|-|-|<br>|SRAM半导体存储器|0.5<del>2.5 ns|$500</del>1000|数据用晶体管存储，可直接读取数据|<br>|DRAM半导体存储器|50<del>70 ns|$10</del>20|数据用电容存储，会不断漏电，需要定期刷新（充电）|<br>|FLASH半导体存储器|5,000<del>50,000 ns|$0.75</del>1.00|EEPROM，电擦除可编程存储器，有读写次数上限|<br>|磁性硬盘|5,000,000<del>20,000,000 ns|$0.05</del>0.10|用磁盘、磁头等进行磁性存储和读写|</p>
+<h2 id="5-3-The-Basics-of-Caches"><a href="#5-3-The-Basics-of-Caches" class="headerlink" title="5.3. The Basics of Caches"></a>5.3. The Basics of Caches</h2><p>Cache是CPU直接用来进行读取的存储器，在第四章的数据通路部分没有指明的是，指令和数据都必须要到了Cache中才能够被CPU访问。</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-5.3.1.jpg" title="数据在Cache中的存放">
+
+<ol>
+<li>整个Cache区域分成多个条目，每个条目的存储结构由3部分组成：本条是否有效、条目标签以及数据块内容</li>
+<li>低位地址作为Cache索引条目的索引地址，高位地址作为一条Cache内容的标签号，用Valid标识该条目是否有效，最后将连续的多个字节内容存入Cache数据块中</li>
+<li>查找内容时，首先根据地位地址找到索引条目，对比该条的标签与高位地址一致并且条目为有效则访问命中，可以直接读取数据块内容给CPU；若没有命中，则要将数据请求下放一级，并从下一级获取数据到该级，然后返回数据给CPU，在取数据到Cache的过程中，CPU需要等待数据到位</li>
+</ol>
+<p>若缓存Cache块中同时存放了多个字的数据，则可以进一步加一个多路选择器来解决：</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-5.3.2.jpg" title="FastMATH处理器中的Cache结构">
+
+<p>正如上面所介绍的，读取数据时CPU首先从Cache中找数据，若未命中，则要多花时间先从下一级提取内容至Cache中，这里就造成了Cache延时；<br>而写入数据时，也会发生冲突：需要考虑用<strong>写直达法</strong>，同时更新Cache与下一级存储器中的内容，或者<strong>写回法</strong>，先写到Cache，当该块Cache需要被替换时再写回存储器。</p>
+<h2 id="5-4-Measuring-and-Improving-Cache-Performance"><a href="#5-4-Measuring-and-Improving-Cache-Performance" class="headerlink" title="5.4. Measuring and Improving Cache Performance"></a>5.4. Measuring and Improving Cache Performance</h2><ul>
+<li>首先是评估Cache的性能</li>
+</ul>
+<p>第一章中的CPU时间可以作进一步的划分：</p>
+<p>$$CPU时间=(CPU执行时钟周期数+存储器阻塞时钟周期数)*时钟周期时间$$</p>
+<p>阻塞时间：</p>
+<p>$$存储器阻塞时钟周期数=读取阻塞周期数+写入阻塞周期数$$</p>
+<p>$$读取阻塞周期数=\frac{读取次数}{程序数}*读取缺失率*读取缺失延时$$</p>
+<p>$$写入阻塞周期数=\frac{写入次数}{程序数}*写入缺失率*写入缺失延时+写缓冲区延时$$</p>
+<p>将写入与读取统一为存储器操作，则：</p>
+<p>$$\begin{align}存储器阻塞时钟周期数&amp;=\frac{存储器操作数}{程序数}*缺失率*缺失延时\&amp;=\frac{指令数}{程序数}*\frac{缺失数}{指令}*缺失延时\end{align}$$</p>
+<p>Cache的缺失和阻塞是不可能避免的，而经过简单的计算分析，可以发现Cache的阻塞延时对整体运行时间的影响甚至<strong>超过了CPI</strong>对运行时间的影响！即如果只是单纯地提高CPU的速度，而存储器的速度没有跟上的话，整体性能的流失会更加严重。</p>
+<p>另外一个比较重要的因素与Cache的大小有关：一味地加大Cache的大小也是没有用的，Cache越大则访问Cache本身的时间将会延长。</p>
+<hr>
+<p>资料：</p>
+<ul>
+<li><a href="https://zhuanlan.zhihu.com/p/32058808" target="_blank" rel="noopener">Cache为什么有那么多级？为什么一级比一级大？是不是Cache越大越好？</a></li>
+</ul>
+<hr>
+<p>将访问Cache的时间和Cache命中情况综合考虑，得出一个平均存储器访问时间（Average Memory Access Time）：</p>
+<p>$$AMAT=命中时间（访问Cache的时间）+缺失率*缺失延时$$</p>
+<ul>
+<li>通过更灵活地调整Cache的结构，改变关联度来减少缺失率</li>
+</ul>
+<p>5.3节中介绍的Cache结构是<strong>直接匹配</strong>的方式，虽然存放和查找非常方便，但是存在的问题是出现多个具有相同Cache索引的地址的反复调用时，就需要反复覆盖同一条索引记录，而每一次的访问都会是Cache缺失的</p>
+<p><strong>全相联</strong>方式：任意的地址都能任意存在Cache的任意一条索引上…这个，每次查找的时候就需要把整个Cache遍历一遍…想想都慢，虽然多加几个判断硬件可以做成并行的，但是成本也加大了。适用于Cache很小的时候。</p>
+<p>折中的办法是<strong>组相联</strong>方式：首先还是按照直接匹配的方式计算索引号，然后就是一条索引号对应一个集合中的几个数据块，这样可以同时存放索引相同的几个不同地址的记录。</p>
+<p>然而整个Cache的物理大小是固定的，增加组数，就是减少了索引数。需要在缺失率和命中时间之间平衡考虑。</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-5.4.1.jpg" title="一个8-Block大小的Cache的几种结构">
+
+<p>在组联合结构中，为了使一条索引中的每块数据同时判断（并行判断），增加一些比较器即可：</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-5.4.2.jpg" title="组联合Cache的实现方式">
+
+<ul>
+<li>多级Cache</li>
+</ul>
+<p>由于物理条件的局限性以及高时钟频率的要求，一级Cache的容量是有限的。为了进一步减少缺失率，采用多级Cache结构。</p>
+<p>二级Cache通常是一级Cache的10倍以上。当一级Cache缺失时，首先会到二级Cache中找，二级Cache的访问速度肯定是要比直接访问到更下层的主存储器更快的。</p>
+<p>与上面的关联度相同，二级Cache太大则访问的时间也会变长，多级Cache也需要根据实际情况权衡考虑。</p>
+<ul>
+<li>软件优化</li>
+</ul>
+<p>在代码上，如果同一块操作（比如多个嵌套循环）需要用到的数据能够用Cache一次性存下来，那么就能保证在操作过程中的Cache访问都能够命中。</p>
+<p>反之，如果需要重复访问的数据太多，那么访问到后面的数据时就会覆盖掉前面的，然后再嵌套回到前面的操作又覆盖掉了后面的数据，增加了很多不必要的Cache缺失</p>
+<h2 id="5-5-Dependable-Memory-Hierarchy"><a href="#5-5-Dependable-Memory-Hierarchy" class="headerlink" title="5.5. Dependable Memory Hierarchy"></a>5.5. Dependable Memory Hierarchy</h2><p>先来定义一些概念：</p>
+<ul>
+<li>故障：机器从正常的运行状态中被中断，跳到对应的故障解决服务中。若不能从故障中恢复就是永久性故障，故障还可能是间歇性的。</li>
+<li>可靠性：估量机器从某一点开始能够持续正常服务的时长。</li>
+<li>平均故障时间（Mean Time To Failure）：平均持续正常工作不发生故障的时长。</li>
+<li>年故障率（Annual Failure Rate）：给定MTTF之后，一年中发生故障的时间比率。</li>
+<li>平均修复时间（Mean Time To Repair）：一旦发生故障之后，从故障中恢复平均需要花费的时间。</li>
+<li>平均故障间时间（Mean Time Between Failure）：MTTF和MTTR的总和</li>
+<li>有效性：用于估量机器在整个故障及恢复过程中正常工作市场的比率。</li>
+</ul>
+<p>$$有效性=\frac{MTTF}{MTBF}=\frac{MTTF}{MTTF+MTTR}$$</p>
+<blockquote>
+<p>可见要想提高有效性，就需要减小MTTR或者增加MTTF。</p>
+</blockquote>
+<p>为了提高MTTF的三种方案：</p>
+<ol>
+<li>从设计上避免故障发生；</li>
+<li>依靠冗余备份，使得即使故障发生了也能够正常运行；</li>
+<li>提前预测可能发生故障的情况，并提前修正错误。</li>
+</ol>
+<h2 id="5-6-Virtual-Machines"><a href="#5-6-Virtual-Machines" class="headerlink" title="5.6. Virtual Machines"></a>5.6. Virtual Machines</h2><p>虚拟机的概念在近期重新兴起，主要是源于：</p>
+<ol>
+<li>现代系统中的隔离和安全性变得越来越重要</li>
+<li>标准操作系统中存在安全性和可靠性方面的故障</li>
+<li>计算机的共享，尤其是<strong>云计算</strong>近几年的发展</li>
+<li>处理器的原始速度在近期得到了非常迅猛的提升，因此虚拟机的开销变得更加可接受了</li>
+</ol>
+<hr>
+<p>这一节虽然短，但是留下来的疑问比较多，回头要重新花时间看下。</p>
+<p>比如<code>I/O-intensive</code>、<code>I/O-bound</code>，似乎后者表示I/O密集，但是前一个单词的intensive本身就是密集的意思，可是这两个词还应该是不一样的。。。</p>
+<h2 id="5-7-Virtual-Memory"><a href="#5-7-Virtual-Memory" class="headerlink" title="5.7. Virtual Memory"></a>5.7. Virtual Memory</h2><p>另开了一篇单独记录：</p>
+<p>学习笔记：<a href="/2015/10/23/2015-10-23-virtualmemory/">硬件/软件接口 Virtual Memory</a></p>
+<hr>
+<h2 id="5-8-A-Common-Framework-for-Memory-Hierarchy"><a href="#5-8-A-Common-Framework-for-Memory-Hierarchy" class="headerlink" title="5.8. A Common Framework for Memory Hierarchy"></a>5.8. A Common Framework for Memory Hierarchy</h2><p>这一部分算是对前面内容的一次总结。</p>
+<p>|机制名称|组数|每组的数据块数|定位方法|需要比较的次数|<br>|-|-|<br>|直接映射|Cache中的块数|1（关联度最小）|索引|1|<br>|组相联|Cache中的块数/关联度|关联度（一般为2~16）|按组索引，组中分别查找|关联度|<br>|全相联|1|Cache中的块数（关联度最大）|遍历|Cache中的块数|<br>|全相联|1|Cache中的块数（关联度最大）|独立的查找表|0|</p>
+<p>随着关联度的增加，缺失率下降，但是访问时间与设备的代价增加。</p>
+<p>全相联的情况下，若采用遍历的方式查找条目，则耗时很久；若采用单独的查找表，则设备上花费很大。</p>
+<hr>
+<p>可以采用3C模型来评价Cache的整体表现。</p>
+<h2 id="5-9-Using-a-Finite-State-Machine-to-Control-a-Simple-Cache"><a href="#5-9-Using-a-Finite-State-Machine-to-Control-a-Simple-Cache" class="headerlink" title="5.9. Using a Finite-State Machine to Control a Simple Cache"></a>5.9. Using a Finite-State Machine to Control a Simple Cache</h2><p>使用有限状态机来控制一个简单的Cache</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-5.9.1.jpg" title="有限状态机">
+
+<p>附录D：<a href="http://booksite.elsevier.com/9780124077263/downloads/advance_contents_and_appendices/appendix_D.pdf" target="_blank" rel="noopener">PDF材料</a></p>
+<h2 id="5-10-Parallelism-and-Memory-Hierarchies-Cache-Coherence"><a href="#5-10-Parallelism-and-Memory-Hierarchies-Cache-Coherence" class="headerlink" title="5.10. Parallelism and Memory Hierarchies: Cache Coherence"></a>5.10. Parallelism and Memory Hierarchies: Cache Coherence</h2><p>多处理器的Cache中还可能存在一些问题，也是并行一定会出现的问题，即：相同数据的冲突问题。</p>
+<p>这里提到的与一般的并行冲突处理思路没什么不同。</p>
+<h2 id="5-11-Parallelism-and-Memory-Hierarchy-Redundant-Arrays-of-Inexpensive-Disks"><a href="#5-11-Parallelism-and-Memory-Hierarchy-Redundant-Arrays-of-Inexpensive-Disks" class="headerlink" title="5.11. Parallelism and Memory Hierarchy: Redundant Arrays of Inexpensive Disks"></a>5.11. Parallelism and Memory Hierarchy: Redundant Arrays of Inexpensive Disks</h2><p><a href="http://booksite.elsevier.com/9780124077263/downloads/advance_contents_and_appendices/section_5.11.pdf" target="_blank" rel="noopener">PDF材料</a></p>
+<h2 id="5-12-Advanced-Material-Implementing-Cache-Controllers"><a href="#5-12-Advanced-Material-Implementing-Cache-Controllers" class="headerlink" title="5.12. Advanced Material: Implementing Cache Controllers"></a>5.12. Advanced Material: Implementing Cache Controllers</h2><p><a href="http://booksite.elsevier.com/9780124077263/downloads/advance_contents_and_appendices/section_5.12.pdf" target="_blank" rel="noopener">PDF材料</a></p>
+<h2 id="5-13-Real-Stuff-The-ARM-Cortex-A8-and-Intel-Core-i7-Memory-Hierarchies"><a href="#5-13-Real-Stuff-The-ARM-Cortex-A8-and-Intel-Core-i7-Memory-Hierarchies" class="headerlink" title="5.13. Real Stuff: The ARM Cortex-A8 and Intel Core i7 Memory Hierarchies"></a>5.13. Real Stuff: The ARM Cortex-A8 and Intel Core i7 Memory Hierarchies</h2><p>这里是简单介绍了 A8 和 i7 里面的 cache 结构。</p>
+<p>具体内容也没什么特别的，就是 i7 的 TLB 都有 2 级……666……以前还真没想过。</p>
+<h2 id="5-14-Going-Faster-Cache-Blocking-and-Matrix-Multiply"><a href="#5-14-Going-Faster-Cache-Blocking-and-Matrix-Multiply" class="headerlink" title="5.14. Going Faster: Cache Blocking and Matrix Multiply"></a>5.14. Going Faster: Cache Blocking and Matrix Multiply</h2><h2 id="5-15-Fallacies-and-Pitfalls"><a href="#5-15-Fallacies-and-Pitfalls" class="headerlink" title="5.15. Fallacies and Pitfalls"></a>5.15. Fallacies and Pitfalls</h2><p>陷阱：写程序或者在一个编译器中生成代码时，忽略了存储器系统的行为。</p>
+<p>陷阱：在模拟Cache时，忘记说明字节编址或者Cache块的大小。</p>
+<p>陷阱：对于共享Cache，组相联度少于核心的数量或者共享该Cache的线程数。</p>
+<p>陷阱：用存储器平均访问时间来评估乱序处理器的存储器层次结构。</p>
+<p>陷阱：在未分配地址空间的顶部增加段来扩充地址空间。</p>
+<p>谬误：域内磁盘错误率与他们的额定值相匹配。</p>
+<p>谬误：操作系统是规划磁盘访问的最好的地方。</p>
+<p>陷阱：在不为虚拟化设计的指令集系统结构上实现虚拟机监视器。</p>
+<h2 id="5-16-Goncluding-Remarks"><a href="#5-16-Goncluding-Remarks" class="headerlink" title="5.16. Goncluding Remarks"></a>5.16. Goncluding Remarks</h2><h2 id="5-17-Historical-Perspective-and-Further-Reading"><a href="#5-17-Historical-Perspective-and-Further-Reading" class="headerlink" title="5.17. Historical Perspective and Further Reading"></a>5.17. Historical Perspective and Further Reading</h2><p><a href="http://booksite.elsevier.com/9780124077263/downloads/historial%20perspectives/section_5.17.pdf" target="_blank" rel="noopener">PDF材料</a></p>
+<h2 id="5-18-Exercises"><a href="#5-18-Exercises" class="headerlink" title="5.18. Exercises"></a>5.18. Exercises</h2><p><a href="http://jcf94.com/download/2015-09-09-cod-CH05_Solution.pdf">答案</a></p>
+<hr>
+<p>下一部分：</p>
+<ul>
+<li><a href="/2018/02/12/2018-02-12-cod3/">计算机组成与设计.硬件/软件接口 学习笔记（三）</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/09/09/2015-09-09-cod/" rel="bookmark">计算机组成与设计.硬件/软件接口 学习笔记（一）</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/10/23/2015-10-23-virtualmemory/" rel="bookmark">硬件/软件接口 Virtual Memory</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/02/12/2018-02-12-cod3/" rel="bookmark">计算机组成与设计.硬件/软件接口 学习笔记（三）</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/08/16/2015-08-16-compilers/" rel="bookmark">编译原理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/11/03/2015-11-03-mpi/" rel="bookmark">并行编程 MPI初探</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 学习笔记</a>
+              <a href="/tags/%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/" rel="tag"># 体系结构</a>
+              <a href="/tags/%E7%BB%84%E6%88%90%E4%B8%8E%E8%AE%BE%E8%AE%A1-%E7%A1%AC%E8%BD%AF%E4%BB%B6%E6%8E%A5%E5%8F%A3/" rel="tag"># 组成与设计.硬软件接口</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/01/23/2018-01-23-tfunpacking2/" rel="prev" title="TensorFlow 拆包（二）：TF 的数据流模型实现以及自动求导">
+      <i class="fa fa-chevron-left"></i> TensorFlow 拆包（二）：TF 的数据流模型实现以及自动求导
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/02/12/2018-02-12-cod3/" rel="next" title="计算机组成与设计.硬件/软件接口 学习笔记（三）">
+      计算机组成与设计.硬件/软件接口 学习笔记（三） <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#CHAPTER-4-The-Processor"><span class="nav-text">CHAPTER 4. The Processor</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-Instruction"><span class="nav-text">4.1. Instruction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-Logic-Design-Conventions"><span class="nav-text">4.2. Logic Design Conventions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-Building-a-Datapath"><span class="nav-text">4.3. Building a Datapath</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-4-A-Simple-Implementation-Scheme"><span class="nav-text">4.4. A Simple Implementation Scheme</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-5-An-Overview-of-Pipelining"><span class="nav-text">4.5. An Overview of Pipelining</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-6-Pipelined-Datapath-and-Control"><span class="nav-text">4.6. Pipelined Datapath and Control</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-7-Data-Hazards-Forwarding-versus-Stalling"><span class="nav-text">4.7. Data Hazards: Forwarding versus Stalling</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-8-Control-Hazards"><span class="nav-text">4.8. Control Hazards</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-9-Exceptions"><span class="nav-text">4.9. Exceptions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-10-Parallelism-via-Instructions"><span class="nav-text">4.10. Parallelism via Instructions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-11-Real-Stuff-The-ARM-Cortex-A8-and-Intel-Core-i7-Pipelines"><span class="nav-text">4.11. Real Stuff: The ARM Cortex-A8 and Intel Core i7 Pipelines</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-12-Going-Faster-Instruction-Level-Parallelism-and-Matrix-Multiply"><span class="nav-text">4.12. Going Faster: Instruction-Level Parallelism and Matrix Multiply</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-13-Advanced-Topic-An-Introduction-to-Digital-Design-Using-a-Hardware-Design-Language-to-Describe-and-Model-a-Pipeline-and-More-Pipelining-Illustrations"><span class="nav-text">4.13. Advanced Topic: An Introduction to Digital Design Using a Hardware Design Language to Describe and Model a Pipeline and More Pipelining Illustrations</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-14-Fallacies-and-Pitfalls"><span class="nav-text">4.14. Fallacies and Pitfalls</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-15-CondudingRemarks"><span class="nav-text">4.15. CondudingRemarks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-16-Historical-Perspective-and-Further-Reading"><span class="nav-text">4.16. Historical Perspective and Further Reading</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-17-Exercises"><span class="nav-text">4.17. Exercises</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CHAPTER-5-Large-and-Fast-Exploiting-Memory-Hierarchy"><span class="nav-text">CHAPTER 5. Large and Fast: Exploiting Memory Hierarchy</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-Introduction"><span class="nav-text">5.1. Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-Memory-Technologies"><span class="nav-text">5.2. Memory Technologies</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-3-The-Basics-of-Caches"><span class="nav-text">5.3. The Basics of Caches</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-4-Measuring-and-Improving-Cache-Performance"><span class="nav-text">5.4. Measuring and Improving Cache Performance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-5-Dependable-Memory-Hierarchy"><span class="nav-text">5.5. Dependable Memory Hierarchy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-6-Virtual-Machines"><span class="nav-text">5.6. Virtual Machines</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-7-Virtual-Memory"><span class="nav-text">5.7. Virtual Memory</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-8-A-Common-Framework-for-Memory-Hierarchy"><span class="nav-text">5.8. A Common Framework for Memory Hierarchy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-9-Using-a-Finite-State-Machine-to-Control-a-Simple-Cache"><span class="nav-text">5.9. Using a Finite-State Machine to Control a Simple Cache</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-10-Parallelism-and-Memory-Hierarchies-Cache-Coherence"><span class="nav-text">5.10. Parallelism and Memory Hierarchies: Cache Coherence</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-11-Parallelism-and-Memory-Hierarchy-Redundant-Arrays-of-Inexpensive-Disks"><span class="nav-text">5.11. Parallelism and Memory Hierarchy: Redundant Arrays of Inexpensive Disks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-12-Advanced-Material-Implementing-Cache-Controllers"><span class="nav-text">5.12. Advanced Material: Implementing Cache Controllers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-13-Real-Stuff-The-ARM-Cortex-A8-and-Intel-Core-i7-Memory-Hierarchies"><span class="nav-text">5.13. Real Stuff: The ARM Cortex-A8 and Intel Core i7 Memory Hierarchies</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-14-Going-Faster-Cache-Blocking-and-Matrix-Multiply"><span class="nav-text">5.14. Going Faster: Cache Blocking and Matrix Multiply</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-15-Fallacies-and-Pitfalls"><span class="nav-text">5.15. Fallacies and Pitfalls</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-16-Goncluding-Remarks"><span class="nav-text">5.16. Goncluding Remarks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-17-Historical-Perspective-and-Further-Reading"><span class="nav-text">5.17. Historical Perspective and Further Reading</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-18-Exercises"><span class="nav-text">5.18. Exercises</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'd4ef134f11fccad8ddce892cabe6b5a4',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

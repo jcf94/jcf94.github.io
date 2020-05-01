@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="“你最喜欢的Linux发行版是什么？不要跟我说是Ubuntu。”  “额…用过的不多，就是Ubuntu了。”  然后就被安利成功了……">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Arch Linux over Yoga 3 11">
+<meta property="og:url" content="https://jcf94.com/2016/04/10/2016-04-10-arch/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="“你最喜欢的Linux发行版是什么？不要跟我说是Ubuntu。”  “额…用过的不多，就是Ubuntu了。”  然后就被安利成功了……">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2016-04-10-arch-logo.png">
+<meta property="article:published_time" content="2016-04-10T05:58:15.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Arch">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2016-04-10-arch-logo.png">
+
+<link rel="canonical" href="https://jcf94.com/2016/04/10/2016-04-10-arch/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Arch Linux over Yoga 3 11 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2016/04/10/2016-04-10-arch/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Arch Linux over Yoga 3 11
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-04-10 13:58:15" itemprop="dateCreated datePublished" datetime="2016-04-10T13:58:15+08:00">2016-04-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <img data-src="http://jcf94.com/download/2016-04-10-arch-logo.png" class="full-image"/>
+
+<ul>
+<li><p>“你最喜欢的Linux发行版是什么？不要跟我说是Ubuntu。”</p>
+</li>
+<li><p>“额…用过的不多，就是Ubuntu了。”</p>
+</li>
+<li><p>然后就被安利成功了……</p>
+</li>
+</ul>
+<a id="more"></a>
+
+<hr>
+<h1 id="简单介绍一下"><a href="#简单介绍一下" class="headerlink" title="简单介绍一下"></a>简单介绍一下</h1><p>Arch是一个相当简单和轻量级的发行版，官方主打的目标也就是想要把它保持得简单点。</p>
+<p>但是Arch中的软件库管理却做得非常出色，秒杀apt-get和yum等等好大一截，以至于成功被安利并且使用了一段时间之后，真心不想再切回其他的了。</p>
+<p>Arch除了官方的软件库之外，还提供了很多社区维护的软件甚至还有很多用户提供的安装脚本。比如很多本身还在Github上面处于开发阶段的软件，只要Arch的库中有人给它写过安装脚本，都能通过Arch的软件库命令一键安装，中间缺少的各种依赖都会自动补全。堪称神器。</p>
+<p>Arch给我的感觉相当极客，它的发行版采用滚动更新的方式，不像其他发行版会有版本号什么之类的，而且始终保持里面的软件是最新的。（CentOS默认的gcc版本一直在4.5以下没变过好像，其他的发行版也有类似的情况，都是保证某个版本稳定适用。Oh，装完Arch，下完gcc，习惯性地看一下“–version”，返回来个5.3吓我一跳。）</p>
+<p>然后就是系统特别干净，除了Linux最基础的东西以外，其他的几乎什么都没有加进去，由用户根据自己的需求来定制。</p>
+<hr>
+<h1 id="安装过程"><a href="#安装过程" class="headerlink" title="安装过程"></a>安装过程</h1><p>在虚拟机上测试了一下之后，果断在Yoga上装上了Arch。</p>
+<p>记录这个是方便以后自己再装的时候可以不用再去网上找别的教程。</p>
+<hr>
+<p>在空U盘上刻好Arch的镜像，在Yoga的BIOS里面关掉SecurityBoot，然后就可以引导进安装盘了。</p>
+<p>相对Ubuntu这些发行版来说，Arch的精简和轻量级简直令人发指。它安装的时候只给了一个root登录的shell，然后需要通过命令来完成整个安装过程。</p>
+<p>shell登录之后目录下只有一个install.md的文件，其中记录了安装流程，可供安装过程中阅读使用，这些内容跟Arch官网Wiki中的Installation Guide是一样的。额，然而我觉得还是另外开个电脑上看Installation Guide比较好，上面有其他详细内容的页面链接。</p>
+<p>按照教程上的提示安装过程大致是以下几个部分：</p>
+<blockquote>
+<p>1 Pre-installation<br>1.1 Set the keyboard layout<br>1.2 Connect to the Internet<br>1.3 Update the system clock<br>1.4 Partition the disks<br>1.5 Format the partitions<br>1.6 Mount the partitions</p>
+<p>2 Installation<br>2.1 Select the mirrors<br>2.2 Install the base packages<br>2.3 Configure the system<br>2.4 Install a boot loader<br>2.5 Reboot</p>
+<p>3 Post-installation</p>
+</blockquote>
+<h2 id="Pre-installation"><a href="#Pre-installation" class="headerlink" title="Pre-installation"></a>Pre-installation</h2><p>这部分主要是安装前的准备工作，比如检查硬盘情况，设置网络等等。</p>
+<p>键盘和时间设置可以跳过，到后面安装的过程中会另外设置。</p>
+<p>首先要<strong>检查网络</strong>，Arch的安装对网络的要求非常高，因为需要在安装过程中直接下载/更新一些软件，如果网络不太好，那…</p>
+<blockquote class="blockquote-center">
+还是不要装了吧。。。
+</blockquote>
+
+<p>最简单的情况是连在路由器上的有线网，最好是不需要什么特殊的登录等等的要求，直接插上网线就能用的情况。</p>
+<blockquote>
+<p>以下介绍的部分都是建立在网卡能直接被安装shell驱动的情况，如果驱不起来…那就over了，查查wiki怎么解决吧</p>
+</blockquote>
+<p>在shell中调用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ip link</span><br></pre></td></tr></table></figure>
+
+<p>可以查看当前的网络硬件情况，比如网口在里面显示的是eth0，那么：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ip link <span class="built_in">set</span> eth0 up</span><br></pre></td></tr></table></figure>
+
+<p>应该就能启动了，然后</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ dhcpcd</span><br></pre></td></tr></table></figure>
+
+<p>自动获取完地址之后应该就能ping通外网了。</p>
+<hr>
+<p>Yoga上面没有自带网口，我也没有USB网卡可以用，幸好Arch的安装shell中也包含了无线网的连接工具。</p>
+<p>首先使用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ wifi-menu -o</span><br></pre></td></tr></table></figure>
+
+<p>这个工具会扫描区域内的无线网信息，设置好连接的SSID和密码等信息之后生成连接网络用的配置文件。使用时会弹出一个对话框界面，非常方便。</p>
+<p>生成的配置文件会被写在/etc/netctl/目录下，以网卡编号命名的一个文件中。把这个文件复制一份或者直接改名成wireless-wpa。</p>
+<p>之后，运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ netctl start wireless-wpa</span><br></pre></td></tr></table></figure>
+
+<p>就能连接之前设置好的无线网了。</p>
+<hr>
+<p>之后是对硬盘的检查和分区。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ fdisk -l</span><br></pre></td></tr></table></figure>
+
+<p>可以显示当前硬盘上各个分区的情况，然后根据需要把分区格式化成ext4格式，主要用到的几个指令是：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ cfdisk            磁盘分区</span><br><span class="line"></span><br><span class="line">$ mkfs.ext4 xxxx    把分区格式化成ext4格式，后面跟上分区表，一般是/dev/sda1、/dev/sda2这些</span><br><span class="line"></span><br><span class="line">$ mkswap xxxx       把分区格式化成交换分区，后面跟上分区表</span><br><span class="line"></span><br><span class="line">$ swapon xxxx       启用交换分区，后面跟上分区表</span><br></pre></td></tr></table></figure>
+
+<p>分区结束之后，开始挂载各个分区到系统中：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mount xxxx yyyy   把硬盘上的xxxx挂载到yyyy目录下</span><br></pre></td></tr></table></figure>
+
+<p>首先挂载”/“目录，然后在目录下创建其他目录，并继续挂载其他的部分，比如我的Yoga下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ mount /dev/sda8 /mnt</span><br><span class="line">$ <span class="built_in">cd</span> /mnt</span><br><span class="line">$ mkdir home</span><br><span class="line">$ mount /dev/sda7 /mnt/home</span><br></pre></td></tr></table></figure>
+
+<p>然后开始正式安装的过程。</p>
+<h2 id="Installation"><a href="#Installation" class="headerlink" title="Installation"></a>Installation</h2><p>为了后面能够更快地安装，在正式安装的时候可以修改一下/etc/pacman.d/mirrorlist文件中记录的安装源地址，删掉国外的，留一个速度最快的国内源就好…比如科大源。</p>
+<p>然后输入：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pacstrap /mnt base</span><br></pre></td></tr></table></figure>
+
+<p>命令，开始安装基础的Linux。命令执行结束之后可以看到/mnt目录下面已经出现了常见的Linux根目录结构了。</p>
+<p>调用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ genfstab -p /mnt &gt;&gt; /mnt/etc/fstab</span><br></pre></td></tr></table></figure>
+
+<p>生成分区的挂载表。</p>
+<p>至此，在安装shell上的工作全部完成，并且已经安装到硬盘上的Linux系统也已经初具雏形了，调用以下指令将根目录切换到硬盘上去，之后所有的工作都是在已经安装好的新Linux系统中完成：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ arch-chroot /mnt /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>最后的bash也可以不加，这样切换过去之后默认用的是sh作为shell。</p>
+<p>设置计算机的名字：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">echo</span> Yoga-arch &gt; /etc/hostname</span><br></pre></td></tr></table></figure>
+
+<p>设置时区：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime</span><br></pre></td></tr></table></figure>
+
+<p>用vi打开/etc/locale.gen文件，把需要用到的语言从里面注释掉，一般常用的是en_US和zh_CN，选择UTF-8的就行。</p>
+<p>然后调用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ locale-gen</span><br></pre></td></tr></table></figure>
+
+<p>生成语言信息。</p>
+<p>还要在配置文件中加一下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">echo</span> LANG=your_locale &gt; /etc/locale.conf</span><br></pre></td></tr></table></figure>
+
+<p>这些全部设置好之后就可以开始最后的系统安装了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mkinitcpio -p linux</span><br></pre></td></tr></table></figure>
+
+<p>至此，然后可以改一下root的密码，至此，Arch linux系统安装结束。</p>
+<hr>
+<p>然而，系统虽然是装好了，引导还没添加。之后可以选择自己常用的引导工具来引导Arch。</p>
+<p>当然这些在Arch里面是没有的，需要自己安装：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pacman -S grub efibootmgr os-prober</span><br></pre></td></tr></table></figure>
+
+<p>grub是linux下最常用的引导软件，efibootmgr用于efi模式的支持，os-prober用于处理多系统的引导。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /boot</span><br><span class="line">$ mkdir efi</span><br><span class="line">$ mount /dev/sda2 /boot/efi</span><br><span class="line">$</span><br><span class="line">$ grub-mkconfig -o /boot/grub/grub.cfg</span><br><span class="line">$ grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=grub</span><br></pre></td></tr></table></figure>
+
+<p>首先将efi分区挂载到系统中，然后使用grub-mkconfig将整个硬盘上的系统信息写入配置文件，然后使用grub-install安装引导。</p>
+<p>重启即可引导进入Arch！！！</p>
+<blockquote class="blockquote-center">
+！！！
+然而这时候得等一下
+！！！
+要是什么都不注意直接重启可能就会悲剧
+</blockquote>
+
+<p>前面说过新装好的Arch里面什么都没有，可能连网络连接的工具都是不完整的，这个时候最好检查一下网络管理软件netctl等等是不是已经装上了，否则重启之后可能没有办法连上网。</p>
+<hr>
+<h2 id="Post-installation"><a href="#Post-installation" class="headerlink" title="Post-installation"></a>Post-installation</h2><p>装好Arch之后就是各种驱动，图形界面等等的安装了，记录一下通常需要做的事情：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ pacman -S alsa-utils      <span class="comment"># 声卡驱动</span></span><br><span class="line">$ pacman -S xorg xorg-xinit <span class="comment"># X图形环境</span></span><br><span class="line">$ pacman -S gdm gnome       <span class="comment"># gnome图形界面以及gdm启动器</span></span><br><span class="line">$ systemctl <span class="built_in">enable</span> gdm      <span class="comment"># 设置gdm开机启动</span></span><br></pre></td></tr></table></figure>
+
+<p>然后重启一遍，进入系统就OK了。</p>
+<h1 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h1><p>Yoga对Arch的支持还算可以，基本的设备都是能够驱动起来的，几个Fn键也都是正常的，目前还没有解决的问题是触摸屏不支持多点触控，触控板也不太好用，总体上还是比较满意的。</p>
+<p>记录一下Arch下常装的几个工具：</p>
+<h2 id="yaourt"><a href="#yaourt" class="headerlink" title="yaourt"></a>yaourt</h2><p>Arch默认的软件库管理工具是pacman，yaourt是在pacman的基础上做的一个辅助工具，安装完之后语法与原始的pacman相同，但是功能更为强大。</p>
+<p>安装方式是在/etc/pacman.conf中加入yaourt的源</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[archlinuxfr]</span><br><span class="line">SigLevel &#x3D; Never</span><br><span class="line">Server &#x3D; http:&#x2F;&#x2F;repo.archlinux.fr&#x2F;$arch</span><br></pre></td></tr></table></figure>
+
+<p>然后同步一下源信息并安装即可：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ pacman -Sy</span><br><span class="line">$ pacman -S yaourt</span><br></pre></td></tr></table></figure>
+
+<h2 id="zsh"><a href="#zsh" class="headerlink" title="zsh"></a>zsh</h2><p>通常bash是最为常用的shell，zsh搭配“oh my zsh”的配置脚本…只能说非常强大。</p>
+<p>回头可以专门写一篇讲zsh的。</p>
+<h2 id="xorg-wayland-gdm-gnome"><a href="#xorg-wayland-gdm-gnome" class="headerlink" title="xorg/wayland+gdm+gnome"></a>xorg/wayland+gdm+gnome</h2><p>图形界面。</p>
+<h2 id="file-roller"><a href="#file-roller" class="headerlink" title="file-roller"></a>file-roller</h2><p>gnome下解压用的插件。</p>
+<h1 id="在Yoga上的Bug记录"><a href="#在Yoga上的Bug记录" class="headerlink" title="在Yoga上的Bug记录"></a>在Yoga上的Bug记录</h1><h2 id="触摸屏的多点触控问题"><a href="#触摸屏的多点触控问题" class="headerlink" title="触摸屏的多点触控问题"></a>触摸屏的多点触控问题</h2><p>装了不少驱动，最好还是发现Linux对触摸屏的支持不算太好，其实多点触控已经驱起来了，但是没有对应的动作可以执行。</p>
+<p>Wiki上写了一个叫Touchegg的软件可以配置多点触控的动作。</p>
+<p>搞了半天装上之后发现还是不能用，虽然成功地识别了多点，然后在一个文档里面找到了一句话大意是说pinch（捏）等等动作支持没完成什么的…</p>
+<blockquote class="blockquote-center">
+坑爹呢这是！
+</blockquote>
+
+<p>论坛上有人说gnome和某些应用已经支持了多点触控，回头找找看官方的说明。</p>
+<blockquote>
+<p>4月15号更新</p>
+</blockquote>
+<p>Oh，我的天！</p>
+<p>晚上回来<code>yaourt -Syu</code>一下更新了一堆东西，比较重要的东西有xinput的输入驱动，然后chrome也更新到了版本号50。打开chrome之后惊喜地发现多点触控能用了，双指放上去可以成功缩放页面了。</p>
+<p>不知道是驱动更新了还是chrome的功能。</p>
+<hr>
+<p>应该是chrome的功能，因为我现在在vs code下面开了双栏，然后左右不能够独立触摸滑动，我记得windows下是可以的。</p>
+<p>之前在chrome下做过一些设置，可惜49版没有什么效果，在chrome地址栏输入：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chrome://flags</span><br></pre></td></tr></table></figure>
+
+<p>然后跳出来的页面中开启<code>Enable touch events</code>项。</p>
+<h2 id="NetworkManager在gnome下显示故障"><a href="#NetworkManager在gnome下显示故障" class="headerlink" title="NetworkManager在gnome下显示故障"></a>NetworkManager在gnome下显示故障</h2><p>4月9号还是10号左右的时候gnome有过一次更新，新版本后NetworkManager在设置里面打开就出问题了，各种显示不正常。原本以为是我的Arch装了什么奇怪的东西起冲突了，后来发现实验室的台式机也是这个状况，找到原因是gnome更新带来的bug。</p>
+<p>4月13号gnome再次有个小版本更新，故障消失，不得不赞一下Arch滚动更新之迅速，一有bug应该马上就会有人上报。</p>
+<h2 id="gdm下触控板只能移动不能点击"><a href="#gdm下触控板只能移动不能点击" class="headerlink" title="gdm下触控板只能移动不能点击"></a>gdm下触控板只能移动不能点击</h2><p>gdm下触摸屏能点，但是触控板不能点，然后触摸屏还不太好用，所以挺不舒服的。</p>
+<p>在Arch的gdm Wiki页上找到了解决方案：</p>
+<ul>
+<li><a href="https://wiki.archlinux.org/index.php/GDM#Enabling_tap-to-click" target="_blank" rel="noopener">Enabling tap-to-click</a></li>
+</ul>
+<p>触控板点击的这个功能在gdm下是默认关闭的（话说我不明白为啥要关？）</p>
+<p>直接在命令行下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo -u gdm gsettings <span class="built_in">set</span> org.gnome.desktop.peripherals.touchpad tap-to-click <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>即可。</p>
+<p>然而我这里输这个居然dbus报错了，不知道什么情况，还好还有GUI下的解决方法：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ xhost +SI:localuser:gdm</span><br><span class="line">$ sudo -u gdm dconf-editor</span><br></pre></td></tr></table></figure>
+
+<p>首先处理一下gdm的访问权限，然后在dconf-editor的图形界面下面把tap-to-click改过来。</p>
+<p>重启gdm即可。</p>
+<h2 id="Arch和Windows时间不一致问题"><a href="#Arch和Windows时间不一致问题" class="headerlink" title="Arch和Windows时间不一致问题"></a>Arch和Windows时间不一致问题</h2><p>发现一个非常蛋疼的事情，Arch和Windows下如果都开了自动同步网络时间的话，同步的结果会差8个小时。而且它们都会修改bios里面的硬件时间，在Arch下设置好时区，把时间改到正常了，然后切到Windows下面就不正常了；如果在Windows下面改过来了，切到Arch下又会不正常。</p>
+<p>刚装的时候未果，只好把Arch的自动同步时间关掉，然后时区选到英国那边的零时区，这样才保证两边不会出问题。</p>
+<p>今天回来好好研究了一下，发现这是因为两个系统默认读取硬件时间之后的设定不同。Windows会把bios上的硬件时间直接作为localtime，而Arch会把硬件时间认为是UCT的标准时间，然后加上由于时区产生的8小时算出来计算机所在的当地时间。</p>
+<p>据Arch的Wiki上说，Windows这样做是不太好的，会有夏令时计算上的bug，也建议用户不要使用localtime，而采用Arch的标准。</p>
+<p>幸运的是，我们国家貌似没有夏令时的制度，那么果断把Arch的UCT改成localtime即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">timedatectl <span class="built_in">set</span>-local-rtc <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>然后用<code>status</code>可以检查配置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">timedatectl status</span><br></pre></td></tr></table></figure>
+
+<p>打开之后，下面会有个warning，提示说localtime怎么不好啊，什么的，无视之就好，重启一下检查bios和Windows时间是不是都是一致的。</p>
+<h2 id="给Arch安装微软字体"><a href="#给Arch安装微软字体" class="headerlink" title="给Arch安装微软字体"></a>给Arch安装微软字体</h2><p>Arch中有一些编写好的aur包比如<code>ttf-ms-win10</code>、<code>ttf-ms-win8</code>等等，支持快速地给系统装上windows对应版本上面自带的那些字体，比如我还是非常喜欢微软雅黑的，而且默认gnome下面的中文偶尔在某些应用下面显示得怪怪的，看起来非常地不舒服。</p>
+<p>于是直接<code>yaourt -S ttf-ms-win10</code>，结果安装给我报错了，说是需要下载的文件找不到。</p>
+<p>这我就呵呵了，想着是不是这个aur包的PKGBUILD文件写的有问题啊，需要下载的网址写错了什么的。</p>
+<p>重新<code>yaourt</code>装了一下，然后查看PKGBUILD，原来这里面写得很清楚：微软的字体是有license限制的，不是开源随便用的，因此字体以及license文件都需要自己想办法弄到，放到PKGBUILD的目录下面再执行安装即可。</p>
+<p>来源则比较直观，就是windows的安装镜像或者一个现成的windows系统。这个时候就体现出双系统的好处了，直接<code>mount</code>把C盘挂载过来，然后准备把字体直接复制过来就好了。</p>
+<p>但是在这里直接复制的时候发生了点问题，显示出来中间有很多文件是软链接，而且系统无法定位到是链接到哪里去了，遂失败。</p>
+<p>于是重启系统切到windows下面，特意查看了一下，这时候并没有发现里面的文件有链接的迹象啊？</p>
+<p>Anyway，把C盘的字体文件重新复制了一份到D盘。复制快结束的时候资源管理器报告有重复文件，问我是否替换，没怎么注意结果切回Arch安装的时候发现少了文件。试图在PKGBUILD里面直接删掉那个文件的记录，结果下面居然还有个<code>sha256sums</code>校验，我了个去。遂失败。（至今不明白为什么复制会出问题，C盘这个字体文件夹有点神奇）</p>
+<p>于是再重启切回到windows下面，这次我在命令行里面复制，再切回去的时候文件终于都正常了。</p>
+<p>把D盘挂载上，然后把字体复制到<code>/tmp/yaourt-xxx</code>的对应目录中去，继续安装，完成。</p>
+<h2 id="IPv6"><a href="#IPv6" class="headerlink" title="IPv6"></a>IPv6</h2><blockquote>
+<p>2018-03-30</p>
+</blockquote>
+<p>重新把实验室配的台式机也装成了 Arch，发现 IPv6 虽然能够获取到地址，但是就是死活 ping 不通任何一个。</p>
+<p>解决方案是 <a href="https://wiki.archlinux.org/index.php/IPv6#Privacy_extensions" target="_blank" rel="noopener">Arch Wiki</a> 上提到的启用 Privacy Extension。</p>
+<p>暂时不明具体的原理，但是改完 sysctl.d 以及 NetworkManager 的设置之后，重启生效。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/07/13/2015-07-13-makefile/" rel="bookmark">Makefile解析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/04/15/2016-04-15-gcc/" rel="bookmark">记一段差点被Gcc逼疯的历程</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/04/25/2016-04-25-msys2/" rel="bookmark">MSYS2-Windows下的类Unix环境</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/08/30/2016-08-30-iptables/" rel="bookmark">填坑系列 - Iptables</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/tags/Arch/" rel="tag"># Arch</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/03/06/2016-03-06-ustc/" rel="prev" title="USTC">
+      <i class="fa fa-chevron-left"></i> USTC
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/04/15/2016-04-15-gcc/" rel="next" title="记一段差点被Gcc逼疯的历程">
+      记一段差点被Gcc逼疯的历程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#简单介绍一下"><span class="nav-text">简单介绍一下</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#安装过程"><span class="nav-text">安装过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Pre-installation"><span class="nav-text">Pre-installation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Installation"><span class="nav-text">Installation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Post-installation"><span class="nav-text">Post-installation</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#后话"><span class="nav-text">后话</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#yaourt"><span class="nav-text">yaourt</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#zsh"><span class="nav-text">zsh</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#xorg-wayland-gdm-gnome"><span class="nav-text">xorg&#x2F;wayland+gdm+gnome</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#file-roller"><span class="nav-text">file-roller</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#在Yoga上的Bug记录"><span class="nav-text">在Yoga上的Bug记录</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#触摸屏的多点触控问题"><span class="nav-text">触摸屏的多点触控问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NetworkManager在gnome下显示故障"><span class="nav-text">NetworkManager在gnome下显示故障</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gdm下触控板只能移动不能点击"><span class="nav-text">gdm下触控板只能移动不能点击</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Arch和Windows时间不一致问题"><span class="nav-text">Arch和Windows时间不一致问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#给Arch安装微软字体"><span class="nav-text">给Arch安装微软字体</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IPv6"><span class="nav-text">IPv6</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '2db63bd568a98c87e4fdd9a1cb0c8cc6',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

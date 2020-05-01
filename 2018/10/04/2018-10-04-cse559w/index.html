@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="国庆在家闲不住想干活系列……  本篇的内容是陈天奇大佬今年春季在华盛顿大学开的一门课。 大佬是上交 ACM 班的本硕，虽然目前还在 UW 读博中，但是在机器学习圈子里面已经有了很高的名望了，他的 MXNet 和 XGBoost 相信很多人就算没用过也肯定听说过（比如我就没用过…）。前段时间他发布的 TVM 也算是开启了深度学习和系统方面探索的一条新道路。 课程介绍上讲的是这门课的目标是填上深度学">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSE 599W： Systems for ML">
+<meta property="og:url" content="https://jcf94.com/2018/10/04/2018-10-04-cse559w/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="国庆在家闲不住想干活系列……  本篇的内容是陈天奇大佬今年春季在华盛顿大学开的一门课。 大佬是上交 ACM 班的本硕，虽然目前还在 UW 读博中，但是在机器学习圈子里面已经有了很高的名望了，他的 MXNet 和 XGBoost 相信很多人就算没用过也肯定听说过（比如我就没用过…）。前段时间他发布的 TVM 也算是开启了深度学习和系统方面探索的一条新道路。 课程介绍上讲的是这门课的目标是填上深度学">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-arch.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-bp.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-autodif1.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-autodif2.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-cpugpu.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-memory.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-ir.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-evo.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-tpu.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-vta.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-stack.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-expgraph.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-mmalloc.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-mmalloc1.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-mmalloc2.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-schedule.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-04-cse559w-resource.png">
+<meta property="article:published_time" content="2018-10-04T03:02:54.000Z">
+<meta property="article:modified_time" content="2018-10-09T11:00:43.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="Machine Learning">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2018-10-04-cse559w-arch.png">
+
+<link rel="canonical" href="https://jcf94.com/2018/10/04/2018-10-04-cse559w/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>CSE 599W： Systems for ML | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2018/10/04/2018-10-04-cse559w/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CSE 599W： Systems for ML
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-10-04 11:02:54" itemprop="dateCreated datePublished" datetime="2018-10-04T11:02:54+08:00">2018-10-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-10-09 19:00:43" itemprop="dateModified" datetime="2018-10-09T19:00:43+08:00">2018-10-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index"><span itemprop="name">Machine Learning</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>国庆在家闲不住想干活系列……</p>
+</blockquote>
+<p>本篇的内容是陈天奇大佬今年春季<a href="http://dlsys.cs.washington.edu/" target="_blank" rel="noopener">在华盛顿大学开的一门课</a>。</p>
+<p>大佬是上交 ACM 班的本硕，虽然目前还在 UW 读博中，但是在机器学习圈子里面已经有了很高的名望了，他的 MXNet 和 XGBoost 相信很多人就算没用过也肯定听说过（比如我就没用过…）。前段时间他发布的 TVM 也算是开启了深度学习和系统方面探索的一条新道路。</p>
+<p>课程介绍上讲的是这门课的目标是填上深度学习算法和系统的实现以及优化之间的 gap，粗略地翻了一下 PPT，后面也有比较多的篇幅是介绍 TVM 的，正是我想了解的！</p>
+<p>没找到课程的视频，但是 PPT 可以在上面的课程链接或者<a href="https://1drv.ms/f/s!AuxK9QzqA6LQlI8SyU3aTAKCrZJbHQ" target="_blank" rel="noopener">这里</a>找到。</p>
+<a id="more"></a>
+
+<p>下面的内容主要按照每篇 PPT 的整理：</p>
+<hr>
+<h1 id="Lecture-1-Introduction-to-Deep-Learning"><a href="#Lecture-1-Introduction-to-Deep-Learning" class="headerlink" title="Lecture 1: Introduction to Deep Learning"></a>Lecture 1: Introduction to Deep Learning</h1><p>回顾了一下基本原理和发展历史。</p>
+<p>机器学习的过程基本上就是 数学模型+评价指标+参数训练，深度学习则是模型特指各种神经网络。</p>
+<p>具体主要涉及到各种不同的模型架构（CNN、RNN、各种变种），目标函数的选择和训练技巧，正则化初始化等等。</p>
+<p>这些就不多记了。</p>
+<p>Lecture 2 是个实验课，实践怎么搭网络。</p>
+<h1 id="Lecture-3-Overview-of-Deep-Learning-System"><a href="#Lecture-3-Overview-of-Deep-Learning-System" class="headerlink" title="Lecture 3: Overview of Deep Learning System"></a>Lecture 3: Overview of Deep Learning System</h1><p>这一节差不多是大纲的性质，每一个小点后面都会分节细讲。</p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-arch.png" alt="Basic Architecture"></p>
+<p>基本上所有的深度学习框架都是差不多这个结构，首先来看 User API 层：</p>
+<p>这里举了个线性回归的例子来对比手写 Numpy 和框架代码的差别。基本上网络模型都可以比较方便地用一个计算图的结构来表达，节点表示运算操作，边代表数据依赖。</p>
+<p>那为了方便用户写代码，一个框架也是一定要有自动求导的功能的（如果反向计算还需要手写那就太瓜皮了）。</p>
+<p>然后是 System Components 层：</p>
+<p>这里涉及到了首先是计算图的优化，比如一次运行的时候直接过滤掉用不到的图节点（Deadcode Elimination），内存分配方面的优化，图节点和实际计算设备的对应等等。</p>
+<p>实际跑图的时候如果有多个设备或者多个工作线程，如何调度以及发挥出计算设备的并行性也是一个需要考虑的问题。</p>
+<p>最下面的 Architecture 层：</p>
+<p>目前用来支持 DL 的设备也有很多，典型的如 GPU，其他的加速芯片也是越来越多，不同的设备可能要写对应不同的代码，这部分要怎么优化？</p>
+<p>现在最常规的做法是每一种不同的计算设备会有开发厂商自己提供支持库，但是这个对框架的开发者来说还是有一个要整合的过程。另外，如果系统中存在多种不同的计算设备，计算任务在多设备上要怎么分配和调度也会是一个很大的麻烦。</p>
+<p>为了解决最后的这个问题，目前有一种 Compiler Based Approach，即整个 Architecture 层由一个 High Level Operator Description 加上 Tensor Compiler Stack 来统一解决。这就是之后要提到的 TVM 的设计思路了。</p>
+<h1 id="Lecture-4-Backpropagation-and-Automatic-Differentiation"><a href="#Lecture-4-Backpropagation-and-Automatic-Differentiation" class="headerlink" title="Lecture 4: Backpropagation and Automatic Differentiation"></a>Lecture 4: Backpropagation and Automatic Differentiation</h1><p>详细解释第三节中的自动求导。</p>
+<p>计算机中实现求导这个操作主要有两种方式：基于符号的算术求导和直接用数值进行求导。</p>
+<p>算术求导需要构建一棵符号表示树，然后根据各种算术上的求导规则来写公式。缺点在于：如果遇到特别复杂的函数，则需要推导的符号表示树也会很大；然后如果目标只是想要一个导数值，则保存一棵符号表示树就很浪费了；再然后就是这样做容易有误差（？为什么…按公式算不应该误差更小吗）。</p>
+<p>数值求导则是按导数的定义做，直接对方程取极限：</p>
+<p>$$ \frac{\partial f(x)}{\partial x_i} \approx \lim \limits_{h \to 0} \frac{f(x+he_i)-f(x)}{h}$$</p>
+<p>实现起来特别简单，h 取个 1e-6 就差不多了，但是一般只用来检验求导结果用。</p>
+<p>然后对于网络中每一层的反向部分，其实求导涉及到的都只是跟本层运算相关的内容：</p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-bp.png" alt="Backpropagation"></p>
+<p>上一层传下来的是 $\frac{\partial Error}{\partial z}$，再往下可以通过链式求导法则一直推导下去，而其他需要的则只是与本层运算有关的$\frac{\partial z}{\partial x}$ 和 $\frac{\partial z}{\partial y}$。</p>
+<p>更详细的推导可见<a href="/2018/01/23/2018-01-23-tfunpacking2/#Automatic-differentiation">这里</a>。</p>
+<p>因此自动求导则是根据以上的规则来创建反向计算图的过程，伪代码以及结果如下：</p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-autodif1.png" alt="AutoDiff"></p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-autodif2.png" alt="BP &amp; AutoDiff"></p>
+<p>自动求导构建完成反向计算图之后，完整的计算图可以接下来一起用作整体的图优化。</p>
+<h1 id="Lecture-5-GPU-Programming"><a href="#Lecture-5-GPU-Programming" class="headerlink" title="Lecture 5: GPU Programming"></a>Lecture 5: GPU Programming</h1><p>在 CPU 上进行数据运算大致有几个过程（按多级流水分）：Fetch、Decode、ALU Compute、Write Back。由于 CPU 本来也并不是为了纯运算而设计，因而在 ALU Compute 以外的其他部分会有比较大的计算资源和能耗上的 overhead。</p>
+<p>后来增加的向量化指令能够相当程度地改善这种 overhead 的问题，而 GPU 从这个角度来看更像是一种把 ALU 的向量化做的更极致的加速器。</p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-cpugpu.png" alt="CPU vs GPU"></p>
+<p>从存储的层次结构上来对比：</p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-memory.png" alt="Memory Hierarchy"></p>
+<p>GPU 的大量寄存器就使得它能够以比 CPU 小的多的开销来切换线程，这也就能够支撑起大规模的 SIMT 了。</p>
+<p>后面是一些 CUDA 编程的例子，以及如何根据 GPU 的微架构特性高效地发挥出性能来。</p>
+<h1 id="Lecture-6-Optimize-for-Hardware-Backends"><a href="#Lecture-6-Optimize-for-Hardware-Backends" class="headerlink" title="Lecture 6: Optimize for Hardware Backends"></a>Lecture 6: Optimize for Hardware Backends</h1><p>这一节的内容大概在 System Components 和 Architecture 层之间，一份代码面对不同规模的数据（甚至是不同数据块尺寸的数据）往往不作针对性地调整是达不到最佳性能的。</p>
+<p>深入下去需要实际考虑到例如 CPU 的 Cache、GPU 的寄存器等等这些方面，以及 GPU 的多级存储之间的数据搬移开销、数据重用等等，同样是 GPU 也有多种不同的后端。</p>
+<p>不同的 Tiling Patterns、Fuse Patterns、Data Layout、Hardware Backend 合起来使得优化工作也变得相当复杂了。</p>
+<p>为了解决前面说到的所有这些麻烦的问题，然后这里就引出了 TVM Stack。</p>
+<h1 id="Lecture-7-Automatic-Code-Generation-TVM-Stack"><a href="#Lecture-7-Automatic-Code-Generation-TVM-Stack" class="headerlink" title="Lecture 7: Automatic Code Generation - TVM Stack"></a>Lecture 7: Automatic Code Generation - TVM Stack</h1><p>各种不同的<strong>框架</strong>和实际执行运算的各种各样的<strong>硬件后端</strong>之间其实存在着很大的 gap。</p>
+<p>如果从编译器的视角来看待如何解决这个问题，各种框架写的网络可以根据特定的规则转化成某种统一的表示形式，在统一表示的基础上进行一些可重用的图优化，之后再用不同的后端来生成对应不同设备的代码，这就是目前各家都在尝试的设计思路了。</p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-ir.png" alt="Computational Graph as IR"></p>
+<p>举例说：TensorFlow 的 XLA 会把高级代码抽象成 XLA HLO 的表示，做目标无关优化之后再用对应后端来生成更深一层的代码。</p>
+<p>NVIDIA 的 TensorRT 的优化策略也是在图转化之后的统一表示上做，例如根据设定好的规则来做一些相邻计算单元的合并（Kernel Fusion）等等。</p>
+<p>当然这种方式实现的时候会遇到一些同样非常麻烦的问题，一个 operator 需要针对不同的硬件平台、数据格式、精度、线程结构写一堆代码生成规则和优化规则。</p>
+<blockquote>
+<p>到头来是把原本 op 实现的复杂度变成了编译规则的复杂度，绕了个圈以后好像还是很麻烦啊。</p>
+</blockquote>
+<p>TVM 借助了一种叫 Tensor Expression Language 的表示方法，同样采用这种类似表示的还有 Halide（一种图像处理语言）、Loopy（基于 Python 的 kernel 生成器）、TACO（稀疏 Tensor 代码生成器）、Tensor Comprehension（类似 TVM）等等。</p>
+<p>这种表示法最初的想法来源于 Halide，核心在于<strong>把代码的计算和调度分开</strong>。</p>
+<p>例如一段最原始的 TVM 代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">C = tvm.compute((n,), <span class="keyword">lambda</span> i: A[i] + B[i])</span><br><span class="line">s = tvm.create_schedule(C.op)</span><br></pre></td></tr></table></figure>
+
+<p>生成得到的 C 代码是：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; ++i)</span><br><span class="line">&#123;</span><br><span class="line">    C[i] = A[i] + B[i];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>加上额外的调度控制：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">C = tvm.compute((n,), <span class="keyword">lambda</span> i: A[i] + B[i])</span><br><span class="line">s = tvm.create_schedule(C.op)</span><br><span class="line">xo, xi = s[C].split(s[C].axis[<span class="number">0</span>], factor=<span class="number">32</span>)</span><br></pre></td></tr></table></figure>
+
+<p>再生成的代码就变成了：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> xo = <span class="number">0</span>; xo &lt; <span class="built_in">ceil</span>(n / <span class="number">32</span>); ++xo)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> xi = <span class="number">0</span>; xi &lt; <span class="number">32</span>; ++xi)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> i = xo * <span class="number">32</span> + xi;</span><br><span class="line">        <span class="keyword">if</span> (i &lt; n)</span><br><span class="line">        &#123;</span><br><span class="line">            C[i] = A[i] + B[i];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>甚至于还可以支持绑定中间的 xo 和 xi 到特定的变量上：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">C = tvm.compute((n,), <span class="keyword">lambda</span> i: A[i] + B[i])</span><br><span class="line">s = tvm.create_schedule(C.op)</span><br><span class="line">xo, xi = s[C].split(s[C].axis[<span class="number">0</span>], factor=<span class="number">32</span>)</span><br><span class="line">s[C].recorder(xi, xo)</span><br><span class="line">s[C].bind(xo, tvm.thread_axis(“blockIdx.x”)</span><br><span class="line">s[C].bind(xi, tvm.thread_axis(“threadIdx.x”)</span><br></pre></td></tr></table></figure>
+
+<p>话说这样出来的代码就可以用在 CUDA kernel 里面了：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> i = threadIdx.x * <span class="number">32</span> + blockIdx.x;</span><br><span class="line"><span class="keyword">if</span> (i &lt; n)</span><br><span class="line">&#123;</span><br><span class="line">    C[i] = A[i] + B[i];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>具体后续的调度部分的设计，首先需要保证生成的代码在逻辑上要能跑出正确的结果，常见的手工优化代码的方法也都要包含在内，并且要能够方便引入其他额外的新技术。</p>
+<p>目前 TVM 的调度部分还在继续开发中，已经从像 Halide、Loopy 这种成熟的语言中吸取过来的方法有例如 Loop Transformations、Thread Bindings、Cache Locality 等，针对 GPU 还开发了一些方法例如 Thread Cooperation、Tensorization、Latency Hiding 等。</p>
+<p>再额外的就是 TVM 还用了 Auto-tuning，由于 TVM 的论文还没看，不确定我的理解对不对。Schedule Space 模型的自动调优就是尝试不同的优化方法组合，然后在整个策略空间里面搜索哪一种优化效果最好最终就采用哪一种吗？</p>
+<p>末尾给的一些测试中，TVM 表现出了相当不错的性能结果。</p>
+<p>当然，TVM 还刚刚开始发展，后面还有一大堆问题留待解决。</p>
+<h1 id="Lecture-8-Hardware-Specialization-in-Deep-Learning"><a href="#Lecture-8-Hardware-Specialization-in-Deep-Learning" class="headerlink" title="Lecture 8: Hardware Specialization in Deep Learning"></a>Lecture 8: Hardware Specialization in Deep Learning</h1><p>上一节的 TVM 是一个纯软件栈，这一节就来探索一下用于深度学习的专用硬件。</p>
+<p>DL 的疯狂发展对计算硬件也有了越来越高的需求，而且不同应用场景的需求还可能会差很多，例如数据中心和移动终端上面的 AI 设备就完全要往两个极端去考虑。</p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-evo.png" alt="Evolution of Deep Learning"></p>
+<p>上面这张图讲的是在 DL 的发展过程中，对数据的尺寸以及存储精度的需求也在不断变化，低精度可以节省空间以及加速运算，但是这也要在硬件本身可以直接支持低精运算的前提下才能有效果（硬件是64位双精的，你要那它跑 int8？那就呵呵了…emm，此处并不是针对某 sw 哈哈）。另外，一些出现的新算法是不是能够用硬件高效实现也很关键，实现不了的话可能还是要选择老算法更好。</p>
+<p>不断发展的 DL 算法在实验室里面可以任意瞎搞，效果好就好了，但是如果要应用到实际的生产环境中，那能不能实现/怎么高效实现就非常重要了。</p>
+<p>再再另一方面，摩尔定律也逐渐受限，更低纳米制程的工艺难度越来越大，所有这些问题最后都会导向一个终极的解决方案，那就是 <strong>DL 专用的计算芯片/硬件</strong>了。</p>
+<p>下面用 TPU 来举了个栗子：2015 年流片的 ASIC，92 TOPS 的峰值性能，相比 K80 有 30~80倍的性能功耗比。这些数据看着都吓人。</p>
+<p>那为什么这么强呢？原因在于它直接硬件支持 8 位的整数 Inference（相比 16 位半精要节能 6~30 倍），大量的乘加运算部件（MACs）以及大量的片上存储。</p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-tpu.png" alt="TPU Block Diagram"></p>
+<p>TPU 主要的峰值运算性能都来自于右边的一大堆矩阵乘单元和累加器。光片上的 Unified Buffer 和 MMU 就占到了整块 TPU 超过 50% 的芯片面积。</p>
+<p>这种设计也在于尽可能地提高数据的重用程度，提高计算密集度。</p>
+<p>总结一下，像 TPU 这样的 DL 专用的加速器相对 CPU 和 GPU 主要有三个方面的特点：</p>
+<ol>
+<li>通常需要显示管理片内的存储子系统，而 CPU 的 Cache 是隐式的，对程序员透明，GPU 则是可以有自己的 L1 Cache 同时也可以手动维护（Shared Memory）；</li>
+<li>计算主要以 Tensor （矩阵或者向量）为单元，CPU 主要就是标量运算了，配合 SIMD 的话则跟 GPU 一样主要是向量计算；</li>
+<li>如果为 Inference 设计则不需要太高的精度，低比特量化之后可能更适合。</li>
+</ol>
+<p>下面是举了 3 种 Hardware/Software Co-design 的方法：</p>
+<ol>
+<li>Tensor 化（Tensorization）：把矩阵-向量运算变成矩阵矩阵运算，4x8 的矩阵乘上 8x1 的向量变成两个 4x4 和 4x1 的乘积（…提高计算密集度？）</li>
+<li>存储结构针对计算内容做优化：面向卷积优化则需要一个较大的激活函数 Buffer（空间重用），较小的 FIFO 队列（存储参数）；面向 GEMM 优化则需要分配较多的空间用以累加器的块存储。</li>
+<li>低比特量化：可以线性提高存储带宽。</li>
+</ol>
+<blockquote>
+<p>。。。上面的这三个感觉理解的比较模糊。</p>
+</blockquote>
+<hr>
+<p>再往下才是本节的重点内容——<strong>VTA</strong>。</p>
+<p>TVM 构建的是软件栈，硬件加速器方面，他们也提出了一套开源的 FPGA 加速器设计方案，即 VTA（Versatile Tensor Accelerator）。</p>
+<p>VTA 针对不同的带宽、存储和精度需求可以自定义 Tensor Core 的形状、数据类型、内存子系统分配、支持的运算操作等等；对不同类型的代码提供 CISC 或者 RISC 的指令集支持；并且还做了一些 Latency Hiding 的工作。</p>
+<p>大致的框架设计如下：</p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-vta.png" alt="VTA Design"></p>
+<p>IF 单元从 DRAM 中获取到下一条指令后，会根据类型将其发送到目标部件对应的队列中。</p>
+<p>Load 单元负责准备激活函数和计算核的存储资源、提供Micro-Op 的缓存，取出来的数据放在 Load Buffer 中。</p>
+<p>计算单元负责根据前面的 Micro-Op 以及准备好的数据执行 ALU 运算或者 GEMM 运算，更新寄存器的内容。</p>
+<p>Store 单元负责把前面 Store Buffer 中的寄存器值写回 DRAM。</p>
+<p>整体的运行依靠多个任务队列来维护数据依赖关系，基本上是个<strong>数据流</strong>的设计。（。。。）</p>
+<p>VTA 的控制代码部分则依靠 TVM 来生成。</p>
+<p>加上 VTA 之后，整个 TVM 的完整架构显得更复杂了：</p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-stack.png" alt="Programmability Challenge"></p>
+<p>顶层是各种成熟的深度学习框架，TVM 充当编译器的角色，底层的硬件执行部分则由 VTA 来实现。</p>
+<h1 id="Lecture-9-Memory-Optimization"><a href="#Lecture-9-Memory-Optimization" class="headerlink" title="Lecture 9: Memory Optimization"></a>Lecture 9: Memory Optimization</h1><p>还是在 System Components 这层，继续深入分析 DL 训练过程中存在的问题。</p>
+<p>回到前面的自动求导部分，这里抛出来一个问题是为什么自动求导是采用<strong>往计算图中扩展反向计算的数据计算通路</strong>的方式，而不是<strong>直接在原来的图上进行反向计算（Backprop in Graph）</strong>？</p>
+<blockquote>
+<p>这个 Backprop in Graph 这里也没有更详细的说明，我大概理解成<strong>递归返回</strong>的那种样子，正向计算是不断递归向下，然后每层递归退出的时候执行反向，完美！</p>
+<p>其实说起来，本质上递归的这个顺序也就是数据依赖关系的拓扑序。</p>
+</blockquote>
+<p>原因呢，则是在于内存上。</p>
+<p>State-of-art 的很多模型都可能会有资源受限的问题，现在确实很多效果好的新模型都越来越大了，一方面计算量在增长，另一方面内存会成为一个很大的麻烦：CPU 的内存还好一点，如果是用在 GPU 上，目前单块卡的显存最多也只有几十 G 的量级。</p>
+<p>先来看一下前向部分的内存使用情况，以下面这几个简单的运算组成的计算图为例：</p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-expgraph.png" alt=""></p>
+<p><strong>朴素做法</strong>是为每个计算节点都开一块内存，则图越大、计算节点越多，需要的内存量越大。</p>
+<p>然后我们发现这个过程中有很多内存是用过之后就不会再用了的，因此更高级一些的方案是<strong>配合内存池进行动态内存分配</strong>，例如上面 <code>mul</code> 算完之后所占有的内存就不再需要了，因此这块内存可以被内存池回收，然后用在 <code>exp</code> 的计算上。</p>
+<p>再有另外一种方式则是<strong>静态内存规划</strong>，即拿到计算图之后，就按照尽可能重用内存的方案事先分配内存，基本上达到的效果应该要跟上一种内存池的动态分配方案差不多。这种做法有点类似<strong>编译器的寄存器重命名</strong>的过程。</p>
+<p>基本的分配原则也非常简单，只是应用的时候另外要注意如果分配不好是有可能要影响计算的并发性的：</p>
+<ul>
+<li>Inplace：可行的情况下尽可能地原地存储，即把输出存到输入的内存里（前提是这份输入只被一个计算节点依赖）</li>
+<li>Reuse：不再用到的内存尽可能地重用。</li>
+</ul>
+<p>下面的几个内存规划的例子也都比较简单：根据拓扑顺序依次分配和回收；或者先从起点到终点找一条最长路径，把路径上的内存全部设为 Inplace 重用，然后再找别的路径等等。</p>
+<blockquote>
+<p>这里举的内存重用的例子都特别简单，实际上每个计算节点需要的数据尺寸和内存大小都不一定一样，不可能这么简单地就分配好了。</p>
+</blockquote>
+<p>回到前面那个自动求导的两种方案的问题，可以很容易地体会出来<strong>往计算图中扩展反向通路</strong>的方案非常容易做内存优化：</p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-mmalloc.png" alt=""></p>
+<p>只需要把 Inplace 和 Reuse 用好即可，在 MXNet 上测试出来的效果也非常好。</p>
+<p>深度学习的 BP 算法中存在的最大问题在于反向运算时需要用到前向的一些结果，这事实上就大大地限制了 Reuse 策略的发挥，因为前向算出来的结果总需要找个地方暂存着。</p>
+<p>针对一些内存需求特别大的场景，可以采用<strong>计算换空间</strong>的折中方案：</p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-mmalloc1.png" alt=""></p>
+<p>只保存前向结果的一部分，当反向运算中需要时，再重新从前面开始把缺失的部分重新算一遍，用 25% 的额外计算量可以把整体的内存使用降到原来的开方级别，在某些场景下还是有非常不错的收益的。</p>
+<blockquote>
+<p>实验室的一位师姐之前在 RNN 的优化里面用到过这种方法，节省下内存之后可以跑更大的 BatchSize，最后得到的效果非常好。</p>
+</blockquote>
+<p>再回到前面两种反向方案的讨论中，这一节的最后给了一个特别有趣的点：内存重用的优化方案从某种程度上来看有点像递归中的内存分布！！</p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-mmalloc2.png" alt=""></p>
+<blockquote>
+<p>666666！</p>
+</blockquote>
+<h1 id="Lecture-10-Parallel-Scheduling"><a href="#Lecture-10-Parallel-Scheduling" class="headerlink" title="Lecture 10: Parallel Scheduling"></a>Lecture 10: Parallel Scheduling</h1><p>System Components 这层的另外一个方面是并行调度的问题。</p>
+<p>用户写好一个计算图，如果框架没有能力把机器上所有的硬件资源全都调动起来那就太浪费了。</p>
+<p>关于 DL 中模型并行数据并行这块就不再多提了，在常规的数据并行中，计算和通信之间存在着一个 Gap：</p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-schedule.png" alt=""></p>
+<p>这样一张有着复杂的计算、通信需求的计算图要如何才能比较好地并行起来呢，答案就是我们需要一个自动的调度系统。</p>
+<p>首先计算图本身可以很好地描述计算之间的数据依赖关系，那在这个基础上的 Scheduler 设计感觉其实也没啥好说的，基本上都是很常规能够想到的解决方案。TensorFlow、MXNet 等等的基础设计原则都是这样，只是实现上可能有所不同。</p>
+<p>同样是队列的调度方案，这里的这种是以每个变量为单位有一个自己的队列，TensorFlow 中是线程池中的每个线程会有个自己的队列。</p>
+<h1 id="Lecture-11-Distributed-Training-and-Communication-Protocols"><a href="#Lecture-11-Distributed-Training-and-Communication-Protocols" class="headerlink" title="Lecture 11: Distributed Training and Communication Protocols"></a>Lecture 11: Distributed Training and Communication Protocols</h1><p>这一节把目标放在上一节调度图中的 Synchronization 部分。</p>
+<p>大量的篇幅是对 Allreduce 的讨论，也没啥好说的，跳过跳过…</p>
+<p>Parameter Server - Worker 架构的同步异步，也没啥好说的…</p>
+<blockquote>
+<p>Emm…这两节不是我偷懒，主要是内容比较基础，跟着 PPT 就好了，没什么特别值得注意的。</p>
+</blockquote>
+<h1 id="Lecture-12-Model-Serving"><a href="#Lecture-12-Model-Serving" class="headerlink" title="Lecture 12: Model Serving"></a>Lecture 12: Model Serving</h1><p>除去后面没有资料的几个 Guest Talk 以外，这节算是课程内容的最后一部分了，主要讲的是实验室的成果上线进行实用的过程中可能会有的问题，例如：</p>
+<ul>
+<li>延迟限制：在云上提供服务的时候，Batch Size 没办法做到越大越好；如果是在终端设备上提供服务，则能够支持运行的模型本身也有轻量级的要求；</li>
+<li>资源限制：设备有功耗、内存限制；云服务则有花费开销的限制；</li>
+<li>精度限制：提供多级 QoS 等等。</li>
+</ul>
+<p>在下面这个视频应用中：</p>
+<p><img data-src="http://jcf94.com/download/2018-10-04-cse559w-resource.png" alt=""></p>
+<p>终端设备的采集、处理、数据传输等各个不同有码率、功耗等限制，云端提供服务的部分也有带宽和花费开销的限制，事实上从 Workload 到 Budget 之间也存在一个巨大的 Gap。</p>
+<p>下面的内容主要从模型压缩和服务系统两个方面来介绍。</p>
+<h2 id="Model-Compression"><a href="#Model-Compression" class="headerlink" title="Model Compression"></a>Model Compression</h2><p>这部分是介绍如何对一个网络模型进行压缩。</p>
+<p>首先是<strong>矩阵/向量的低秩分解</strong>，可以应用在全连接层和卷积层中，能够有效地降低整体的计算量和存储量。</p>
+<blockquote>
+<p>这块还是自己的数学知识比较缺乏，暂时不往下细看了。</p>
+</blockquote>
+<p>然后是<strong>网络剪枝</strong>：训好一个网络之后，通过一个 01 的 Mask 把参数中的某些部分置为 0，再重新训练达到之前相同的预测精度，不断重复以上过程并且逐渐增加 Mask 中 0 的比例，最后就可以得到一个想要的剪枝结果。</p>
+<p><strong>权值共享</strong>：对参数矩阵进行重新采样，把实际值存在一张表中，然后参数矩阵改成存储对应实际值在表中的索引。这也是尽可能地减少存储冗余。</p>
+<p><strong>低比特量化</strong>：这个也比较容易理解，就是降低数据类型的存储精度，32 位单精降到半精、int8 甚至是二进制的 01 值。预测结果可能会有一定的精度损失，但是在可以接受的精度损失范围内可以大大节省参数的存储量，并且配合上低精度的硬件预算部件也能大大加快运算速度。</p>
+<p><strong>知识蒸馏</strong>：用一个训练好的大模型来训练一个小模型。</p>
+<blockquote>
+<p>Knowledge Distillation 这块感觉挺神奇，但是还没细看，不是很理解。</p>
+</blockquote>
+<p>这里还给了一些参考的论文资料：</p>
+<ul>
+<li>Compression of deep convolutional neural networks for fast and low power mobile applications. ICLR 2016</li>
+<li>Deep Compression: Compressing Deep Neural Networks with Pruning, Trained Quantization and Huffman Coding. ICLR 2016</li>
+<li>“XNOR-Net: ImageNet Classification Using Binary Convolutional Neural Networks. ECCV 2016</li>
+<li>EIE: Efficient Inference Engine on Compressed Deep Neural Network. ISCA 2016</li>
+<li>MCDNN: An Approximation-Based Execution Framework for Deep Stream Processing Under Resource Constraints. MobiSys 2016</li>
+</ul>
+<h2 id="Serving-System"><a href="#Serving-System" class="headerlink" title="Serving System"></a>Serving System</h2><p>一个比较好的服务系统需要达到几个目标：</p>
+<ul>
+<li>写应用的时候要有很高的灵活性</li>
+<li>应用跑在 GPU 上要有很高的效率</li>
+<li>满足各种不同的延迟 SLA 需求</li>
+</ul>
+<p>然后举了个叫 Nexus 的系统为例，后面就不细看了。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/02/04/2017-02-04-tensorflow/" rel="bookmark">TensorFlow</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/09/10/2018-09-10-multithreadsproject/" rel="prev" title="几个多线程的练手 case">
+      <i class="fa fa-chevron-left"></i> 几个多线程的练手 case
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/10/21/2018-10-21-tfunpacking9/" rel="next" title="TensorFlow 拆包（九）：High Level APIs">
+      TensorFlow 拆包（九）：High Level APIs <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Lecture-1-Introduction-to-Deep-Learning"><span class="nav-text">Lecture 1: Introduction to Deep Learning</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lecture-3-Overview-of-Deep-Learning-System"><span class="nav-text">Lecture 3: Overview of Deep Learning System</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lecture-4-Backpropagation-and-Automatic-Differentiation"><span class="nav-text">Lecture 4: Backpropagation and Automatic Differentiation</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lecture-5-GPU-Programming"><span class="nav-text">Lecture 5: GPU Programming</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lecture-6-Optimize-for-Hardware-Backends"><span class="nav-text">Lecture 6: Optimize for Hardware Backends</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lecture-7-Automatic-Code-Generation-TVM-Stack"><span class="nav-text">Lecture 7: Automatic Code Generation - TVM Stack</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lecture-8-Hardware-Specialization-in-Deep-Learning"><span class="nav-text">Lecture 8: Hardware Specialization in Deep Learning</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lecture-9-Memory-Optimization"><span class="nav-text">Lecture 9: Memory Optimization</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lecture-10-Parallel-Scheduling"><span class="nav-text">Lecture 10: Parallel Scheduling</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lecture-11-Distributed-Training-and-Communication-Protocols"><span class="nav-text">Lecture 11: Distributed Training and Communication Protocols</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lecture-12-Model-Serving"><span class="nav-text">Lecture 12: Model Serving</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Model-Compression"><span class="nav-text">Model Compression</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Serving-System"><span class="nav-text">Serving System</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '799507db5faad59d7299674fca9d5494',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

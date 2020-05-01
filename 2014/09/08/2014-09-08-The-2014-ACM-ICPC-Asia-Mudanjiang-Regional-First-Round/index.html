@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="【A】签到题 【B】构造 【C】遍历+floodfill染色或并查集 【D】DP（背包）+状态压缩 （感觉可出） 【E】线段树 【F】图形题 搜索+状态压缩 【G】数论，某种不定方程……ZOJ上到现在只过了4个人，还找不到题解-_-&#x2F;&#x2F;&#x2F; 【H】回文数变种+dfs枚举构造 又是构造-_-&#x2F;&#x2F;&#x2F; 【I】字符串哈希+DP或者暴力 【J】直接模拟，字符串细节操作">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The 2014 ACM-ICPC Asia Mudanjiang Regional First Round">
+<meta property="og:url" content="https://jcf94.com/2014/09/08/2014-09-08-The-2014-ACM-ICPC-Asia-Mudanjiang-Regional-First-Round/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="【A】签到题 【B】构造 【C】遍历+floodfill染色或并查集 【D】DP（背包）+状态压缩 （感觉可出） 【E】线段树 【F】图形题 搜索+状态压缩 【G】数论，某种不定方程……ZOJ上到现在只过了4个人，还找不到题解-_-&#x2F;&#x2F;&#x2F; 【H】回文数变种+dfs枚举构造 又是构造-_-&#x2F;&#x2F;&#x2F; 【I】字符串哈希+DP或者暴力 【J】直接模拟，字符串细节操作">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2014-09-08T03:24:57.000Z">
+<meta property="article:modified_time" content="2016-01-11T09:44:00.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="ACM-ICPC">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2014/09/08/2014-09-08-The-2014-ACM-ICPC-Asia-Mudanjiang-Regional-First-Round/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>The 2014 ACM-ICPC Asia Mudanjiang Regional First Round | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2014/09/08/2014-09-08-The-2014-ACM-ICPC-Asia-Mudanjiang-Regional-First-Round/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          The 2014 ACM-ICPC Asia Mudanjiang Regional First Round
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2014-09-08 11:24:57" itemprop="dateCreated datePublished" datetime="2014-09-08T11:24:57+08:00">2014-09-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2016-01-11 17:44:00" itemprop="dateModified" datetime="2016-01-11T17:44:00+08:00">2016-01-11</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ACM-%E6%AF%94%E8%B5%9B/" itemprop="url" rel="index"><span itemprop="name">ACM-比赛</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><del>【A】签到题</del></p>
+<p><del>【B】构造</del></p>
+<p><del>【C】遍历+floodfill染色或并查集</del></p>
+<p>【D】DP（背包）+状态压缩 （感觉可出）</p>
+<p>【E】线段树</p>
+<p>【F】图形题 搜索+状态压缩</p>
+<p>【G】数论，某种不定方程……ZOJ上到现在只过了4个人，还找不到题解-_-///</p>
+<p><del>【H】回文数变种+dfs枚举构造</del> 又是构造-_-///</p>
+<p>【I】字符串哈希+DP或者暴力</p>
+<p><del>【J】直接模拟，字符串细节操作</del></p>
+<a id="more"></a>
+
+<hr>
+<h1 id="A、The-Himalayas"><a href="#A、The-Himalayas" class="headerlink" title="A、The Himalayas"></a>A、The Himalayas</h1><p>Time Limit:  2 Seconds<br>Memory Limit:  65536 KB</p>
+<h2 id="Description"><a href="#Description" class="headerlink" title="Description"></a>Description</h2><p>As an artist, Bob usually need to travel around the world. He made a lot of sketch of scenery on his journey. A famous spot he have visited recently is the Himalayas. The Himalayas is a mountain range in South Asia separating the plains of the Indian subcontinent from the Qinghai-Tibet Plateau. The Himalayas include over a hundred mountains exceeding 7,200 meters in elevation.</p>
+<p>One day, Bob came up with an strange idea. He wanted to know the number of mountain peaks in his paintings. As his best friend, he turned to you for help. You are given a list of N height sampling values Hi. You should determine how many peaks are there. For all i which satisfies 2 &lt;= i &lt;= N - 1, Hi is defined as a peak if and only if Hi-1 &lt; Hi &gt; Hi+1.</p>
+<h2 id="Input"><a href="#Input" class="headerlink" title="Input"></a>Input</h2><p>There are multiple test cases. The first line of input contains an integer T indicating the number of test cases. For each test case:</p>
+<p>The first line contains one integer N (1 &lt;= N &lt;= 50). The next line contains N integers Hi (1 &lt;= Hi &lt;= 8844). It is guaranteed that any two adjacent height sampling values will be different.</p>
+<h2 id="Output"><a href="#Output" class="headerlink" title="Output"></a>Output</h2><p>For each test case, output the number of peaks.</p>
+<h2 id="Sample-Input"><a href="#Sample-Input" class="headerlink" title="Sample Input"></a>Sample Input</h2><blockquote>
+<p>2<br>9<br>1 3 2 4 6 3 2 3 1<br>5<br>1 2 3 4 5</p>
+</blockquote>
+<h2 id="Sample-Output"><a href="#Sample-Output" class="headerlink" title="Sample Output"></a>Sample Output</h2><blockquote>
+<p>3<br>0</p>
+</blockquote>
+<h2 id="题意"><a href="#题意" class="headerlink" title="题意"></a>题意</h2><p>给出一系列地形的高度，要求找到山峰的个数</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>稍微判断一下即可。</p>
+<hr>
+<h1 id="B、A-Volcanic-Island"><a href="#B、A-Volcanic-Island" class="headerlink" title="B、A Volcanic Island"></a>B、A Volcanic Island</h1><p>Time Limit: 2 Seconds<br>Memory Limit: 65536 KB<br>Special Judge</p>
+<h2 id="Description-1"><a href="#Description-1" class="headerlink" title="Description"></a>Description</h2><p>An underwater volcano has erupted massively in somewhere of the deep Atlantis Ocean. This large eruption led to the birth of a new volcanic island, which had a shape of square. Near the island, there are N countries. All of them have claimed the sovereignty over the island.</p>
+<p>After a lot of multilateral negotiation and occasional armed conflicts, the N countries decided to divide the square volcanic island equally. They partitioned the island into N x N small equal-sized square chunks. Each country could get a connected region consists of exact N chunks.</p>
+<p>Two chunks A and B are called “connected” if they share an edge, or there exists another chunk C connected with both A and B. A group of chunks are called “connected region” if any two of these chunks are connected.</p>
+<p>Every country want a unique region. It means the N regions should be different with each other. Two regions are considered as the same if and only if one can transform into the other by an isometry (a combination of rigid motions, including translation, rotation and reflection).</p>
+<p>In a nutshell, your task is to divide a square island with N x N chunks into N connected regions with different shape. You also need to draw a map to color the regions of the map so that no two edge-adjacent regions have the same color. Most of the people in these countries believed that four different colors are enough. So you can mark these regions with at most four colors, red, green, blue and yellow.</p>
+<h2 id="Input-1"><a href="#Input-1" class="headerlink" title="Input"></a>Input</h2><p>There are multiple test cases. The first line of input contains an integer T indicating the number of test cases. For each test case:</p>
+<p>There is only an integer N (1 &lt;= N &lt;= 100).</p>
+<h2 id="Output-1"><a href="#Output-1" class="headerlink" title="Output"></a>Output</h2><p>For each test case, output a valid map described above. If there is no solution, output “No solution!” instead. Please note that only four colors (‘R’, ‘G’, ‘B’ and ‘Y’) can be used to drawing the map.</p>
+<p>##Sample Input</p>
+<blockquote>
+<p>2<br>2<br>5</p>
+</blockquote>
+<h2 id="Sample-Output-1"><a href="#Sample-Output-1" class="headerlink" title="Sample Output"></a>Sample Output</h2><blockquote>
+<p>No solution!<br>YYYGR<br>YGGGR<br>YGYYR<br>BYYYR<br>BBBBR</p>
+</blockquote>
+<h2 id="题意-1"><a href="#题意-1" class="headerlink" title="题意"></a>题意</h2><p>给出一张n*n的图，要求用4种颜色去染色，染色之后将图分成n个总数为n的颜色块。另外的一个重要要求就是这n个色块的形状不能出现重复。</p>
+<h2 id="分析-1"><a href="#分析-1" class="headerlink" title="分析"></a>分析</h2><p>本题采用的是special judge，所以需要自己构造出一种方案来对其进行染色。</p>
+<p>赛后参考其他大神的想法，构造方案如下：</p>
+<p>以7和8为例：</p>
+<p>首先将其中的最后一列全部记为一种颜色，剩下的n*(n-1)部分用另外3种颜色去染：</p>
+<p>前n/2种区块蛇形染色：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">n&#x3D;7</span><br><span class="line">-------</span><br><span class="line">1111110</span><br><span class="line">2222210</span><br><span class="line">2233330</span><br><span class="line">xxx3330</span><br><span class="line">xxxxxx0</span><br><span class="line">xxxxxx0</span><br><span class="line">xxxxxx0</span><br><span class="line">-------</span><br><span class="line">n&#x3D;8</span><br><span class="line">--------</span><br><span class="line">11111110</span><br><span class="line">22222210</span><br><span class="line">22333330</span><br><span class="line">44443330</span><br><span class="line">4444xxx0</span><br><span class="line">xxxxxxx0</span><br><span class="line">xxxxxxx0</span><br><span class="line">xxxxxxx0</span><br><span class="line">--------</span><br></pre></td></tr></table></figure>
+
+<p>后n/2块一行一行从左向右将剩下部分填满:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">n&#x3D;7</span><br><span class="line">-------</span><br><span class="line">111111 0</span><br><span class="line">222221 0</span><br><span class="line">223333 0</span><br><span class="line">   333 0</span><br><span class="line">444</span><br><span class="line">554444 0</span><br><span class="line">655555 0</span><br><span class="line">666666 0</span><br><span class="line">-------</span><br><span class="line">n&#x3D;8</span><br><span class="line">--------</span><br><span class="line">1111111 0</span><br><span class="line">2222221 0</span><br><span class="line">2233333 0</span><br><span class="line">4444333 0</span><br><span class="line">4444</span><br><span class="line">    555 0</span><br><span class="line">5555566 0</span><br><span class="line">6666667 0</span><br><span class="line">7777777 0</span><br><span class="line">--------</span><br></pre></td></tr></table></figure>
+
+<p>以上n=7和n=8时最后对齐的方向与第一部分最后一行染色的方向相同。</p>
+<p>接下来需要注意的就是第一块与最后一块的形状相同，于是作一下微调把它们变得不一样即可：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">n&#x3D;7</span><br><span class="line">-------</span><br><span class="line">1111110</span><br><span class="line">2222210</span><br><span class="line">2233330</span><br><span class="line">4443330</span><br><span class="line">6544440</span><br><span class="line">6555550</span><br><span class="line">6666650</span><br><span class="line">-------</span><br><span class="line">n&#x3D;8</span><br><span class="line">--------</span><br><span class="line">11111110</span><br><span class="line">22222210</span><br><span class="line">22333330</span><br><span class="line">44443330</span><br><span class="line">44445550</span><br><span class="line">55555670</span><br><span class="line">66666670</span><br><span class="line">67777770</span><br></pre></td></tr></table></figure>
+
+<p>我的做法是把最后一块色块在最后一行的其中一块与最后第二块色块在n-2行的其中一块进行互换，保证相同颜色这时候还是连在一起的就行。</p>
+<p>测试时，发现n等于5和6时，用这种调整方案是不行的，因为格子数太少，会出现第一块与最后一块颜色相同然后重叠到一起的情况。对包括这个在内的几种情况进行一下特判即可。</p>
+<h2 id="赛后启发"><a href="#赛后启发" class="headerlink" title="赛后启发"></a>赛后启发</h2><p>以后碰到这种需要自己进行构造的题目不要直接就放弃，感觉稍微花点时间还真是能想出来的，，，这种纠结程度就跟贪心似地，，，如果没别的题能做了，至少随便构造一个交一下看看呗。 </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID    : Chen Fan</span></span><br><span class="line"><span class="comment">LANG    : G++</span></span><br><span class="line"><span class="comment">PROG    : ZOJ3810</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">    1111110</span></span><br><span class="line"><span class="comment">    2222210</span></span><br><span class="line"><span class="comment">    2233330</span></span><br><span class="line"><span class="comment">    4443330</span></span><br><span class="line"><span class="comment">    6544440</span></span><br><span class="line"><span class="comment">    6555550</span></span><br><span class="line"><span class="comment">    6666650</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    11111110</span></span><br><span class="line"><span class="comment">    22222210</span></span><br><span class="line"><span class="comment">    22333330</span></span><br><span class="line"><span class="comment">    44443330</span></span><br><span class="line"><span class="comment">    44445550</span></span><br><span class="line"><span class="comment">    55555670</span></span><br><span class="line"><span class="comment">    66666670</span></span><br><span class="line"><span class="comment">    67777770</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> a[<span class="number">110</span>][<span class="number">110</span>];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> t;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;t);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> tt=<span class="number">1</span>;tt&lt;=t;tt++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> n;</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;n);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (n==<span class="number">1</span>) <span class="built_in">printf</span>(<span class="string">"Y\n"</span>);</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (n==<span class="number">2</span>||n==<span class="number">3</span>||n==<span class="number">4</span>) <span class="built_in">printf</span>(<span class="string">"No solution!\n"</span>);</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (n==<span class="number">5</span>) <span class="built_in">printf</span>(<span class="string">"YYYGR\nYGGGR\nYGYYR\nBYYYR\nBBBBR\n"</span>);</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (n==<span class="number">6</span>) <span class="built_in">printf</span>(<span class="string">"RRRRRY\nRGGGGY\nGGRRRY\nRRRGBY\nGGGGBY\nGBBBBY\n"</span>);</span><br><span class="line">        <span class="keyword">else</span> </span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">memset</span>(a,<span class="number">0</span>,<span class="keyword">sizeof</span>(a));</span><br><span class="line"></span><br><span class="line">            <span class="keyword">int</span> x=<span class="number">1</span>,y=<span class="number">1</span>,fx=<span class="number">1</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=n/<span class="number">2</span>;i++)</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j=<span class="number">1</span>;j&lt;=n;j++)</span><br><span class="line">            &#123;</span><br><span class="line">                a[x][y]=i;</span><br><span class="line">                y+=fx;</span><br><span class="line">                <span class="keyword">if</span> ((y==n&amp;&amp;fx==<span class="number">1</span>)||(y==<span class="number">0</span>&amp;&amp;fx==<span class="number">-1</span>))</span><br><span class="line">                &#123;</span><br><span class="line">                    x++;</span><br><span class="line">                    fx=-fx;</span><br><span class="line">                    y+=fx;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i=n/<span class="number">2</span>+<span class="number">1</span>;i&lt;n;i++)</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j=<span class="number">1</span>;j&lt;=n;j++)</span><br><span class="line">            &#123;</span><br><span class="line">                a[x][y]=i;</span><br><span class="line">                y+=fx;</span><br><span class="line">                <span class="keyword">if</span> ((y==n&amp;&amp;fx==<span class="number">1</span>)||(y==<span class="number">0</span>&amp;&amp;fx==<span class="number">-1</span>)) </span><br><span class="line">                &#123;</span><br><span class="line">                    x++;</span><br><span class="line">                    y=n-y+fx;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (fx==<span class="number">-1</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                a[n<span class="number">-2</span>][<span class="number">1</span>]=n<span class="number">-1</span>;</span><br><span class="line">                a[n][n<span class="number">-1</span>]=n<span class="number">-2</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> </span><br><span class="line">            &#123;</span><br><span class="line">                a[n<span class="number">-2</span>][n<span class="number">-1</span>]=n<span class="number">-1</span>;</span><br><span class="line">                a[n][<span class="number">1</span>]=n<span class="number">-2</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">char</span> words[]=&#123;<span class="string">'R'</span>,<span class="string">'G'</span>,<span class="string">'B'</span>&#125;;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=n;i++)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j=<span class="number">1</span>;j&lt;=n;j++)</span><br><span class="line">                <span class="keyword">if</span> (a[i][j]==<span class="number">0</span>) <span class="built_in">printf</span>(<span class="string">"Y"</span>);</span><br><span class="line">                <span class="keyword">else</span> <span class="built_in">printf</span>(<span class="string">"%c"</span>,words[a[i][j]%<span class="number">3</span>]);</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">"\n"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="C、Untrusted-Patrol"><a href="#C、Untrusted-Patrol" class="headerlink" title="C、Untrusted Patrol"></a>C、Untrusted Patrol</h1><p>Time Limit:  3 Seconds<br>Memory Limit:  65536 KB</p>
+<h2 id="Description-2"><a href="#Description-2" class="headerlink" title="Description"></a>Description</h2><p>Edward is a rich man. He owns a large factory for health drink production. As a matter of course, there is a large warehouse in the factory.</p>
+<p>To ensure the safety of drinks, Edward hired a security man to patrol the warehouse. The warehouse has N piles of drinks and M passageways connected them (warehouse is not big enough). When the evening comes, the security man will start to patrol the warehouse following a path to check all piles of drinks.</p>
+<p>Unfortunately, Edward is a suspicious man, so he sets sensors on K piles of the drinks. When the security man comes to check the drinks, the sensor will record a message. Because of the memory limit, the sensors can only record for the first time of the security man’s visit.</p>
+<p>After a peaceful evening, Edward gathered all messages ordered by recording time. He wants to know whether is possible that the security man has checked all piles of drinks. Can you help him?</p>
+<p>The security man may start to patrol at any piles of drinks. It is guaranteed that the sensors work properly. However, Edward thinks the security man may not works as expected. For example, he may digs through walls, climb over piles, use some black magic to teleport to anywhere and so on. </p>
+<h2 id="Input-2"><a href="#Input-2" class="headerlink" title="Input"></a>Input</h2><p>There are multiple test cases. The first line of input is an integer T indicates the number of test cases. For each test case:</p>
+<p>The first line contains three integers N (1 &lt;= N &lt;= 100000), M (1 &lt;= M &lt;= 200000) and K (1 &lt;= K &lt;= N).</p>
+<p>The next line contains K distinct integers indicating the indexes of piles (1-based) that have sensors installed. The following M lines, each line contains two integers Ai and Bi (1 &lt;= Ai, Bi &lt;= N) which indicates a bidirectional passageway connects piles Ai and Bi.</p>
+<p>Then, there is an integer L (1 &lt;= L &lt;= K) indicating the number of messages gathered from all sensors. The next line contains L distinct integers. These are the indexes of piles where the messages came from (each is among the K integers above), ordered by recording time.</p>
+<h2 id="Output-2"><a href="#Output-2" class="headerlink" title="Output"></a>Output</h2><p>For each test case, output “Yes” if the security man worked normally and has checked all piles of drinks, or “No” if not.</p>
+<h2 id="Sample-Input-1"><a href="#Sample-Input-1" class="headerlink" title="Sample Input"></a>Sample Input</h2><blockquote>
+<p>2<br>5 5 3<br>1 2 4<br>1 2<br>2 3<br>3 1<br>1 4<br>4 5<br>3<br>4 2 1<br>5 5 3<br>1 2 4<br>1 2<br>2 3<br>3 1<br>1 4<br>4 5<br>3<br>4 1 2</p>
+</blockquote>
+<h2 id="Sample-Output-2"><a href="#Sample-Output-2" class="headerlink" title="Sample Output"></a>Sample Output</h2><blockquote>
+<p>No<br>Yes</p>
+</blockquote>
+<h2 id="题意-2"><a href="#题意-2" class="headerlink" title="题意"></a>题意</h2><p>给出一张图，图中的某些结点上装着传感器，访问到装着传感器的节点时，就会被记录下来。现在给出一串传感器记录下来的时间访问序列，询问一个人是否能够按照序列的顺序遍历完整张图。</p>
+<h2 id="分析-2"><a href="#分析-2" class="headerlink" title="分析"></a>分析</h2><h3 id="1-floodfill染色："><a href="#1-floodfill染色：" class="headerlink" title="1.floodfill染色："></a>1.floodfill染色：</h3><p>当时看到这道题想到的只有暴力DFS，写出来之后发现由于floodfill染色的性质，每个点只是访问一次就够了，效率还是很优的。</p>
+<p>基本想法是从时间序列第一个点开始，按时间顺序扩展每一个点，所有标记着传感器的点不可达。扩展完第一个点之后，判断一下下一个点是否能够到达，若不能到达即说明按顺序遍历不可能；否则继续扩展下一个点。</p>
+<p>对每一个结点设置四种标记：无标记、已访问、不可访问、能够访问；</p>
+<p>普通点在到达之前无标记，到达之后标记为已访问；传感器结点在到达之前标记为不可访问，到达之后标记为能够访问，搜过之后标记为已访问；</p>
+<p>一、直接搜索L个传感器的序列，首先将所有拥有传感器的序列全部标记为不可访问；</p>
+<p>二、从第一个开始，扩展遍历所有能到达的点，遍历时的点有两种状态：无标记（普通点）和不可/能够访问（带有传感器的点）。无标记点可以直接改为已访问，不可访问的点则标记为能够访问。遍历完之后将该传感器点标为已访问；</p>
+<p>三、判断下一个传感器点的状况是不是能够访问，若是则表示可以从之前的传感器点不经过任何序列后面的点而到达，若标记是不可访问则表示不可能从之前的传感器点到达这里，那就直接输出NO了。</p>
+<p>四、之后重复二、三过程，直到搜完所有L个点，判断整张图的连通性，即是不是所有点都能到达。</p>
+<p>对于K和L，个人觉得描述的最后一句是有用的，就是L只会小于等于K，不一定要等于K。然后第一次没有加这个特判，结果WA了……加上之后AC，-_-////真的是我想多了吗</p>
+<p>然后就是前向星存储。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID    : Chen Fan</span></span><br><span class="line"><span class="comment">LANG    : G++</span></span><br><span class="line"><span class="comment">PROG    : ZOJ3811</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">nod</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">int</span> x,y;</span><br><span class="line">&#125; node;</span><br><span class="line">node a[<span class="number">400010</span>];</span><br><span class="line"><span class="keyword">int</span> start[<span class="number">100010</span>],num[<span class="number">100010</span>];</span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">short</span> flag[<span class="number">100010</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> sen[<span class="number">100010</span>];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">op</span><span class="params">(node a,node b)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (a.x==b.x) <span class="keyword">return</span> a.y&lt;b.y;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">return</span> a.x&lt;b.x;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">dfs</span><span class="params">(<span class="keyword">int</span> s)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    flag[s]=<span class="number">3</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;num[s];i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> next=a[start[s]+i].y;</span><br><span class="line">        <span class="keyword">if</span> (flag[next]==<span class="number">0</span>) dfs(next);</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (flag[next]==<span class="number">1</span>) flag[next]=<span class="number">2</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> t;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;t);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> tt=<span class="number">1</span>;tt&lt;=t;tt++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> n,m,k;</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%d%d%d"</span>,&amp;n,&amp;m,&amp;k);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=k;i++) <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;sen[i]);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=m;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> x,y;</span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">"%d%d"</span>,&amp;x,&amp;y);</span><br><span class="line">            a[i*<span class="number">2</span>].x=x;</span><br><span class="line">            a[i*<span class="number">2</span>].y=y;</span><br><span class="line">            a[i*<span class="number">2</span><span class="number">-1</span>].x=y;</span><br><span class="line">            a[i*<span class="number">2</span><span class="number">-1</span>].y=x;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> l;</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;l);</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">memset</span>(flag,<span class="number">0</span>,<span class="keyword">sizeof</span>(flag));</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=l;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;sen[i]);</span><br><span class="line">            flag[sen[i]]=<span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (l&lt;k)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"No\n"</span>);</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        m*=<span class="number">2</span>;</span><br><span class="line">        <span class="built_in">memset</span>(start,<span class="number">0</span>,<span class="keyword">sizeof</span>(start));</span><br><span class="line">        <span class="built_in">memset</span>(num,<span class="number">0</span>,<span class="keyword">sizeof</span>(num));</span><br><span class="line">        sort(&amp;a[<span class="number">1</span>],&amp;a[m+<span class="number">1</span>],op);</span><br><span class="line">        <span class="keyword">int</span> o=<span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=m;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (o!=a[i].x) </span><br><span class="line">            &#123;</span><br><span class="line">                o=a[i].x;</span><br><span class="line">                start[o]=i;</span><br><span class="line">            &#125;</span><br><span class="line">            num[o]++;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        flag[sen[<span class="number">1</span>]]=<span class="number">2</span>;</span><br><span class="line">        <span class="keyword">bool</span> outp=<span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=l;i++)</span><br><span class="line">        <span class="keyword">if</span> (flag[sen[i]]==<span class="number">2</span>) dfs(sen[i]);</span><br><span class="line">        <span class="keyword">else</span> </span><br><span class="line">        &#123;</span><br><span class="line">            outp=<span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (outp)</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=n;i++) </span><br><span class="line">        <span class="keyword">if</span> (flag[i]!=<span class="number">3</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            outp=<span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (outp) <span class="built_in">printf</span>(<span class="string">"Yes\n"</span>);</span><br><span class="line">        <span class="keyword">else</span> <span class="built_in">printf</span>(<span class="string">"No\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-并查集"><a href="#2-并查集" class="headerlink" title="2.并查集"></a>2.并查集</h3><p>大体思路与上面类似，把1中的染色部分改成扩展一个可以任意到达的无限集即可。</p>
+<h2 id="启发"><a href="#启发" class="headerlink" title="启发"></a>启发</h2><p>题目中给出了明显的顺序的话，可以作为一个突破点。</p>
+<hr>
+<h1 id="H、Generalized-Palindromic-Number"><a href="#H、Generalized-Palindromic-Number" class="headerlink" title="H、Generalized Palindromic Number"></a>H、Generalized Palindromic Number</h1><p>Time Limit: 2 Seconds<br>Memory Limit: 65536 KB</p>
+<h2 id="Description-3"><a href="#Description-3" class="headerlink" title="Description"></a>Description</h2><p>A number that will be the same when it is written forwards or backwards is known as a palindromic number. For example, 1234321 is a palindromic number.</p>
+<p>We call a number generalized palindromic number, if after merging all the consecutive same digits, the resulting number is a palindromic number. For example, 122111 is a generalized palindromic number. Because after merging, 122111 turns into 121 which is a palindromic number.</p>
+<p>Now you are given a positive integer N, please find the largest generalized palindromic number less than N.</p>
+<h2 id="Input-3"><a href="#Input-3" class="headerlink" title="Input"></a>Input</h2><p>There are multiple test cases. The first line of input contains an integer T (about 5000) indicating the number of test cases. For each test case:</p>
+<p>There is only one integer N (1 &lt;= N &lt;= 1018).</p>
+<h2 id="Output-3"><a href="#Output-3" class="headerlink" title="Output"></a>Output</h2><p>For each test case, output the largest generalized palindromic number less than N.</p>
+<h2 id="Sample-Input-2"><a href="#Sample-Input-2" class="headerlink" title="Sample Input"></a>Sample Input</h2><blockquote>
+<p>4<br>12<br>123<br>1224<br>1122</p>
+</blockquote>
+<h2 id="Sample-Output-3"><a href="#Sample-Output-3" class="headerlink" title="Sample Output"></a>Sample Output</h2><blockquote>
+<p>11<br>121<br>1221<br>1121</p>
+</blockquote>
+<h2 id="题意-3"><a href="#题意-3" class="headerlink" title="题意"></a>题意</h2><p>如果一个数把相邻数位相同的部分都合并之后它还是一个回文数，那就称其为广义回文数。现在给出一个n，要求找到小于n的最大的广义回文数。</p>
+<h2 id="分析-3"><a href="#分析-3" class="headerlink" title="分析"></a>分析</h2><p>开始时想从某种贪心的方法出发手动构造这样一个数出来，很可惜失败了，这里每次摆数字的判断有些麻烦。</p>
+<p>赛后尝试用DFS进行构造：</p>
+<p>每次从前后同时向中间构造，保证回文性。构造时先在高位摆上一个值，然后从低位向中间摆相同的数，中间注意剪枝判断。</p>
+<p>注意摆值的时候上限与更高一位是不是与n相应位相同有关。如果前一位与原数不同，则可以从9开始摆，否则不能比原数大。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID    : Chen Fan</span></span><br><span class="line"><span class="comment">LANG    : G++</span></span><br><span class="line"><span class="comment">PROG    : ZOJ3816</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> tail,nn[<span class="number">30</span>],num[<span class="number">30</span>],ans[<span class="number">30</span>];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">check</span><span class="params">(<span class="keyword">int</span> a[],<span class="keyword">int</span> b[],<span class="keyword">int</span> l,<span class="keyword">int</span> r)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=r;i&gt;=l;i--) </span><br><span class="line">    <span class="keyword">if</span> (a[i]!=b[i]) <span class="keyword">return</span> a[i]&gt;b[i];</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">dfs</span><span class="params">(<span class="keyword">int</span> high,<span class="keyword">int</span> low,<span class="keyword">bool</span> flag)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (high&lt;low)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (check(nn,num,<span class="number">1</span>,tail)&amp;&amp;check(num,ans,<span class="number">1</span>,tail))</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=tail;i++) ans[i]=num[i];</span><br><span class="line">    &#125; <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> end;</span><br><span class="line">        <span class="keyword">if</span> (flag) end=nn[high];</span><br><span class="line">        <span class="keyword">else</span> end=<span class="number">9</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=end;i&gt;=<span class="number">0</span>;i--)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> now=low;</span><br><span class="line">            <span class="keyword">if</span> (check(ans,num,high+<span class="number">1</span>,tail)) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">            num[high]=i;</span><br><span class="line">            <span class="keyword">if</span> (num[high]!=num[high+<span class="number">1</span>])</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">while</span> (now&lt;=high)</span><br><span class="line">                &#123;</span><br><span class="line">                    num[now]=num[high];</span><br><span class="line">                    now++;</span><br><span class="line">                    dfs(high<span class="number">-1</span>,now,flag&amp;&amp;i==end);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> dfs(high<span class="number">-1</span>,low,flag&amp;&amp;i==end);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> t;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;t);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> tt=<span class="number">1</span>;tt&lt;=t;tt++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">long</span> <span class="keyword">long</span> n;</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%llu"</span>,&amp;n);</span><br><span class="line">        </span><br><span class="line">        tail=<span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span>(n)</span><br><span class="line">        &#123;</span><br><span class="line">            tail++;</span><br><span class="line">            nn[tail]=n%<span class="number">10</span>;</span><br><span class="line">            n/=<span class="number">10</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">memset</span>(num,<span class="number">0</span>,<span class="keyword">sizeof</span>(num));</span><br><span class="line">        <span class="built_in">memset</span>(ans,<span class="number">0</span>,<span class="keyword">sizeof</span>(ans));</span><br><span class="line">        dfs(tail,<span class="number">1</span>,<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=tail;i&gt;=<span class="number">1</span>;i--) <span class="built_in">printf</span>(<span class="string">"%d"</span>,ans[i]);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="启发-1"><a href="#启发-1" class="headerlink" title="启发"></a>启发</h2><p>实在不行可以暴搜啊！！！！！</p>
+<hr>
+<h1 id="J、Pretty-Poem"><a href="#J、Pretty-Poem" class="headerlink" title="J、Pretty Poem"></a>J、Pretty Poem</h1><p>Time Limit:  2 Seconds<br>Memory Limit:  65536 KB</p>
+<h2 id="Description-4"><a href="#Description-4" class="headerlink" title="Description"></a>Description</h2><p>Poetry is a form of literature that uses aesthetic and rhythmic qualities of language. There are many famous poets in the contemporary era. It is said that a few ACM-ICPC contestants can even write poetic code. Some poems has a strict rhyme scheme like “ABABA” or “ABABCAB”. For example, “niconiconi” is composed of a rhyme scheme “ABABA” with A = “ni” and B = “co”.</p>
+<p>More technically, we call a poem pretty if it can be decomposed into one of the following rhyme scheme: “ABABA” or “ABABCAB”. The symbol A, B and C are different continuous non-empty substrings of the poem. By the way, punctuation characters should be ignored when considering the rhyme scheme.</p>
+<p>You are given a line of poem, please determine whether it is pretty or not.</p>
+<h2 id="Input-4"><a href="#Input-4" class="headerlink" title="Input"></a>Input</h2><p>There are multiple test cases. The first line of input contains an integer T indicating the number of test cases. For each test case:</p>
+<p>There is a line of poem S (1 &lt;= length(S) &lt;= 50). S will only contains alphabet characters or punctuation characters.</p>
+<h2 id="Output-4"><a href="#Output-4" class="headerlink" title="Output"></a>Output</h2><p>For each test case, output “Yes” if the poem is pretty, or “No” if not.</p>
+<h2 id="Sample-Input-3"><a href="#Sample-Input-3" class="headerlink" title="Sample Input"></a>Sample Input</h2><blockquote>
+<p>3<br>niconiconi~<br>pettan,pettan,tsurupettan<br>wafuwafu</p>
+</blockquote>
+<h2 id="Sample-Output-4"><a href="#Sample-Output-4" class="headerlink" title="Sample Output"></a>Sample Output</h2><blockquote>
+<p>Yes<br>Yes<br>No</p>
+</blockquote>
+<h2 id="分析-4"><a href="#分析-4" class="headerlink" title="分析"></a>分析</h2><p>由于本题数据量最大只有50个字符，可以直接模拟枚举。</p>
+<p>首先枚举AB，满足AB匹配之后，再判断AB长度的三倍与总长度之间的关系，分类讨论。</p>
+<p>算法就是这么个算法，但是实现起来超容易出错……</p>
+<p>附上一组处理得比较全面的测试数据</p>
+<blockquote>
+<p>8<br>xyxyxxy<br>xyxyyxy<br>xxxxyxx<br>xxxxx<br>xyxyx<br>xxxxxxxx<br>xxxxxxxxxxxxx<br>xyzzxyzxyzzxyzxyzxyzzxyz</p>
+</blockquote>
+<h2 id="启发-2"><a href="#启发-2" class="headerlink" title="启发"></a>启发</h2><p>题目数据量才这么点。。。果断应该直接上的</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/09/15/2014-09-15-The-2014-ACMICPC-Asia-Regional-Xian-Online/" rel="bookmark">The 2014 ACMICPC Asia Regional Xian Online</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/09/13/2014-09-13-The-2014-ACM-ICPC-Asia-Regional-Anshan-Online/" rel="bookmark">The 2014 ACM-ICPC Asia Regional Anshan Online</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/09/23/2014-09-23-The-2014-ACMICPC-Asia-Regional-Guangzhou-Online/" rel="bookmark">The 2014 ACMICPC Asia Regional Guangzhou Online</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/09/23/2014-09-23-The-2014-ACMICPC-Asia-Regional-Beijing-Online/" rel="bookmark">The 2014 ACMICPC Asia Regional Beijing Online</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/09/28/2014-09-28-The-2014-ACMICPC-Asia-Regional-Shanghai-Online/" rel="bookmark">The 2014 ACMICPC Asia Regional Shanghai Online</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ACM-ICPC/" rel="tag"># ACM-ICPC</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2014/09/07/2014-09-07-HDU-1811-Rank-of-Tetris/" rel="prev" title="HDU 1811 Rank of Tetris 拓扑排序+并查集">
+      <i class="fa fa-chevron-left"></i> HDU 1811 Rank of Tetris 拓扑排序+并查集
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2014/09/09/2014-09-09-HDU-3367-Pseudoforest/" rel="next" title="HDU 3367 Pseudoforest 最大生成树">
+      HDU 3367 Pseudoforest 最大生成树 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#A、The-Himalayas"><span class="nav-text">A、The Himalayas</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Description"><span class="nav-text">Description</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Input"><span class="nav-text">Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output"><span class="nav-text">Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Input"><span class="nav-text">Sample Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Output"><span class="nav-text">Sample Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#题意"><span class="nav-text">题意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析"><span class="nav-text">分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#B、A-Volcanic-Island"><span class="nav-text">B、A Volcanic Island</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Description-1"><span class="nav-text">Description</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Input-1"><span class="nav-text">Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output-1"><span class="nav-text">Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Output-1"><span class="nav-text">Sample Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#题意-1"><span class="nav-text">题意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析-1"><span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#赛后启发"><span class="nav-text">赛后启发</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#C、Untrusted-Patrol"><span class="nav-text">C、Untrusted Patrol</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Description-2"><span class="nav-text">Description</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Input-2"><span class="nav-text">Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output-2"><span class="nav-text">Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Input-1"><span class="nav-text">Sample Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Output-2"><span class="nav-text">Sample Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#题意-2"><span class="nav-text">题意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析-2"><span class="nav-text">分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-floodfill染色："><span class="nav-text">1.floodfill染色：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-并查集"><span class="nav-text">2.并查集</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启发"><span class="nav-text">启发</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#H、Generalized-Palindromic-Number"><span class="nav-text">H、Generalized Palindromic Number</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Description-3"><span class="nav-text">Description</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Input-3"><span class="nav-text">Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output-3"><span class="nav-text">Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Input-2"><span class="nav-text">Sample Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Output-3"><span class="nav-text">Sample Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#题意-3"><span class="nav-text">题意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析-3"><span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启发-1"><span class="nav-text">启发</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#J、Pretty-Poem"><span class="nav-text">J、Pretty Poem</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Description-4"><span class="nav-text">Description</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Input-4"><span class="nav-text">Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output-4"><span class="nav-text">Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Input-3"><span class="nav-text">Sample Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Output-4"><span class="nav-text">Sample Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析-4"><span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启发-2"><span class="nav-text">启发</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'e93f1f15e7df15606c010ecbc8110bc7',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

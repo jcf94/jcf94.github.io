@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="之前花了点时间稍微研究了下系统内核载入，重新翻出来整理一下： 内核载入之前的工作 1981年IBM PC刚推出时，系统只带有640K的的RAM，内存寻址范围最大也只有1M。现如今基本的32位机都能寻址到4G，经过CPU的新特性更是可以支持到64G的物理内存。但是为了与原来的PC想兼容，系统1M一下物理内存使用分配上仍然保持与原来一致。ROM BIOS都在物理内存能寻址的最高端位置处，所以在大于1M">
+<meta property="og:type" content="article">
+<meta property="og:title" content="BIOS内核载入的方式（引导实验）">
+<meta property="og:url" content="https://jcf94.com/2015/08/19/2015-08-19-biosinit/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="之前花了点时间稍微研究了下系统内核载入，重新翻出来整理一下： 内核载入之前的工作 1981年IBM PC刚推出时，系统只带有640K的的RAM，内存寻址范围最大也只有1M。现如今基本的32位机都能寻址到4G，经过CPU的新特性更是可以支持到64G的物理内存。但是为了与原来的PC想兼容，系统1M一下物理内存使用分配上仍然保持与原来一致。ROM BIOS都在物理内存能寻址的最高端位置处，所以在大于1M">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2015-08-19-biosinit-1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-08-19-biosinit-2.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-08-19-biosinit-3.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-08-19-biosinit-4.jpg">
+<meta property="article:published_time" content="2015-08-19T10:20:21.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="内核">
+<meta property="article:tag" content="BIOS">
+<meta property="article:tag" content="引导">
+<meta property="article:tag" content="mbr">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2015-08-19-biosinit-1.jpg">
+
+<link rel="canonical" href="https://jcf94.com/2015/08/19/2015-08-19-biosinit/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>BIOS内核载入的方式（引导实验） | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2015/08/19/2015-08-19-biosinit/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          BIOS内核载入的方式（引导实验）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-08-19 18:20:21" itemprop="dateCreated datePublished" datetime="2015-08-19T18:20:21+08:00">2015-08-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Architecture/" itemprop="url" rel="index"><span itemprop="name">Computer Architecture</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>之前花了点时间稍微研究了下系统内核载入，重新翻出来整理一下：</p>
+<h1 id="内核载入之前的工作"><a href="#内核载入之前的工作" class="headerlink" title="内核载入之前的工作"></a>内核载入之前的工作</h1><hr>
+<p>1981年IBM PC刚推出时，系统只带有640K的的RAM，内存寻址范围最大也只有1M。现如今基本的32位机都能寻址到4G，经过CPU的新特性更是可以支持到64G的物理内存。但是为了与原来的PC想兼容，系统1M一下物理内存使用分配上仍然保持与原来一致。ROM BIOS都在物理内存能寻址的最高端位置处，所以在大于1M内存的新计算机上，ROM BIOS最后会被映射到1M末尾的 Shadow 区域中。</p>
+<a id="more"></a>
+
+<p><img data-src="http://jcf94.com/download/2015-08-19-biosinit-1.jpg" alt="内核"></p>
+<p>计算机上电初始化时，物理内存被设置成从地址0开始的连续区域。除了地址从0xA0000~0xFFFFF（640K~1M）存放显存和ROM BIOS和0xFFFE0000~0xFFFFFFFF（4G的最后64K）存放ROM BIOS以外，其他部分都可以用作主要内存。</p>
+<p>后续内核载入之后会重新分配，以后再研究。</p>
+<p>x86体系的PC启动之后由BIOS完成自检，然后开始搜索外存上的引导信息，查找设备进行系统启动。BIOS会把硬盘等设备的头512字节数据复制到内存，检查这512字节是不是以16进制的0x55和0xaa结尾，这是启动引导程序的标记。</p>
+<h1 id="用汇编写一个简易的引导程序"><a href="#用汇编写一个简易的引导程序" class="headerlink" title="用汇编写一个简易的引导程序"></a>用汇编写一个简易的引导程序</h1><hr>
+<p>下面是一个简单的程序：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">.global start</span><br><span class="line">.code16</span><br><span class="line">.text</span><br><span class="line">start:</span><br><span class="line">        movw $<span class="number">0xb800</span>,%ax</span><br><span class="line">        movw %ax,%ds</span><br><span class="line">        movb $<span class="number">0x41</span>,(<span class="number">0</span>)</span><br><span class="line">        movb $<span class="number">0x1f</span>,(<span class="number">1</span>)</span><br><span class="line">hlt</span><br></pre></td></tr></table></figure>
+
+<p><code>.global start</code> 这一句把start标签做全局符号导出，后面链接的时候会用到。</p>
+<p>把代码保存为boot.s文件。然后用gas的as.exe和ld.exe两个程序真正把这段汇编代码处理成机器码</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">as -o boot.o boot.s</span><br><span class="line"></span><br><span class="line">ld -Ttext 0x200 -s -o boot --entry start  boot.o</span><br></pre></td></tr></table></figure>
+
+<p><code>-Ttext 0x200</code> 的作用是让输出的代码设置为从boot输出文件的0x200位置开头，否则我们就很难确定我们得到的boot文件从哪开始才是代码，一会写入的时候也从这里写就行。</p>
+<p>ld 命令里的 <code>--entry start</code> 这段就是我们之前的汇编文件中需要写 <code>.global start</code> 这句声明的原因。指定入口。</p>
+<p>在保护模式启动之前，微机处于实地址模式，这个时候需要先设定数据段段寄存器的地址，然后就可以用一个16位的地址来访问内存开头的1M空间了。</p>
+<p><code>.code16</code> 这一句声明是为了让gas了解到这段程序是为实模式编写的，且限定为16位的汇编编译。</p>
+<p>首先把数据段寄存器设置成0xb800，这样，地址0就会指向PC的CPU中用来显示屏幕的一段内存的开头。在这个CPU的最初的阶段，一般屏幕有80行，25列，而当我们把数据段寄存器赋予值0xb800，地址0所指向的字节就代表第一行第一个字符，这里是ascii码中的大写字母A，即0x41。地址1现在指向的字节代表了第一行第一个字符的字体颜色和背景颜色，格式与windows命令行的color命令一样。</p>
+<p>详细如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">颜色设置</span><br><span class="line">颜色属性由两个十六进制数字指定 -- 第一个为背景，第二个则为前景。每个数字可以为以下任何值之一:</span><br><span class="line">0 &#x3D; 黑色</span><br><span class="line">1 &#x3D; 蓝色</span><br><span class="line">2 &#x3D; 绿色</span><br><span class="line">3 &#x3D; 浅绿色</span><br><span class="line">4 &#x3D; 红色</span><br><span class="line">5 &#x3D; 紫色</span><br><span class="line">6 &#x3D; 黄色</span><br><span class="line">7 &#x3D; 白色</span><br><span class="line">8 &#x3D; 灰色</span><br><span class="line">9 &#x3D; 淡蓝色</span><br><span class="line">A &#x3D; 淡绿色</span><br><span class="line">B &#x3D; 淡浅绿色</span><br><span class="line">C &#x3D; 淡红色</span><br><span class="line">D &#x3D; 淡紫色</span><br><span class="line">E &#x3D; 淡黄色</span><br><span class="line">F &#x3D; 亮白色</span><br></pre></td></tr></table></figure>
+
+<p>如果把上面这段程序作为一个引导写进硬盘，则之后理论上将能够看到运行结果是屏幕上出现一个蓝底白字的A。</p>
+<h1 id="准备写入存储设备，了解一下BIOS启动的流程，主要是MBR"><a href="#准备写入存储设备，了解一下BIOS启动的流程，主要是MBR" class="headerlink" title="准备写入存储设备，了解一下BIOS启动的流程，主要是MBR"></a>准备写入存储设备，了解一下BIOS启动的流程，主要是MBR</h1><hr>
+<p>完成编译之后需要把这块写入硬盘/U盘等存储设备。</p>
+<p>刚开始我是拿U盘来试的，结果差点把我的U盘给毁了……汗……后来想到在VMware虚拟机里面直接新建一块硬盘来做。</p>
+<p><img data-src="http://jcf94.com/download/2015-08-19-biosinit-2.jpg" alt="vmware1"></p>
+<p>此时这块新建的磁盘里面什么都没有，但是用winhex打开磁盘1，看到的是这样的：</p>
+<p><img data-src="http://jcf94.com/download/2015-08-19-biosinit-3.jpg" alt="vmware2"></p>
+<p>winhex是一个16进制的编辑器，可以直接用来查看文件或者读取硬盘，免费版只能查看不能修改，不过这个对我们来说已经够了，因为之后的写硬盘操作我们要用C语言直接完成。</p>
+<p>不管硬盘上设定的一扇区有多大，第一个扇区的引导都是固定512B，可以看到前512B的最后两个字节是 <code>55 AA</code>，即引导结束标志。然后开始部分是一些初始程序和找不到操作系统的提示信息。</p>
+<p>这些东西都是在创建硬盘的时候里面默认写着的，如果对此块硬盘进行引导的话，将返回这些错误信息。</p>
+<hr>
+<p>下面解释一下MBR的相关知识：</p>
+<p>MBR全称是Master Boot Record，硬盘主引导记录，它存在于硬盘的第一个物理扇区，也就是0面0磁道1扇区。</p>
+<p>软盘上的引导扇区的作用是把软盘上存放的真正的操作系统内核读到内存中，然后跳到内核去执行。而MBR的作用却是找到硬盘上的活动分区，然后把活动分区上的引导记录读到内存中，然后再跳到此引导记录中去执行，后面的过程就与从软盘启动计算机一致了。</p>
+<p>这里，可以把硬盘上的活动分区都看成一是个软盘。我们知道一个硬盘可以分成多个分区，也就是说一个硬盘可以视为由多个软盘组成，每一个分区都可以有自己的引导记录，这就如每个软盘上都有自己的引导记录一样。那么哪一个分区（软盘）用来真正引导计算机呢？这就由MBR来完成，MBR查看每个分区记录，当找到一个活动分区时，就把此活动分区的引导记录载入。</p>
+<p>显然，必须有一个地方来存放硬盘的分区记录，这就是所谓的硬盘分区表。这个硬盘分区表也在MBR中，不过MBR只有一个扇区大小，既要有用来查找硬盘分区表的代码，还要包含硬盘分区表，所以这个硬盘分区表不可能很大。实际上，这个表只有四个表项，也就是说在一块硬盘里，最多有4个分区能用来引导电脑。</p>
+<p>再来完整的看看<strong>MBR载入的流程</strong>，计算机启动的时候，MBR先把自己搬移到0x0600处，随后MBR开始查找内部的硬盘分区表表项，之后找到的引导程序会被BIOS载入到内存的0x7C00处，然后BIOS跳转到0x7C00处执行。</p>
+<p>每个硬盘分区表表项的第一个字节只能是0x80或者0x00。如果是0×80表示这是一个活动分区，然后MBR再从这个表项中读出此分区在硬盘上的位置，将此分区的第一个扇区（含有此分区的引导记录）读入0x7C00处，然后跳到0x7C00处执行。如果表项的第一个字节是0x00，则查找下一个表项，直到四个表项都找完为止。如果此第一个字节既不是0x80又不是0x00，则打印一条错误信息。</p>
+<p>MBR的整个结构，总长度上面说过了，一共512字节：</p>
+<p>|地址|说明|长度（Byte）<br>|-|<br>|0x000（0）|MBR中的执行代码|440<br>|0x1B8（440）|磁盘商标（可选）|6<br>|0X1BE（446）|分区表（共4项，每项16字节）|4*16=64<br>|0X1FE（510）|引导记录标志（55AA）|2</p>
+<p>分区表表项结构如图所示，总长度一共16字节：</p>
+<p>|地址偏移量|说明|长度（Byte）<br>|-|<br>|0x0|状态码，0x80表示为活动分区，0x00表示为非活动分区，其他值无效|1<br>|0x1|分区的第一个扇区的CHS地址（磁头、柱面、扇区）|3<br>|0x4|分区类型（FAT、NTFS、ext2、ext3等）|1<br>|0x5|分区的最后一个扇区的CHS地址|3<br>|0x8|分区的第一个扇区的LBA地址|4<br>|0xC|分区的长度（多少个扇区）|4</p>
+<p>所以写入前440个长度即可。后面的保持不变。</p>
+<p>……之前拿U盘试的时候直接改了前面512B的所有内容，导致后来电脑直接读不出来U盘的东西了。因为分区表整个被破坏了。</p>
+<h1 id="把引导写入硬盘"><a href="#把引导写入硬盘" class="headerlink" title="把引导写入硬盘"></a>把引导写入硬盘</h1><hr>
+<p>写硬盘用C语言来完成：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;windows.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    FILE *fp = <span class="literal">NULL</span>;</span><br><span class="line">    DWORD length;</span><br><span class="line">    HANDLE handle = <span class="literal">NULL</span>;</span><br><span class="line">    byte buff[<span class="number">512</span>],buf[<span class="number">512</span>];</span><br><span class="line">    <span class="keyword">int</span> i;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//读取硬盘，并把原始的引导信息保存下来</span></span><br><span class="line">    handle = CreateFile(TEXT(<span class="string">"\\\\.\\PHYSICALDRIVE1"</span>),GENERIC_READ,<span class="number">0</span>,<span class="literal">NULL</span>,OPEN_EXISTING,<span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">	<span class="keyword">if</span> (handle == INVALID_HANDLE_VALUE)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"Cannot open the Device~!\n"</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">memset</span>(buff,<span class="number">0</span>,<span class="keyword">sizeof</span>(buff));</span><br><span class="line">	ReadFile(handle,buff,<span class="keyword">sizeof</span>(buff),&amp;length,<span class="literal">NULL</span>);</span><br><span class="line">	CloseHandle(handle);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;length;i++)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (i%<span class="number">16</span>==<span class="number">0</span>) <span class="built_in">printf</span>(<span class="string">"\n"</span>);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"%02X "</span>,buff[i]);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"\n"</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//打开之前写好的引导文件</span></span><br><span class="line">    fp = fopen(<span class="string">"boot"</span>,<span class="string">"rb"</span>);</span><br><span class="line">	<span class="keyword">if</span> (fp == <span class="literal">NULL</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"Cannot open the File~!\n"</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="built_in">memset</span>(buf,<span class="number">0</span>,<span class="keyword">sizeof</span>(buf));</span><br><span class="line">    fseek(fp,<span class="number">0x200</span>,SEEK_SET); <span class="comment">//之前编译的时候指定的文件位置在这里用上</span></span><br><span class="line">    fread(buf,<span class="keyword">sizeof</span>(buf),<span class="number">1</span>,fp);</span><br><span class="line">    fclose(fp);</span><br><span class="line">    <span class="keyword">for</span> (i=<span class="number">440</span>;i&lt;<span class="number">512</span>;i++) buf[i]=buff[i]; <span class="comment">//保留原有的引导的440以后的内容</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//把整理好的引导信息写进硬盘</span></span><br><span class="line">    handle = CreateFile(TEXT(<span class="string">"\\\\.\\PHYSICALDRIVE1"</span>),GENERIC_WRITE,<span class="number">0</span>,<span class="literal">NULL</span>,OPEN_EXISTING,<span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">	<span class="keyword">if</span> (handle == INVALID_HANDLE_VALUE)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"Cannot open the Device~!\n"</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!WriteFile(handle,buf,<span class="keyword">sizeof</span>(buf),&amp;length,<span class="literal">NULL</span>))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"Writing Error~!"</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="built_in">printf</span>(<span class="string">"Writing Success~!"</span>);</span><br><span class="line">    CloseHandle(handle);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>写入完成之后，重启虚拟机，把硬盘1的启动项调到硬盘0前面去，然后启动！</p>
+<p><img data-src="http://jcf94.com/download/2015-08-19-biosinit-4.jpg" alt="vmware3"></p>
+<p>BIOS闪了一下之后，果然左上角出现了预先设计的A，至此引导程序实验成功。然后重新恢复启动项正常进去之后硬盘1也没有出什么问题。</p>
+<p>最后…<a href="http://www.cnblogs.com/bombless/archive/2010/12/28/writing-x86-os-part1.html" target="_blank" rel="noopener">这篇文章</a>给了我很大的帮助</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/07/13/2015-07-13-makefile/" rel="bookmark">Makefile解析</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%86%85%E6%A0%B8/" rel="tag"># 内核</a>
+              <a href="/tags/BIOS/" rel="tag"># BIOS</a>
+              <a href="/tags/%E5%BC%95%E5%AF%BC/" rel="tag"># 引导</a>
+              <a href="/tags/mbr/" rel="tag"># mbr</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/08/16/2015-08-16-compilers/" rel="prev" title="编译原理">
+      <i class="fa fa-chevron-left"></i> 编译原理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/08/22/2015-08-22-networkflow/" rel="next" title="网络流整理">
+      网络流整理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#内核载入之前的工作"><span class="nav-text">内核载入之前的工作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#用汇编写一个简易的引导程序"><span class="nav-text">用汇编写一个简易的引导程序</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#准备写入存储设备，了解一下BIOS启动的流程，主要是MBR"><span class="nav-text">准备写入存储设备，了解一下BIOS启动的流程，主要是MBR</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#把引导写入硬盘"><span class="nav-text">把引导写入硬盘</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '68a822edb7abf6bd68b95325867e8e77',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="上一篇核心课程的复习笔记还是在写在上学期：信号相关专业复习 《随机信号》是我本科阶段最后一门通信的核心课程，主要内容是用概率论的方法分析随机信号的统计特性等特点。虽然马上就要毕业离开通信领域了，还是把这最后一门好好理理。 目前上课只介绍到了连续信号的分析。 主要内容是随机过程的统计特性等等特点，平稳随机过程的谱分析，以及随机信号通过线性系统的分析。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="随机信号 复习笔记">
+<meta property="og:url" content="https://jcf94.com/2015/10/26/2015-10-26-suiji/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="上一篇核心课程的复习笔记还是在写在上学期：信号相关专业复习 《随机信号》是我本科阶段最后一门通信的核心课程，主要内容是用概率论的方法分析随机信号的统计特性等特点。虽然马上就要毕业离开通信领域了，还是把这最后一门好好理理。 目前上课只介绍到了连续信号的分析。 主要内容是随机过程的统计特性等等特点，平稳随机过程的谱分析，以及随机信号通过线性系统的分析。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-10-26T07:04:34.000Z">
+<meta property="article:modified_time" content="2018-03-07T06:50:40.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="复习笔记">
+<meta property="article:tag" content="信号处理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2015/10/26/2015-10-26-suiji/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>随机信号 复习笔记 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2015/10/26/2015-10-26-suiji/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          随机信号 复习笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-10-26 15:04:34" itemprop="dateCreated datePublished" datetime="2015-10-26T15:04:34+08:00">2015-10-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-03-07 14:50:40" itemprop="dateModified" datetime="2018-03-07T14:50:40+08:00">2018-03-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Bachelor-of-Engineering/" itemprop="url" rel="index"><span itemprop="name">Bachelor-of-Engineering</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>上一篇核心课程的复习笔记还是在写在上学期：<a href="/2015/07/01/2015-07-01-xinhaoxiangguan/">信号相关专业复习</a></p>
+<p>《随机信号》是我本科阶段最后一门通信的核心课程，主要内容是用概率论的方法分析随机信号的统计特性等特点。虽然马上就要毕业离开通信领域了，还是把这最后一门好好理理。</p>
+<p>目前上课只介绍到了连续信号的分析。</p>
+<p>主要内容是随机过程的统计特性等等特点，平稳随机过程的谱分析，以及随机信号通过线性系统的分析。</p>
+<a id="more"></a>
+
+<h1 id="1-什么是随机信号（随机过程）"><a href="#1-什么是随机信号（随机过程）" class="headerlink" title="1. 什么是随机信号（随机过程）"></a>1. 什么是随机信号（随机过程）</h1><p>一组随机变量，结果不仅与每次实验有关，还与时间t有关，这时候的随机变量就叫<strong>随机过程</strong>。</p>
+<p>随机过程就是<strong>多条样本函数的集合</strong>。</p>
+<h2 id="随机过程的定义和一般表征"><a href="#随机过程的定义和一般表征" class="headerlink" title="随机过程的定义和一般表征"></a>随机过程的定义和一般表征</h2><p>设随机实验的样本空间是$S={\xi}$，对于每个$\xi$，对应有参数$t$的函数$X(\xi,t),t\in T$。那么对于每一个$\xi$，得到一族$t$的函数${X(\xi,t),t\in T}$。</p>
+<p>这个$t$的<strong>函数族</strong>称为<strong>随机过程</strong>，简记为$X(\xi,t)$，或$X(t)$。族中每个函数称为一个<strong>样本</strong>，它是随机过程的一次试验的<strong>物理实现</strong>，是一个<strong>确知的时间函数</strong>。</p>
+<p>对于每个给定的时间$t_i(i=1,2,…),X(\xi,t_i)$都是<strong>随机变量</strong>。</p>
+<p>样本函数集合：</p>
+<p>$$X(t,\xi)=\{X(t,\xi_i),i=1,2,…\}$$</p>
+<p>样本变量集合：</p>
+<p>$$X(t,\xi)=\{X(t_i,\xi),i=1,2,…\}$$</p>
+<h1 id="2-随机信号的研究方法"><a href="#2-随机信号的研究方法" class="headerlink" title="2. 随机信号的研究方法"></a>2. 随机信号的研究方法</h1><h2 id="时域分析"><a href="#时域分析" class="headerlink" title="时域分析"></a>时域分析</h2><h3 id="（1）随机过程的概率特性"><a href="#（1）随机过程的概率特性" class="headerlink" title="（1）随机过程的概率特性"></a>（1）随机过程的概率特性</h3><p>随机过程$X(t)$在任意时刻$t_1\in T$的取值$X(t_1)$是以为随机变量，则其：</p>
+<p>一维概率分布函数：</p>
+<p>$$F_X(x_1;t_1)=P\{x(t_1)\le x_1\}$$</p>
+<p>一维概率密度函数：</p>
+<p>$$f_X(x_1;t_1)=\frac{\partial F_X(x_1;t_1)}{\partial x_1}$$</p>
+<p>为了描述在任意两个时刻$t_1$和$t_2$的状态间的内在联系，引入二维随机变量的概率分布：</p>
+<p>二维概率分布函数：</p>
+<p>$$F_X(x_1,x_2;t_1,t_2)=P\{X(t_1)\le x_1,X(t_2)\le x_2\}$$</p>
+<p>二维概率密度函数：</p>
+<p>$$f_X(x_1,x_2;t_1,t_2)=\frac{\partial F_X(x_1,x_2;t_1,t_2)}{\partial x_1 \partial x_2}$$</p>
+<h3 id="（2）随机信号的数字特征"><a href="#（2）随机信号的数字特征" class="headerlink" title="（2）随机信号的数字特征"></a>（2）随机信号的数字特征</h3><h4 id="均值-数学期望（一阶原点矩）"><a href="#均值-数学期望（一阶原点矩）" class="headerlink" title="均值/数学期望（一阶原点矩）"></a>均值/数学期望（一阶原点矩）</h4><p>相当于把时间$t$先固定，然后用随机变量的方法来计算当前时刻样本变量集合的数学期望。</p>
+<p>$$m_X(t)=E[X(t)]=\int_{-\infty}^{\infty}xf_X(x;t)dx$$</p>
+<p>$$m_X(t)$$是一个<strong>平均函数</strong>，是时间$t$的函数，随机过程的样本在它附近起伏变化。</p>
+<h4 id="均方值（二阶原点矩）"><a href="#均方值（二阶原点矩）" class="headerlink" title="均方值（二阶原点矩）"></a>均方值（二阶原点矩）</h4><p>$$\Psi_X^2(t)=E[X^2(t)]=\int_{-\infty}^{\infty}x^2f_X(x;t)dx$$</p>
+<h4 id="方差（二阶中心矩）"><a href="#方差（二阶中心矩）" class="headerlink" title="方差（二阶中心矩）"></a>方差（二阶中心矩）</h4><p>$$\sigma_X^2(t)=D[X(t)]=E[(X(t)-m_X(t))^2]$$</p>
+<p>方差和均方值都是$t$的确定函数，描述了随机过程$X(t)$的所有样本函数在$t$时刻的函数值相对于$m_X(t)$的<strong>偏离程度</strong>/围绕数学期望的<strong>分散程度</strong>。</p>
+<h4 id="相关函数（混合原点矩）"><a href="#相关函数（混合原点矩）" class="headerlink" title="相关函数（混合原点矩）"></a>相关函数（混合原点矩）</h4><p>$$R_X(t_1,t_2)=E[X(t_1)X(t_2)]=\int_{-\infty}^{\infty}\int_{-\infty}^{\infty}x_1x_2f_X(x_1,x_2;t_1,t_2)dx_1dx_2$$</p>
+<p>描述了$X(t)$在任意两个不同时刻的状态之间的<strong>相关程度</strong>，即整个随机过程中任意两个不同时刻之间的内在关系：<strong>线性相关性</strong>。</p>
+<p>当$t_1=t_2=t$时：</p>
+<p>$$R_X(t_1,t_2)=R_X(t,t)=E[X(t)X(t)]=E[X^2(t)]$$</p>
+<p>此时$X(t)$的自相关函数等于均方值。</p>
+<h4 id="协方差函数（混合中心矩）"><a href="#协方差函数（混合中心矩）" class="headerlink" title="协方差函数（混合中心矩）"></a>协方差函数（混合中心矩）</h4><p>$$\begin{align}<br>K_X(t_1,t_2)<br>&amp;=E[(X(t_1)-m_X(t_1))(X(t_2)-m_X(t_2))]\<br>&amp;=\int_{-\infty}^{\infty}\int_{-\infty}^{\infty}(x_1-m_X(t_1))(x_2-m_X(t_2))f_X(x_1,x_2;t_1,t_2)dx_1dx_2\<br>&amp;=R_X(t_1,t_2)-m_X(t_1)m_X(t_2)<br>\end{align}$$</p>
+<p>描述了$X(t)$在任意两个不同时刻的起伏值之间的相关程度。</p>
+<p>当$t_1=t_2=t$时：</p>
+<p>$$K_X(t_1,t_2)=K_X(t,t)=E[(X(t)-m_X(t))^2]=D[X(t)]=\sigma^2_X(t)$$</p>
+<p>此时$X(t)$的协方差函数等于方差。</p>
+<h4 id="描述两个随机信号之间的联系"><a href="#描述两个随机信号之间的联系" class="headerlink" title="描述两个随机信号之间的联系"></a>描述两个随机信号之间的联系</h4><p>互相关函数、互协方差函数、互相关系数…</p>
+<p>方法类似。</p>
+<h2 id="频域分析"><a href="#频域分析" class="headerlink" title="频域分析"></a>频域分析</h2><h3 id="（1）随机信号样本函数的功率及功率谱"><a href="#（1）随机信号样本函数的功率及功率谱" class="headerlink" title="（1）随机信号样本函数的功率及功率谱"></a>（1）随机信号样本函数的功率及功率谱</h3><p>平稳过程的任何一个非零样本函数的持续时间都是<strong>无限长</strong>，因此不满足<strong>绝对可积</strong>和<strong>能量有限</strong>的条件，傅里叶变换<strong>不存在</strong>。</p>
+<p>为了能够用频域来分析，首先定义<strong>其中一条样本函数</strong>的<strong>截断函数</strong>：</p>
+<p>$$x_T(t)=\begin{cases}x(t),&amp;|t|\le T\\0,&amp;|t|\gt T\end{cases}$$</p>
+<p>易知，截断函数是符合傅里叶变换存在的充要条件的，有：</p>
+<p>$$F_x(\omega,T)=\int_{-\infty}^{\infty}x_T(t)e^{-j\omega t}dt=\int_{-T}^{T}x(t)e^{-j\omega t}dt$$</p>
+<p>截断函数的<strong>能量</strong>（帕萨瓦尔等式）：</p>
+<p>$$E=\int_{-\infty}^{\infty}x_T^2(t)dt=\frac{1}{2\pi}\int_{-\infty}^{\infty}|F_x(\omega,T)|^2d\omega$$</p>
+<p>把上式右边的被积式称为截断函数的<strong>能量谱</strong>：</p>
+<p>$$|F_x(\omega,T)|^2$$</p>
+<p>截断函数的<strong>功率</strong>：</p>
+<p>$$\frac{1}{2T}\int_{-T}^{T}x^2(t)dt=\frac{1}{2\pi}\int_{-\infty}^{\infty}\frac{1}{2T}|F_x(\omega,T)|^2d\omega$$</p>
+<p>令$T\to\infty$并交换运算次序，得到$x(t)$在$(-\infty,\infty)$上的<strong>平均功率</strong>：</p>
+<p>$$\lim_{T\to\infty}\frac{1}{2T}\int_{-T}^{T}x^2(t)dt=\frac{1}{2\pi}\int_{-\infty}^{\infty}\lim_{T\to\infty}\frac{1}{2T}|F_x(\omega,T)|^2d\omega$$</p>
+<p>把上式右边的被积式称作函数的<strong>平均功率谱密度</strong>，简称<strong>功率谱密度</strong>，记作：</p>
+<p>$$S_x(\omega)=\lim_{T\to\infty}\frac{1}{2T}|F_x(\omega,T)|^2$$</p>
+<h3 id="（2）随机信号的功率谱密度"><a href="#（2）随机信号的功率谱密度" class="headerlink" title="（2）随机信号的功率谱密度"></a>（2）随机信号的功率谱密度</h3><p>把单个样本函数的功率谱推广到整个随机过程$X(t)$</p>
+<p>对于随机过程来说，求各样本函数功率谱密度的统计平均：</p>
+<p>$$\begin{align}<br>S_X(\omega)=E[S_x(\omega)]&amp;=E[\lim_{T\to\infty}\frac{1}{2T}|F_x(\omega,T)|^2]\<br>&amp;=\lim_{T\to\infty}\frac{1}{2T}E[|F_x(\omega,T)|^2]<br>\end{align}$$</p>
+<p>定义为整个随机过程$X(t)$的功率谱密度。</p>
+<p>求完统计平均之后，$S_X(\omega)$是一个$\omega$的确知函数。</p>
+<hr>
+<p>随机过程的平均功率：</p>
+<ul>
+<li>频域计算</li>
+</ul>
+<p>任意样本函数的平均功率：</p>
+<p>$$Q_x=\frac{1}{2\pi}\int_{-\infty}^{\infty}S_x(\omega)d\omega$$</p>
+<p>随机过程的平均功率：</p>
+<p>$$Q=E[Q_x]=\frac{1}{2\pi}\int_{-\infty}^{\infty}E[S_x(\omega)]d\omega=\frac{1}{2\pi}S_\color{red}{X}(\omega)d\omega$$</p>
+<ul>
+<li>时域计算</li>
+</ul>
+<p>任意样本函数的平均功率：</p>
+<p>$$Q_x=\lim_{T\to\infty}\frac{1}{2T}\int_{-T}^{T}|x(t)|^2dt$$</p>
+<p>随机过程的平均功率：</p>
+<p>$$Q=E[Q_x]=\lim_{T\to\infty}\frac{1}{2T}\int_{-T}^{T}E[x^2(t)]dt$$</p>
+<p>注：这里的$Q$是一个确定的值，不是随机变量了。</p>
+<h4 id="平稳随机过程功率谱密度的性质"><a href="#平稳随机过程功率谱密度的性质" class="headerlink" title="平稳随机过程功率谱密度的性质"></a>平稳随机过程功率谱密度的性质</h4><p>（1）$S_{X}(\omega)$是$\omega$的<strong>实的、非负的偶函数</strong></p>
+<p>（2）功率谱密度可积</p>
+<h3 id="（3）功率谱密度与自相关函数的关系"><a href="#（3）功率谱密度与自相关函数的关系" class="headerlink" title="（3）功率谱密度与自相关函数的关系"></a>（3）功率谱密度与自相关函数的关系</h3><p>功率谱密度反应了<strong>随机信号在频域的统计特性</strong>，自相关函数反映了<strong>随机信号在时域的统计特性</strong>，它们均是描述随机信号的重要数字特征。</p>
+<p>维纳辛钦定理：当一个<strong>平稳过程</strong>满足一定条件的时候，其自相关函数与功率谱密度可以构成<strong>一对傅里叶变换对</strong>。</p>
+<p>满足：</p>
+<p>$$\int_{-\infty}^{\infty}|\tau R_X(\tau)|d\tau\lt \infty$$</p>
+<p>要求均值为0。</p>
+<p>则：</p>
+<p>$$S_X(\omega)=\int_{-\infty}^{\infty}R_X(\tau)e^{-j\omega\tau}d\tau$$</p>
+<p>满足：</p>
+<p>$$\int_{-\infty}^{\infty}S_X(\omega)d\omega\lt \infty$$</p>
+<p>平均功率有限。</p>
+<p>则：</p>
+<p>$$R_X(\tau)=\frac{1}{2\pi}\int_{-\infty}^{\infty}S_X(\omega)e^{j\omega\tau}d\omega$$</p>
+<h1 id="3-两大类随机信号"><a href="#3-两大类随机信号" class="headerlink" title="3. 两大类随机信号"></a>3. 两大类随机信号</h1><h2 id="平稳随机过程（平稳性）"><a href="#平稳随机过程（平稳性）" class="headerlink" title="平稳随机过程（平稳性）"></a>平稳随机过程（平稳性）</h2><p>平稳随机过程$X(t)$是在时间平移下<strong>概率性质不变</strong>的随机过程。</p>
+<h3 id="（1）严平稳随机过程（狭义平稳随机过程）"><a href="#（1）严平稳随机过程（狭义平稳随机过程）" class="headerlink" title="（1）严平稳随机过程（狭义平稳随机过程）"></a>（1）严平稳随机过程（狭义平稳随机过程）</h3><p>一个随机过程的n维概率密度（或n维分布函数）<strong>不随时间起点选择的不同而改变</strong>，即：</p>
+<p>$$f_X(x_1,x_2,…,x_n;t_1,t_2,…,t_n)=f_X(x_1,x_2,…,x_n;t_1+\tau,t_2+\tau,…,t_n+\tau)$$</p>
+<p>则称$X(t)$为<strong>严平稳随机过程</strong>。</p>
+<p>性质：</p>
+<p>1.它的一维概率密度与时间无关：</p>
+<p>$$f_X(x_1;t_1)=f_X(x_1;t_1+\tau)=f_X(x_1;0)=f_X(x_1)$$</p>
+<p>其均值、均方值、方差也同样与时间无关。</p>
+<p>2.它的二维概率密度只与$t_1$和$t_2$的时间间隔有关，而与时间起点无关：</p>
+<p>$$f_X(x_1,x_2;t_1,t_2)=f_X(x_1,x_2;t_1+\tau,t_2+\tau)=f_X(x_1,x_2;0,t_2-t_1)=f_X(x_1,x_2;\eta)$$</p>
+<p>其相关函数、协方差函数同样只与时间间隔有关，与时间起点无关。</p>
+<h3 id="（2）宽平稳随机过程（广义平稳随机过程）"><a href="#（2）宽平稳随机过程（广义平稳随机过程）" class="headerlink" title="（2）宽平稳随机过程（广义平稳随机过程）"></a>（2）宽平稳随机过程（广义平稳随机过程）</h3><p>若随机过程的<strong>均值函数和相关函数</strong>存在，并且满足：</p>
+<p>1.均值与时间无关（常数）；<br>2.相关函数只与时间间隔有关，与时间起点无关。</p>
+<p>则称$X(t)$为<strong>宽平稳随机过程</strong>。</p>
+<p>宽平稳过程反映了一个系统处于<strong>稳态工作条件</strong>下的<strong>统计性质</strong>。</p>
+<blockquote>
+<p>严平稳一定是宽平稳，反之不一定。<br>当随机过程满足高斯分布时，严平稳和宽平稳是等价的。</p>
+</blockquote>
+<p>若无特别指明，则“平稳随机过程”指的就是<strong>宽平稳过程</strong>。</p>
+<hr>
+<p>假定平稳过程的均值$E[X(t)]=0$，则此时平稳过程的协方差函数$K_X(t_1,t_2)=K_X(\tau)$与相关函数$R_X(t_1,t_2)=E[X(t_1)X(t_2)]=R_X(\tau)$相等。</p>
+<p>当均值不为0时，可以通过定义$Y(t)=X(t)-E[X(t)]$来得到均值为0的平稳过程$Y(t)$。</p>
+<hr>
+<h3 id="（3）平稳随机过程相关函数的性质"><a href="#（3）平稳随机过程相关函数的性质" class="headerlink" title="（3）平稳随机过程相关函数的性质"></a>（3）平稳随机过程相关函数的性质</h3><p>自相关函数：</p>
+<p>（1）</p>
+<p>$$R_X(0)=E[X^2(t)]=\Psi_X^2\ge0$$</p>
+<p>自相关函数在$\tau=0$处的值给出了平稳过程的<strong>均方值</strong>，表示了平稳过程的<strong>平均功率</strong>。</p>
+<p>（2）</p>
+<p>$$R_X(\tau)=R_X(-\tau)$$</p>
+<p>自相关函数具有<strong>对称性</strong>，是$\tau$的<strong>偶函数</strong>。</p>
+<p>（3）</p>
+<p>$$R_X(0)\ge|R_X(\tau)|$$</p>
+<p>自相关函数在$\tau=0$处有<strong>最大值</strong>。</p>
+<p>（4）</p>
+<p>平稳随机过程的自相关函数对所有的$\omega$满足：</p>
+<p>$$\int_{-\infty}^{\infty}R_X(\tau)e^{-j\omega\tau}d\tau\ge0$$</p>
+<p>相关系数：</p>
+<p>$$r_X(\tau)=\frac{K_X(\tau)}{K_X(0)}=\frac{R_X(\tau)-m_X^2}{\sigma^2_X}$$</p>
+<p>又称<strong>归一化自相关函数</strong>或<strong>标准自协方差函数</strong>，它确切表征了平稳随机过程在两个不同时刻的起伏值之间的线性关联程度。</p>
+<p>相关时间：</p>
+<p>$r_X(\tau)$从其最大值$r_X(0)=1$下降到$r_X(\tau_0)=0.05$所经历的时间间隔，定义为相关时间。</p>
+<p>相关时间越小，意味着相关系数随$\tau$增加/降落得越快，说明随机过程随时间变化得越剧烈。</p>
+<h2 id="各态历经随机过程（遍历性）"><a href="#各态历经随机过程（遍历性）" class="headerlink" title="各态历经随机过程（遍历性）"></a>各态历经随机过程（遍历性）</h2><p>各态历经性（遍历性）：只要观测时间<strong>足够长</strong>，随机过程的<strong>一个样本函数</strong>也能够“遍历”整个集合中出现的各种可能的状态。</p>
+<h3 id="（1）严遍历性随机过程（狭义遍历性随机过程）"><a href="#（1）严遍历性随机过程（狭义遍历性随机过程）" class="headerlink" title="（1）严遍历性随机过程（狭义遍历性随机过程）"></a>（1）严遍历性随机过程（狭义遍历性随机过程）</h3><p>如果一个随机过程$X(t)$，它的<strong>各种时间平均</strong>都依概率1收敛于相应的集合平均，则称该随机过程具有严格的遍历性，称它为<strong>严遍历性过程（狭义遍历性过程）</strong>。</p>
+<h3 id="（2）宽遍历性随机过程（广义遍历性随机过程）"><a href="#（2）宽遍历性随机过程（广义遍历性随机过程）" class="headerlink" title="（2）宽遍历性随机过程（广义遍历性随机过程）"></a>（2）宽遍历性随机过程（广义遍历性随机过程）</h3><p>定义：</p>
+<p>设${X(t),-\infty\lt t\lt\infty}$是均方连续的平稳过程，则分别称：</p>
+<p>$$A\langle X(t)\rangle=\overline{X(t)}=\lim_{T\to\infty}\frac{1}{2T}\int_{-T}^{T}X(t)dt$$</p>
+<p>$$\mathfrak{R}_X(t,t+\tau)=\overline{X(t)X(t+\tau)}=\lim_{T\to\infty}\frac{1}{2T}\int_{-T}^{T}X(t)X(t+\tau)dt$$</p>
+<p>为该过程的<strong>时间均值</strong>和<strong>时间相关函数</strong>。</p>
+<p>若：</p>
+<p>$$A\langle X(t)\rangle=\overline{X(t)}=E[X(t)]=m_X$$</p>
+<p>依概率1成立，则称该平稳过程的<strong>均值具有遍历性</strong>。</p>
+<p>$\overline{X(t)}$与取哪一条样本有关，与时间无关<br>$E[X(t)]$与时间$t$有关，与取哪一条样本无关</p>
+<p>均值的各态历经性表明：任何一条样本函数所包含的取值状态与随机过程（任意时刻）所有的状态相同，而且出现的频率与随机过程各状态的概率相同。</p>
+<p>若：</p>
+<p>$$\mathfrak{R}_X(t,t+\tau)=\overline{X(t)X(t+\tau)}=E[X(t)X(t+\tau)]=R_X(\tau)$$</p>
+<p>依概率1成立，则称该平稳过程的<strong>相关函数具有遍历性</strong>。<br>若$\tau=0$时上式成立，则称该平稳过程的<strong>均方值具有遍历性</strong>。</p>
+<p>如果均方连续的平稳过程$X(t)$的<strong>均值和相关函数都具有遍历性</strong>，则称该平稳随机过程为<strong>宽遍历性过程（广义遍历性过程）</strong>。</p>
+<hr>
+<p>实际过程中，要严格验证平稳过程是否满足遍历性条件是比较困难的，最简单的办法是<strong>假定平稳过程是遍历性的</strong>，由此假设出发，对观测材料进行分析、处理，看其所得结论是否符合实际。</p>
+<h1 id="4-白噪声"><a href="#4-白噪声" class="headerlink" title="4. 白噪声"></a>4. 白噪声</h1><h2 id="理想白噪声"><a href="#理想白噪声" class="headerlink" title="理想白噪声"></a>理想白噪声</h2><p>分布在$(-\infty,\infty)$整个频率区间上，<strong>均值为零</strong>而<strong>功率谱密度为一个非零常数</strong>，即：</p>
+<p>$$S_N(\omega)=\frac{1}{2}N_0$$</p>
+<p>的<strong>平稳随机过程</strong>称为白噪声过程或简称为<strong>白噪声</strong>。</p>
+<p>其中$N_0$为一个正实常数。</p>
+<p>利用维纳辛钦定理，可以得到白噪声的自相关函数：</p>
+<p>$$R_N(\tau)=\frac{1}{2\pi}\int_{-\infty}^{\infty}S_N(\omega)e^{j\omega\tau}d\omega=\frac{N_0}{4\pi}\int_{-\infty}^{\infty}e^{j\omega\tau}d\omega=\frac{1}{2}N_0\delta(\tau)$$</p>
+<p>自相关系数：</p>
+<p>$$r_N(\tau)=\frac{R_N(\tau)-m_N^2}{\sigma_N^2}=\frac{R_N(\tau)}{R_N(0)}=\begin{cases}1&amp;\tau=0\\0&amp;\tau\ne0\end{cases}$$</p>
+<h2 id="带限白噪声"><a href="#带限白噪声" class="headerlink" title="带限白噪声"></a>带限白噪声</h2><p>若一个平稳随机过程的<strong>均值为零</strong>，而功率谱密度限定在某一个有限的频率范围内<strong>均匀分布</strong>，而<strong>在此范围以外为零</strong>，则称这个过程是带限白噪声。</p>
+<h3 id="（1）低通白噪声"><a href="#（1）低通白噪声" class="headerlink" title="（1）低通白噪声"></a>（1）低通白噪声</h3><p>$$S_X(\omega)=\begin{cases}S_0&amp;|\omega|\le W\\0&amp;|\omega|\gt W\end{cases}$$</p>
+<p>自相关函数：</p>
+<p>$$R_X(\tau)=\frac{1}{2\pi}\int_{-\infty}^{\infty}S_X(\omega)e^{j\omega\tau}d\omega=\frac{1}{2\pi}\int_{-W}^{W}S_0e^{j\omega\tau}d\omega=\frac{WS_0}{\pi}\frac{sinW\tau}{W\tau}$$</p>
+<h3 id="（2）带通白噪声"><a href="#（2）带通白噪声" class="headerlink" title="（2）带通白噪声"></a>（2）带通白噪声</h3><p>$$S_X(\omega)=\begin{cases}S_0&amp;\omega_0-\frac{W}{2}\lt|\omega|\lt\omega_0+\frac{W}{2}\\0&amp;其他\end{cases}$$</p>
+<p>自相关函数：</p>
+<p>$$R_X(\tau)=\frac{WS_0}{\pi}\frac{\sin\frac{W\tau}{2}}{\frac{W\tau}{2}}\cos\omega_0\tau$$</p>
+<h1 id="5-随机信号通过连续时间系统的分析"><a href="#5-随机信号通过连续时间系统的分析" class="headerlink" title="5. 随机信号通过连续时间系统的分析"></a>5. 随机信号通过连续时间系统的分析</h1><p>在系统给定的条件下，输出信号的<strong>某个统计特性只取决于输入信号的相应的统计特性</strong>，而不依赖于输入型号其他统计特性。</p>
+<p>则根据输入信号已知的均值、相关函数、功率谱密度，再加上已知线性系统的单位冲激响应或者传递函数，就可求出随机信号响应的均值、相关函数和功率谱密度。</p>
+<h2 id="3dB带宽"><a href="#3dB带宽" class="headerlink" title="3dB带宽"></a>3dB带宽</h2><p>如果系统的特性为<strong>低通</strong>，则3dB带宽定义为幅频特性$|H(\omega)|$值下降到最大值的$\frac{1}{\sqrt{2}}$即$0.707|H(\omega)|_{max}$时的<strong>正频率</strong>，此时功率谱下降到峰值的一半。</p>
+<p>如果系统特性是带通：3dB带宽定义为幅频特性$|H(\omega)|$下降到最大值的$\frac{1}{\sqrt{2}}$即$0.707|H(\omega)|_{max}$时对应<strong>正频率的差值</strong>。</p>
+<h2 id="等效噪声带宽"><a href="#等效噪声带宽" class="headerlink" title="等效噪声带宽"></a>等效噪声带宽</h2><p>当系统比较复杂时，计算系统输出噪声的统计特性是非常困难的。在实际中为了计算方便，常常用一个幅频响应为矩形的理想系统等效替代实际系统。</p>
+<p>等效的原则：</p>
+<p>1.理想系统与实际系统在同一白噪声激励下，两个系统的输出平均功率是相等的；<br>2.理想系统的增益等于实际系统的最大增益。</p>
+<p>等效噪声带宽：定义为理想系统的带宽。</p>
+<p>设一个普通的系统幅频特性为$|H(\omega)|$，则其平均功率为：</p>
+<p>$$E[Y^2(t)]=\frac{N_0}{2\pi}\int_0^{\infty}|H(\omega)|^2d\omega$$</p>
+<p>取积分限$0\sim\Delta\omega_e$，$|H(\omega)|=K$，则理想线性系统对同一白噪声输入的输出总平均功率为：</p>
+<p>$$\frac{N_0}{2\pi}\int_0^{\Delta\omega_e}K^2d\omega=\frac{N_0K^2\Delta\omega_e}{2\pi}=\frac{N_0}{2\pi}\int_0^{\infty}|H(\omega)|^2d\omega$$</p>
+<p>则解方程可得：</p>
+<p>$$\Delta\omega_e=\frac{1}{|H(\omega)|^2_{max}}\int_0^{\infty}|H(\omega)|^2d\omega$$</p>
+<p>对于低通系统来说，$|H(\omega)|$的最大值出现在$\omega=0$处。</p>
+<p>中心频率为$\omega_0$的带通系统，$|H(\omega)|$的最大值出现在$\omega=\omega_0$处。</p>
+<h2 id="白噪声通过理想线性系统分析"><a href="#白噪声通过理想线性系统分析" class="headerlink" title="白噪声通过理想线性系统分析"></a>白噪声通过理想线性系统分析</h2><h2 id="希尔伯特变换和解析过程"><a href="#希尔伯特变换和解析过程" class="headerlink" title="希尔伯特变换和解析过程"></a>希尔伯特变换和解析过程</h2><p>设有一个实值函数$x(t)$，它的希尔伯特变换记作$\hat{x}(t)$或者$H[x(t)]$</p>
+<p>$$\hat{x}(t)=H[x(t)]=\frac{1}{\pi}\int_{-\infty}^{\infty}\frac{x(\tau)}{t-\tau}d\tau=x(t)*\frac{1}{\pi t}$$</p>
+<p>易得希尔伯特变换的冲激响应及传递函数：</p>
+<p>$$h_H(t)=\frac{1}{\pi t}\leftrightarrow H_H(j\omega)=-jsgn(\omega)=\begin{cases}-j,&amp;\omega\ge0\\j,&amp;\omega\lt0\end{cases}$$</p>
+<p>希尔伯特逆变换：</p>
+<p>$$\begin{align}<br>x(t)=H^{-1}[\hat{x}(t)]<br>&amp;=-\frac{1}{\pi}\int_{-\infty}^{\infty}\frac{\hat{x}(t-\tau)}{\tau}d\tau\<br>&amp;=\frac{1}{\pi}\int_{-\infty}^{\infty}\frac{\hat{x}(t+\tau)}{\tau}d\tau\<br>&amp;=-\frac{1}{\pi}*\hat{x}(t)<br>\end{align}$$</p>
+<p>希尔伯特变换相当于一个正交滤波器/90°移相器。</p>
+<p>对于正频率分量，移相-90°；对于负频率分量，移相+90°。</p>
+<hr>
+<p>给定任一实随机过程$X(t)$，定义一个复随机过程为$\tilde{X}(t)$为：</p>
+<p>$$\tilde{X}(t)=X(t)+j\hat{X}(t)$$</p>
+<p>上式中，$\hat{X}(t)$是$X(t)$的希尔伯特变换，它也是一个实随机过程。</p>
+<p>称$\tilde{X}(t)$是实随机过程$X(t)$的<strong>复解析过程</strong>，简称<strong>解析过程</strong>。</p>
+<p>性质：</p>
+<p>（1）若$X(t)$是实平稳随机过程，则$\hat{X}(t)$也是实平稳过程，且联合平稳；</p>
+<p>（2）实函数与其希尔伯特变换的<strong>相关函数和功率谱相同</strong>，即：</p>
+<p>$$R_{\hat{X}}(\tau)=R_X(\tau)$$</p>
+<p>$$S_{\hat{X}}(\omega)=S_X(\omega)$$</p>
+<p>（3）</p>
+<p>$$R_{\hat{X}X}(\tau)=-\hat{R}_X(\tau)$$</p>
+<p>$$R_{X\hat{X}}(\tau)=\hat{R}_X(\tau)$$</p>
+<p>（4）</p>
+<p>$$R_{\hat{X}X}(\tau)=-R_{X\hat{X}}(\tau)$$</p>
+<p>（5）</p>
+<p>$$R_{\hat{X}X}(-\tau)=-R_{\hat{X}X}(\tau)$$</p>
+<p>（6）</p>
+<p>$$R_{\hat{X}X}(0)=0$$</p>
+<p>表明，在同一时刻，随机变量$\hat{X}_t$和$X_t$正交，但上式不意味着整个随机过程正交。</p>
+<p>（7）</p>
+<p>$$R_{\tilde{X}}(\tau)=2[R_X(\tau)+jR_{X\hat{X}}(\tau)]=2[R_X(\tau)+j\hat{R}_X(\tau)]$$</p>
+<p>（8）</p>
+<p>$$S_{X\hat{X}}(\omega)=\begin{cases}-jS_X(\omega),&amp;\omega\ge0\\jS_X(\omega),&amp;\omega\lt0\end{cases}$$</p>
+<p>（9）</p>
+<p>$$S_{\tilde{X}}(\omega)=\begin{cases}4S_X(\omega),&amp;\omega\ge0\\0,&amp;\omega\lt0\end{cases}$$</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/07/01/2015-07-01-xinhaoxiangguan/" rel="bookmark">信号相关专业复习</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/05/28/2015-05-28-xiandaijiaohuan/" rel="bookmark">现代交换原理 复习笔记 部分</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/05/30/2015-05-30-shuzishipin/" rel="bookmark">数字视频 复习笔记</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/06/19/2015-06-19-zhuanye/" rel="bookmark">专业知识整理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/06/27/2015-06-27-weibojishuyutianxian/" rel="bookmark">微波技术与天线 复习笔记</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%A4%8D%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 复习笔记</a>
+              <a href="/tags/%E4%BF%A1%E5%8F%B7%E5%A4%84%E7%90%86/" rel="tag"># 信号处理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/10/24/2015-10-24-dnsswitch/" rel="prev" title="博客站双机备份切换">
+      <i class="fa fa-chevron-left"></i> 博客站双机备份切换
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/11/03/2015-11-03-mpi/" rel="next" title="并行编程 MPI初探">
+      并行编程 MPI初探 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-什么是随机信号（随机过程）"><span class="nav-text">1. 什么是随机信号（随机过程）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#随机过程的定义和一般表征"><span class="nav-text">随机过程的定义和一般表征</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-随机信号的研究方法"><span class="nav-text">2. 随机信号的研究方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#时域分析"><span class="nav-text">时域分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#（1）随机过程的概率特性"><span class="nav-text">（1）随机过程的概率特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#（2）随机信号的数字特征"><span class="nav-text">（2）随机信号的数字特征</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#均值-数学期望（一阶原点矩）"><span class="nav-text">均值&#x2F;数学期望（一阶原点矩）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#均方值（二阶原点矩）"><span class="nav-text">均方值（二阶原点矩）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#方差（二阶中心矩）"><span class="nav-text">方差（二阶中心矩）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#相关函数（混合原点矩）"><span class="nav-text">相关函数（混合原点矩）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#协方差函数（混合中心矩）"><span class="nav-text">协方差函数（混合中心矩）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#描述两个随机信号之间的联系"><span class="nav-text">描述两个随机信号之间的联系</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#频域分析"><span class="nav-text">频域分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#（1）随机信号样本函数的功率及功率谱"><span class="nav-text">（1）随机信号样本函数的功率及功率谱</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#（2）随机信号的功率谱密度"><span class="nav-text">（2）随机信号的功率谱密度</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#平稳随机过程功率谱密度的性质"><span class="nav-text">平稳随机过程功率谱密度的性质</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#（3）功率谱密度与自相关函数的关系"><span class="nav-text">（3）功率谱密度与自相关函数的关系</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-两大类随机信号"><span class="nav-text">3. 两大类随机信号</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#平稳随机过程（平稳性）"><span class="nav-text">平稳随机过程（平稳性）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#（1）严平稳随机过程（狭义平稳随机过程）"><span class="nav-text">（1）严平稳随机过程（狭义平稳随机过程）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#（2）宽平稳随机过程（广义平稳随机过程）"><span class="nav-text">（2）宽平稳随机过程（广义平稳随机过程）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#（3）平稳随机过程相关函数的性质"><span class="nav-text">（3）平稳随机过程相关函数的性质</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#各态历经随机过程（遍历性）"><span class="nav-text">各态历经随机过程（遍历性）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#（1）严遍历性随机过程（狭义遍历性随机过程）"><span class="nav-text">（1）严遍历性随机过程（狭义遍历性随机过程）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#（2）宽遍历性随机过程（广义遍历性随机过程）"><span class="nav-text">（2）宽遍历性随机过程（广义遍历性随机过程）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-白噪声"><span class="nav-text">4. 白噪声</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#理想白噪声"><span class="nav-text">理想白噪声</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#带限白噪声"><span class="nav-text">带限白噪声</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#（1）低通白噪声"><span class="nav-text">（1）低通白噪声</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#（2）带通白噪声"><span class="nav-text">（2）带通白噪声</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-随机信号通过连续时间系统的分析"><span class="nav-text">5. 随机信号通过连续时间系统的分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3dB带宽"><span class="nav-text">3dB带宽</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#等效噪声带宽"><span class="nav-text">等效噪声带宽</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#白噪声通过理想线性系统分析"><span class="nav-text">白噪声通过理想线性系统分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#希尔伯特变换和解析过程"><span class="nav-text">希尔伯特变换和解析过程</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'd8ad02f4958fca3dc9701cd06ec4f328',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

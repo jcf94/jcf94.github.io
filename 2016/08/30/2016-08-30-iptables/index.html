@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="iptables 是 Linux 中一个非常重要的安全工具，用于配置内核防火墙。 参考自：Arch Wiki - iptables 12345678910111213141516171819202122232425262728293031323334                               XXXXXXXXXXXXXXXXXX">
+<meta property="og:type" content="article">
+<meta property="og:title" content="填坑系列 - Iptables">
+<meta property="og:url" content="https://jcf94.com/2016/08/30/2016-08-30-iptables/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="iptables 是 Linux 中一个非常重要的安全工具，用于配置内核防火墙。 参考自：Arch Wiki - iptables 12345678910111213141516171819202122232425262728293031323334                               XXXXXXXXXXXXXXXXXX">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2016-08-30-iptables-tables_traverse.jpg">
+<meta property="article:published_time" content="2016-08-30T02:28:36.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="填坑系列">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="firewall">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2016-08-30-iptables-tables_traverse.jpg">
+
+<link rel="canonical" href="https://jcf94.com/2016/08/30/2016-08-30-iptables/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>填坑系列 - Iptables | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2016/08/30/2016-08-30-iptables/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          填坑系列 - Iptables
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-08-30 10:28:36" itemprop="dateCreated datePublished" datetime="2016-08-30T10:28:36+08:00">2016-08-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>iptables 是 Linux 中一个非常重要的安全工具，用于配置内核防火墙。</p>
+<p>参考自：<a href="https://wiki.archlinux.org/index.php/Iptables" target="_blank" rel="noopener">Arch Wiki - iptables</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">                               XXXXXXXXXXXXXXXXXX</span><br><span class="line">                             XXX     Network    XXX</span><br><span class="line">                               XXXXXXXXXXXXXXXXXX</span><br><span class="line">                                       +</span><br><span class="line">                                       |</span><br><span class="line">                                       v</span><br><span class="line"> +-------------+              +------------------+</span><br><span class="line"> |table: filter| &lt;---+        | table: nat       |</span><br><span class="line"> |chain: INPUT |     |        | chain: PREROUTING|</span><br><span class="line"> +-----+-------+     |        +--------+---------+</span><br><span class="line">       |             |                 |</span><br><span class="line">       v             |                 v</span><br><span class="line"> [<span class="built_in">local</span> process]     |           ****************          +--------------+</span><br><span class="line">       |             +---------+ Routing decision +------&gt; |table: filter |</span><br><span class="line">       v                         ****************          |chain: FORWARD|</span><br><span class="line">****************                                           +------+-------+</span><br><span class="line">Routing decision                                                  |</span><br><span class="line">****************                                                  |</span><br><span class="line">       |                                                          |</span><br><span class="line">       v                        ****************                  |</span><br><span class="line">+-------------+       +------&gt;  Routing decision  &lt;---------------+</span><br><span class="line">|table: nat   |       |         ****************</span><br><span class="line">|chain: OUTPUT|       |               +</span><br><span class="line">+-----+-------+       |               |</span><br><span class="line">      |               |               v</span><br><span class="line">      v               |      +-------------------+</span><br><span class="line">+--------------+      |      | table: nat        |</span><br><span class="line">|table: filter | +----+      | chain: POSTROUTING|</span><br><span class="line">|chain: OUTPUT |             +--------+----------+</span><br><span class="line">+--------------+                      |</span><br><span class="line">                                      v</span><br><span class="line">                               XXXXXXXXXXXXXXXXXX</span><br><span class="line">                             XXX    Network     XXX</span><br><span class="line">                               XXXXXXXXXXXXXXXXXX</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<hr>
+<h1 id="Basic"><a href="#Basic" class="headerlink" title="Basic"></a>Basic</h1><p>iptables 用于检查、修改、转发、丢弃 IP 数据包，其中每一步的详细工作通过 tables 和 chains 这两个结构来完成。</p>
+<p>上面那张图的完整情况是这个样子的：</p>
+<img data-src="http://jcf94.com/download/2016-08-30-iptables-tables_traverse.jpg" title="Packets Traverse"/>
+
+<p>每个节点上的小写字母表示 table ，下面的大写字母表示 chain ，可以把每个节点理解成很多设定好的规则。每一个 IP 数据包都要从上到下经过这样一整个工作流的检查（有的数据包从外面进来到 Local Process 就结束了，有的是从 Local Process 里面产生然后发送到外面去）。</p>
+<h2 id="Tables"><a href="#Tables" class="headerlink" title="Tables"></a>Tables</h2><p>iptables 中包含5个 tables：</p>
+<ul>
+<li><p><code>raw</code> 用于配置数据包，其中的数据包不会被系统跟踪</p>
+</li>
+<li><p><code>filter</code> 存放了所有与<strong>防火墙</strong>相关的操作</p>
+</li>
+<li><p><code>nat</code> 用于<strong>网络地址转换</strong></p>
+</li>
+<li><p><code>mangle</code> 用于对特定数据包的修改</p>
+</li>
+<li><p><code>security</code> 用于强制访问控制（…不懂…暂时跳过）</p>
+</li>
+</ul>
+<p>通常情况下常用的是 filter 和 nat ，其他的用于更复杂的情况，所以上面手画的流图里面只画出了这两个 tables 。</p>
+<h2 id="Chains"><a href="#Chains" class="headerlink" title="Chains"></a>Chains</h2><p>tables 由 chains 组成，例如 filter 表中就有 INPUT 、 OUTPUT 、 FORWARD 3条内建的 chains ，这三条 chains 作用在数据包过滤过程的不同时间点上（参见上面的流程图）。 nat 表包含 PREROUTING 、 POSTROUTING 、 OUTPUT 这三条 chains 。</p>
+<h1 id="Configuration"><a href="#Configuration" class="headerlink" title="Configuration"></a>Configuration</h1><p>在 Arch Linux 和 CentOS 上 iptables 的启动和关闭都在服务里配置（话说 CentOS 7 已经改用 firewalld 来管理防火墙了）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl start iptables</span></span><br><span class="line"><span class="comment"># systemctl stop iptables</span></span><br></pre></td></tr></table></figure>
+
+<p>然后不同的发行版设置的 iptables 的记录文件的位置还不一定一样，比如 Arch 里面是在 <code>/etc/iptables/iptables.rules</code> ， CentOS 就是直接放在 <code>/etc/sysconfig/iptables</code> 这个文件里了， Ubuntu … 恕我没找到。</p>
+<p>管理和配置 iptables 可以在 root 权限下用 <code>iptables</code> 命令，或者直接修改配置文件，然后重启 iptables 也行。一般我比较喜欢改文件，一目了然，不容易出错，，，不过像 Ubuntu 这种我没找到写在哪的就坑了。</p>
+<p>具体的 <code>iptables</code> 命令还是用的时候 <code>man iptables</code> 慢慢查吧，这里简单记一下几个常用命令的用法：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># iptables -A chain rule</span></span><br><span class="line">向 chain 中附加一条规则 rule</span><br><span class="line"></span><br><span class="line"><span class="comment"># iptables -C chain rule</span></span><br><span class="line">检查 chain 中是否存在规则 rule</span><br><span class="line"></span><br><span class="line"><span class="comment"># iptables -D chain rule</span></span><br><span class="line">从 chain 中删除规则 rule</span><br><span class="line"></span><br><span class="line"><span class="comment"># iptables -I chain [rulenum] rule</span></span><br><span class="line">向 chain 中插入一条规则 rule</span><br><span class="line">这个跟 -A 的区别是 -A 是加入到 chain 的末尾</span><br><span class="line">-I 如果不指定插入的序号的话则默认序号为1，即插入到 chain 的开头</span><br><span class="line"></span><br><span class="line"><span class="comment"># iptables -S [chain]</span></span><br><span class="line">打印 chain 中的所有规则，不指定 chain 的话就是所有 chain</span><br><span class="line"></span><br><span class="line"><span class="comment"># iptables -L [chain]</span></span><br><span class="line">列出 chain 中的所有规则，不指定 chain 的话就是所有 chain</span><br></pre></td></tr></table></figure>
+
+<p>上面的每条命令还可以加 <code>-t table</code> 来指定当前的操作对某个特定的表 table 进行。</p>
+<p>-A 和 -I 的不同在于， iptables 检查规则时是从上往下按 rules 的顺序依次进行，一旦匹配到一条 rule 那就直接跳出当前 chain 了，因此同样的一些 rules 插入到 iptables 里之后可能因为顺序的不同会有不同的结果。</p>
+<h1 id="Rules"><a href="#Rules" class="headerlink" title="Rules"></a>Rules</h1><p>比较坑的是我在好几个 wiki 上查了 iptables ，但是上面很少有讲 rules 具体怎么写的， <code>man iptables</code> 返回的信息是在 PARAMETERS 这段中有讲。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[!] -p, --protocol protocol</span><br><span class="line">指定协议，可以是 tcp/udp/udplite/icmp/icmpv6/esp/ah/sctp/mh/all</span><br><span class="line">加了 ! 则表示除了该协议以外，下同</span><br><span class="line"></span><br><span class="line">[!] -s, --<span class="built_in">source</span> address[/mask][,...]</span><br><span class="line">指定源地址</span><br><span class="line"></span><br><span class="line">[!] -d, --destination address[/mask][m...]</span><br><span class="line">指定目标地址</span><br><span class="line"></span><br><span class="line">[!] -i, --<span class="keyword">in</span>-interface name</span><br><span class="line">指定数据包进入的网卡设备</span><br><span class="line"></span><br><span class="line">[!] -o, --out-interface name</span><br><span class="line">指定数据包流出的网卡设备</span><br><span class="line"></span><br><span class="line">-j, --jump target</span><br><span class="line">指定当前 rule 要跳转到的目标，可以是 ACCEPT/DROP/REJECT/LOG</span><br><span class="line">ACCEPT 和 LOG 都是让数据包通过当前的 chain ，区别是 LOG 会记录日志信息</span><br><span class="line">DROP 直接把包从这里丢弃不做任何操作， REJECT 丢弃包并且向源地址发送拒绝响应</span><br><span class="line"></span><br><span class="line">-g, --goto chain</span><br><span class="line">跳到某条 chain 中继续执行</span><br></pre></td></tr></table></figure>
+
+<h1 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h1><p>列个示例吧，下面是一台 VPN 服务器 iptables 文件的一部分内容：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">*filter						<span class="comment"># filter 表</span></span><br><span class="line">:INPUT ACCEPT [0:0]</span><br><span class="line">:FORWARD ACCEPT [0:0]</span><br><span class="line">:OUTPUT ACCEPT [0:0]				<span class="comment"># 设置默认规则都是 ACCEPT</span></span><br><span class="line">-A INPUT -i enp7s0 -j ACCEPT</span><br><span class="line">-A INPUT -i ppp+ -j ACCEPT</span><br><span class="line">-A INPUT -i lo -j ACCEPT			<span class="comment"># 设置各块网卡都能通过</span></span><br><span class="line">-A INPUT -p tcp -m tcp --dport 80 -j ACCEPT</span><br><span class="line">-A INPUT -p tcp -m tcp --dport 1723 -j ACCEPT</span><br><span class="line">-A INPUT -p udp -m udp --dport 1194 -j ACCEPT</span><br><span class="line">-A INPUT -p udp -m udp --dport 4500 -j ACCEPT</span><br><span class="line">-A INPUT -p esp -j ACCEPT</span><br><span class="line">-A INPUT -p gre -j ACCEPT</span><br><span class="line">-A INPUT -p icmp -j ACCEPT</span><br><span class="line">-A INPUT -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT</span><br><span class="line">-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT</span><br><span class="line">-A INPUT -j REJECT --reject-with icmp-host-prohibited</span><br><span class="line">-A FORWARD -d 202.38.64.59/32 -i ppp+ -j DROP	<span class="comment"># 有个特定的地址不想让它转发</span></span><br><span class="line">COMMIT</span><br><span class="line"></span><br><span class="line">*nat						<span class="comment"># nat 表</span></span><br><span class="line">:PREROUTING ACCEPT [0:0]</span><br><span class="line">:INPUT ACCEPT [0:0]</span><br><span class="line">:OUTPUT ACCEPT [0:0]</span><br><span class="line">:POSTROUTING ACCEPT [0:0]</span><br><span class="line">-A POSTROUTING -o enp7s0 -j MASQUERADE		<span class="comment"># 设置输出数据包地址伪装</span></span><br><span class="line">COMMIT</span><br></pre></td></tr></table></figure>
+
+<p>默认规则后面的 [0:0] 是用 <code>iptables-save</code> 命令保存当前的 iptables 配置到文件后写的，表示当前收发了多少数据包。我这里是手写的所以就直接设成 0 了，其实没什么用。</p>
+<p>数据包进入某个 table 之后是从上往下遍历所有规则，最后再走默认规则。</p>
+<p>事实上上面这个文件写的是有问题的，所有输入的数据包的 INPUT 链在网卡这里就直接被 ACCPET 了，所以后面写的一堆规则其实没啥用…</p>
+<p>比较好的写法是把默认规则设成 DROP ，然后再写一些需要用的 ACCPET 规则，让数据包从上到下一条一条匹配，如果没有匹配到任何一条规则，那就说明这个包不是我们想要的，默认 DROP 掉。</p>
+<p>filter 表的 FORWARD 链这里这条规则表示：从 ppp+ 这些网卡（PPTP 服务生成的虚拟网卡，对应了每个 VPN 的连接）来的，要到 202.38.64.59 这个地址去的数据包全部丢掉，这样 VPN 进来的连接就不能通过这台机子的转发来访问这个地址了。</p>
+<p>下面的 nat 表， MASQUERADE 表示动态地址伪装，即 VPN 链接过来的数据从服务器出去的时候把数据包的源地址改成服务器的地址，用于 NAT 转换。</p>
+<hr>
+<p>话说其实应该找时间开个虚拟机好好测试一下的…</p>
+<p>To be continued…</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/07/20/2016-07-20-grpc/" rel="bookmark">填坑系列 - gRPC</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/07/13/2015-07-13-makefile/" rel="bookmark">Makefile解析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/04/15/2016-04-15-gcc/" rel="bookmark">记一段差点被Gcc逼疯的历程</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/04/25/2016-04-25-msys2/" rel="bookmark">MSYS2-Windows下的类Unix环境</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/04/10/2016-04-10-arch/" rel="bookmark">Arch Linux over Yoga 3 11</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%A1%AB%E5%9D%91%E7%B3%BB%E5%88%97/" rel="tag"># 填坑系列</a>
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/tags/firewall/" rel="tag"># firewall</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/07/20/2016-07-20-grpc/" rel="prev" title="填坑系列 - gRPC">
+      <i class="fa fa-chevron-left"></i> 填坑系列 - gRPC
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/09/07/2016-09-07-rdmaibv/" rel="next" title="Simple usage of RDMA ibv">
+      Simple usage of RDMA ibv <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Basic"><span class="nav-text">Basic</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Tables"><span class="nav-text">Tables</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Chains"><span class="nav-text">Chains</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Configuration"><span class="nav-text">Configuration</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Rules"><span class="nav-text">Rules</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Example"><span class="nav-text">Example</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '528189ee313419d5e83479eeb04365b6',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

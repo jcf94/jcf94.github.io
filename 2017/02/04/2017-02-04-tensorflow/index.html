@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="把去年 7 月的那篇 TF 删掉了，重新开一篇。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TensorFlow">
+<meta property="og:url" content="https://jcf94.com/2017/02/04/2017-02-04-tensorflow/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="把去年 7 月的那篇 TF 删掉了，重新开一篇。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2016-07-10-tensorflow-tf.png">
+<meta property="og:image" content="http://jcf94.com/download/2016-07-10-tensorflow-tfing.gif">
+<meta property="article:published_time" content="2017-02-04T05:33:27.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="Google">
+<meta property="article:tag" content="Deep Learning">
+<meta property="article:tag" content="Machine Learning">
+<meta property="article:tag" content="TensorFlow">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2016-07-10-tensorflow-tf.png">
+
+<link rel="canonical" href="https://jcf94.com/2017/02/04/2017-02-04-tensorflow/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>TensorFlow | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2017/02/04/2017-02-04-tensorflow/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TensorFlow
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2017-02-04 13:33:27" itemprop="dateCreated datePublished" datetime="2017-02-04T13:33:27+08:00">2017-02-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index"><span itemprop="name">Machine Learning</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img data-src="http://jcf94.com/download/2016-07-10-tensorflow-tf.png" alt=""></p>
+<p>把去年 7 月的那篇 TF 删掉了，重新开一篇。</p>
+<a id="more"></a>
+
+<hr>
+<ul>
+<li>2016.07.10</li>
+</ul>
+<p>初次接触 TensorFlow，当时主要是面临 RDMA 竞赛，题目的目标是 TensorFlow 的 RDMA 优化。</p>
+<p>分析之后发现这玩意有点大，不确定是否能够来得及整个剖析一遍，只好关注于 TensorFlow 里面的通信模块（<a href="/2016/07/20/2016-07-20-grpc/">gRPC</a>）的 RDMA 化了。</p>
+<p>只是对 TensorFlow 的分布式版做了一些很小的测试，更多的还不太了解。</p>
+<ul>
+<li>2016.11.07</li>
+</ul>
+<p>写了个：</p>
+<blockquote>
+<p>未来可能要花很长时间在这玩意上了。</p>
+</blockquote>
+<p>初步确定之后有个大方向是围绕 TensorFlow 展开。</p>
+<ul>
+<li>2016 学年末</li>
+</ul>
+<p>TensorFlow 这艘大船搭上了实验室的很多人，主要是实验室看上了 TensorFlow 的数据流框架：</p>
+<p><img data-src="http://jcf94.com/download/2016-07-10-tensorflow-tfing.gif" alt=""></p>
+<p>深度学习是一方面，另外的想法是是否可以以 TensorFlow 为基础，用数据流来支持其他类型的计算，如并行科学计算等等。</p>
+<p>按之前 RDMA 优化下来的感觉，TensorFlow 的并行性能还是受 gRPC 限制，我的任务方向是着手考虑是否能够把整个 gRPC 都拿掉，用例如 MPI 等等的办法来替代其中的通信交互。</p>
+<p>期间也见过一些其他人改出来的 “MPI 版 TensorFlow”，都是在外面跑一个 MPI 的调度框架，然后里面跑单节点版的来避开 gRPC 的影响。</p>
+<hr>
+<h1 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h1><p>其他的介绍啥的暂时不写了，直接记一些干货吧。</p>
+<p>以下是一个来自 <a href="https://github.com/aymericdamien/TensorFlow-Examples/blob/master/notebooks/2_BasicModels/linear_regression.ipynb" target="_blank" rel="noopener">github</a> 的例子。</p>
+<p>该例做的是一个简单的线性回归，即给出一些已知点来拟合一条直线。在 TensorFlow 里面可以直接视作一个训练的过程。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">import</span> numpy</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line">rng = numpy.random</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设定后面需要的一些参数</span></span><br><span class="line">learning_rate = <span class="number">0.01</span></span><br><span class="line">training_epochs = <span class="number">2000</span></span><br><span class="line">display_step = <span class="number">50</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 给出训练数据，就是两个坐标数组了</span></span><br><span class="line">train_X = numpy.asarray([<span class="number">3.3</span>, <span class="number">4.4</span>, <span class="number">5.5</span>, <span class="number">6.71</span>, <span class="number">6.93</span>, <span class="number">4.168</span>, <span class="number">9.779</span>, <span class="number">6.182</span>, <span class="number">7.59</span>, <span class="number">2.167</span>, <span class="number">7.042</span>, <span class="number">10.791</span>, <span class="number">5.313</span>, <span class="number">7.997</span>, <span class="number">5.654</span>, <span class="number">9.27</span>, <span class="number">3.1</span>])</span><br><span class="line">train_Y = numpy.asarray([<span class="number">1.7</span>, <span class="number">2.76</span>, <span class="number">2.09</span>, <span class="number">3.19</span>, <span class="number">1.694</span>, <span class="number">1.573</span>, <span class="number">3.366</span>, <span class="number">2.596</span>, <span class="number">2.53</span>, <span class="number">1.221</span>, <span class="number">2.827</span>, <span class="number">3.465</span>, <span class="number">1.65</span>, <span class="number">2.904</span>, <span class="number">2.42</span>, <span class="number">2.94</span>, <span class="number">1.3</span>])</span><br><span class="line"><span class="comment"># 坐标点的个数</span></span><br><span class="line">n_samples = train_X.shape[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># tf Graph 的输入部分，这里创建了两个占位符</span></span><br><span class="line">X = tf.placeholder(<span class="string">"float"</span>)</span><br><span class="line">Y = tf.placeholder(<span class="string">"float"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立模型</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 模型的权重和偏值</span></span><br><span class="line">W = tf.Variable(rng.randn(), name=<span class="string">"weight"</span>)</span><br><span class="line">b = tf.Variable(rng.randn(), name=<span class="string">"bias"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 激活函数是一个乘加的线性模型，A = X * W + b</span></span><br><span class="line">activation = tf.add(tf.mul(X, W), b)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 最小化方差</span></span><br><span class="line"><span class="comment"># 这里调用了 TensorFlow 里面内置的优化函数，每次都算出方差 cost，再调用内置的梯度下降算法在给定的学习率的条件下优化方差到最小</span></span><br><span class="line"><span class="comment"># ... 说白了整个线性回归就 optimizer 这里是有用的，然而直接用的 TF 的内置函数来完成了</span></span><br><span class="line">cost = tf.reduce_sum(tf.pow(activation-Y, <span class="number">2</span>))/(<span class="number">2</span>*n_samples) <span class="comment">#L2 loss</span></span><br><span class="line">optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost) <span class="comment">#Gradient descent</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 变量的初始化器</span></span><br><span class="line">init = tf.initialize_all_variables()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动 TensorFlow 的流图计算</span></span><br><span class="line"><span class="keyword">with</span> tf.Session() <span class="keyword">as</span> sess:</span><br><span class="line">    <span class="comment"># 首先初始化所有变量</span></span><br><span class="line">    sess.run(init)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 训练 training_epochs 次</span></span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> range(training_epochs):</span><br><span class="line">    	<span class="comment"># 把输入的两个序列 train_X 和 train_Y 中对应位置的数打包成 (x, y) 的结构</span></span><br><span class="line">        <span class="keyword">for</span> (x, y) <span class="keyword">in</span> zip(train_X, train_Y):</span><br><span class="line">            <span class="comment"># 运行 optimizer 就是训练过程了，每次训练都使得 W 和 b 朝着使方差 cost 最小的方向更近一步</span></span><br><span class="line">            sess.run(optimizer, feed_dict=&#123;X: x, Y: y&#125;)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 过某特定步输出一次 log</span></span><br><span class="line">        <span class="keyword">if</span> epoch % display_step == <span class="number">0</span>:</span><br><span class="line">            print(<span class="string">"Epoch:"</span>, <span class="string">'%04d'</span> % (epoch+<span class="number">1</span>), <span class="string">"cost="</span>, \</span><br><span class="line">                <span class="string">"&#123;:.9f&#125;"</span>.format(sess.run(cost, feed_dict=&#123;X: train_X, Y:train_Y&#125;)), \</span><br><span class="line">                <span class="string">"W="</span>, sess.run(W), <span class="string">"b="</span>, sess.run(b))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 上面循环完之后整个线性回归的过程就结束了</span></span><br><span class="line">    print(<span class="string">"Optimization Finished!"</span>)</span><br><span class="line">    print(<span class="string">"cost="</span>, sess.run(cost, feed_dict=&#123;X: train_X, Y: train_Y&#125;), \</span><br><span class="line">          <span class="string">"W="</span>, sess.run(W), <span class="string">"b="</span>, sess.run(b))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 把结果显示出来，这里用了 matplotlib 这个库</span></span><br><span class="line">    plt.plot(train_X, train_Y, <span class="string">'ro'</span>, label=<span class="string">'Original data'</span>)</span><br><span class="line">    plt.plot(train_X, sess.run(W) * train_X + sess.run(b), label=<span class="string">'Fitted line'</span>)</span><br><span class="line">    plt.legend()</span><br><span class="line">    plt.show()</span><br></pre></td></tr></table></figure>
+
+<p>这个例子得益于优化算法完全由 TensorFlow 里面自己来实现了，所以写起来非常简单。</p>
+<p>TensorFlow 在深度学习中的使用方法就这么简单，类似上面这个例子：</p>
+<ul>
+<li>建立数据流图</li>
+<li>在 Session 中启动数据流图，把数据<strong>喂</strong>进去</li>
+</ul>
+<p>然后数据跑完一遍，留下的参数就离最优解更近一步。</p>
+<p>之后的重点就是看看 <code>Session.run()</code> 以及内置的这些 <code>tf.train.xxx</code> 函数在代码里面是怎么实现的了。</p>
+<hr>
+<h1 id="TensorFlow-Unpacking"><a href="#TensorFlow-Unpacking" class="headerlink" title="TensorFlow Unpacking"></a>TensorFlow Unpacking</h1><ul>
+<li>2018年新年启动</li>
+</ul>
+<p>开始 TensorFlow 比较完整的源码分析记录：</p>
+<hr>
+<ul>
+<li><a href="/2018/01/13/2018-01-13-tfunpacking/">TensorFlow 拆包（一）：Session.Run()</a></li>
+<li><a href="/2018/01/23/2018-01-23-tfunpacking2/">TensorFlow 拆包（二）：TF 的数据流模型实现</a></li>
+<li><a href="/2018/02/28/2018-02-28-tfunpacking3/">TensorFlow 拆包（三）：Graph 和 Node</a></li>
+<li><a href="/2018/03/07/2018-03-07-tfunpacking4/">TensorFlow 拆包（四）：Device</a></li>
+<li><a href="/2018/03/09/2018-03-09-tfunpacking5/">TensorFlow 拆包（五）：Distributed</a></li>
+<li><a href="/2018/03/12/2018-03-12-tfunpacking6/">TensorFlow 拆包（六）：RDMA</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/04/04/2017-04-04-alexnet/" rel="bookmark">AlexNet</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/07/20/2016-07-20-grpc/" rel="bookmark">填坑系列 - gRPC</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/03/22/2017-03-22-deeplearning/" rel="bookmark">深度学习初探</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/06/21/2017-06-21-3dct/" rel="bookmark">医学影像 & AI</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/12/20/2017-12-20-distributeddl/" rel="bookmark">分布式机器学习 / 深度学习论文整理</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Google/" rel="tag"># Google</a>
+              <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+              <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+              <a href="/tags/TensorFlow/" rel="tag"># TensorFlow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/01/26/2017-01-26-vs/" rel="prev" title="Visual Studio 与 Linux">
+      <i class="fa fa-chevron-left"></i> Visual Studio 与 Linux
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/02/06/2017-02-06-swigdebug/" rel="next" title="Python-SWIG 初探以及其 gdb 调试">
+      Python-SWIG 初探以及其 gdb 调试 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Example"><span class="nav-text">Example</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TensorFlow-Unpacking"><span class="nav-text">TensorFlow Unpacking</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '63fed6d7d924340c3ad6843c48aad17a',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

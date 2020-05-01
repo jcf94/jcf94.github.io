@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="还是在整理秋招遭遇过的面试题的时候顺便补充一下多线程相关的东西。 一开始是分了 Basic 和 Project 两个大标题，主要还是想写三个面试遇到的多线程例子的实现，然后发现前面 Basic 部分的东西写的有点多了……篇幅有点长，然后想了想还是把 Project 部分另外开一篇吧。 这大概就是计划赶不上变化？……就是这么任性。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多线程相关整理">
+<meta property="og:url" content="https://jcf94.com/2018/09/07/2018-09-07-multithreads/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="还是在整理秋招遭遇过的面试题的时候顺便补充一下多线程相关的东西。 一开始是分了 Basic 和 Project 两个大标题，主要还是想写三个面试遇到的多线程例子的实现，然后发现前面 Basic 部分的东西写的有点多了……篇幅有点长，然后想了想还是把 Project 部分另外开一篇吧。 这大概就是计划赶不上变化？……就是这么任性。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2018-09-07T01:50:25.000Z">
+<meta property="article:modified_time" content="2018-09-12T08:33:28.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="Multithreads">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2018/09/07/2018-09-07-multithreads/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>多线程相关整理 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2018/09/07/2018-09-07-multithreads/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          多线程相关整理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-09-07 09:50:25" itemprop="dateCreated datePublished" datetime="2018-09-07T09:50:25+08:00">2018-09-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-12 16:33:28" itemprop="dateModified" datetime="2018-09-12T16:33:28+08:00">2018-09-12</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Project/" itemprop="url" rel="index"><span itemprop="name">Project</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>还是在整理秋招遭遇过的面试题的时候顺便补充一下多线程相关的东西。</p>
+<p>一开始是分了 Basic 和 Project 两个大标题，主要还是想写三个面试遇到的多线程例子的实现，然后发现前面 Basic 部分的东西写的有点多了……篇幅有点长，然后想了想还是把 Project 部分另外开一篇吧。</p>
+<p>这大概就是计划赶不上变化？……就是这么任性。</p>
+<a id="more"></a>
+
+<hr>
+<p>这里来理一下 C 和 C++ 里面与多线程相关的 API。</p>
+<h1 id="C-Format"><a href="#C-Format" class="headerlink" title="C Format"></a>C Format</h1><p>在 C11 之前，C 标准库里面本身不带线程支持，通常需要用 UNIX/LINUX 系统库里面的 clone、fork 之类或者用 POSIX 标准的 pthread 库来实现。虽然这些东西都包含在 glibc 的库里面了，但是事实上不算 C 语言本身的标准，所以在 cppreference 里面是搜不到的（当时奇怪了好久）。</p>
+<p>pthread 底层用来创建线程的实现应该也是调的 clone、fork 这些系统调用来完成的。</p>
+<p>至于 mutex 锁、信号量这些原语，从 Linux 2.6.x 版本内核之后都是通过 FUTEX 系统调用来实现的，具体以后有空再看。</p>
+<p>另外需要对<strong>线程</strong>和<strong>进程</strong>这两个概念作一下强调，Linux 中本身不分进程和线程统称为 task，后来用于区分这两个概念主要是看一个 task 所拥有的资源情况。进程有自己的内存空间，线程共享父进程的内存空间。</p>
+<hr>
+<h2 id="fork-vfork-clone"><a href="#fork-vfork-clone" class="headerlink" title="fork(), vfork(), clone()"></a>fork(), vfork(), clone()</h2><p>先来看一下三个系统接口。</p>
+<table>
+<thead>
+<tr>
+<th>系统调用</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>fork()</td>
+<td>创建父进程的<strong>完整副本</strong>，复制父进程的资源，包括所有内存的内容。<strong>写时复制</strong>。</td>
+</tr>
+<tr>
+<td>vfork()</td>
+<td>创建的子进程与父进程共享数据段，并且由 vfork 创建的子进程先运行，父进程在子进程返回前保持阻塞。</td>
+</tr>
+<tr>
+<td>clone()</td>
+<td>可以对创建的子进程做更多控制，启动的时候指定需要执行的函数内容。</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>需要注意的是这几个 API 在 Mingw 里面是用不了的。</p>
+<p>Bash on Windows 大法好<del>~</del></p>
+</blockquote>
+<p>fork() 的使用方式特别简单：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID	: Chen Fan</span></span><br><span class="line"><span class="comment">LANG	: GCC</span></span><br><span class="line"><span class="comment">PROG	: </span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> aaa = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">pid_t</span> fpid = fork();</span><br><span class="line">    <span class="keyword">int</span> bbb = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (fpid &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        perror(<span class="string">"Fork Error!"</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (fpid == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        aaa++;</span><br><span class="line">        bbb++;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"This is son, with pid: %d, aaa: %d(%p), bbb: %d(%p)\n"</span>, getpid(), aaa, &amp;aaa, bbb, &amp;bbb);</span><br><span class="line">    &#125; <span class="keyword">else</span> </span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"This is Father, with pid: %d, aaa: %d(%p), bbb: %d(%p)\n"</span>, getpid(), aaa, &amp;aaa, bbb, &amp;bbb);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"Son's pid: %d\n"</span>, fpid);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># jcf @ J-CF-MSI in /mnt/c/Users/jcf/Desktop/multithread [15:45:20]</span></span><br><span class="line">$ gcc test.c</span><br><span class="line"></span><br><span class="line"><span class="comment"># jcf @ J-CF-MSI in /mnt/c/Users/jcf/Desktop/multithread [15:45:50]</span></span><br><span class="line">$ ./a.out</span><br><span class="line">This is Father, with pid: 487, aaa: 1(0x7fffe2ce2d9c), bbb: 1(0x7fffe2ce2da0)</span><br><span class="line">This is son, with pid: 488, aaa: 2(0x7fffe2ce2d9c), bbb: 2(0x7fffe2ce2da0)</span><br><span class="line">Son<span class="string">'s pid: 488</span></span><br></pre></td></tr></table></figure>
+
+<p>fork() 创建产生的子进程除了这个函数返回的 pid 值以外，与父进程完全一致，父子进程也都会从 fork() 函数返回之后继续向下执行相同的内容。另外，如果把本地的变量值的地址打出来，会发现它们的虚拟地址也都是一样的。</p>
+<p>这里用了一个写时复制的技术，fork 出来的子进程一开始直接用的是父进程的内存空间，所有内容包括虚拟地址都是跟父进程完全一致的，直到发生了数据更改，才会在物理地址空间中作一个新的映射。这也就提高了创建子进程的效率，因为分配新的页表也会是一件比较耗时的工作。</p>
+<p>然后是 vfork()，把上面这段代码中的 fork 直接改成 vfork 之后会得到这样的运行结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># jcf @ J-CF-MSI in /mnt/c/Users/jcf/Desktop/multithread [15:46:37] C:134</span></span><br><span class="line">$ gcc test.c</span><br><span class="line"></span><br><span class="line"><span class="comment"># jcf @ J-CF-MSI in /mnt/c/Users/jcf/Desktop/multithread [15:46:42]</span></span><br><span class="line">$ ./a.out</span><br><span class="line">This is son, with pid: 550, aaa: 2(0x7ffff4873a2c), bbb: 2(0x7ffff4873a30)</span><br><span class="line">This is Father, with pid: 549, aaa: 0(0x7ffff4873a2c), bbb: 1(0x7ffff4873a30)</span><br><span class="line">Son<span class="string">'s pid: 550</span></span><br><span class="line"><span class="string">*** stack smashing detected ***: ./a.out terminated</span></span><br><span class="line"><span class="string">[1]    549 abort (core dumped)  ./a.out</span></span><br></pre></td></tr></table></figure>
+
+<p>vfork 调用之后，父进程会被阻塞，所以可以看到不同于之前的情况，这里永远都是 son 这句先输出，执行完毕之后才会轮到父进程执行。</p>
+<p>那为什么会炸了呢……</p>
+<p>在 fpid 等于 0 的分支末尾加上 <code>exit(0);</code> 之后程序就能够正常执行了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># jcf @ J-CF-MSI in /mnt/c/Users/jcf/Desktop/multithread [15:47:10] C:134</span></span><br><span class="line">$ gcc test.c</span><br><span class="line"></span><br><span class="line"><span class="comment"># jcf @ J-CF-MSI in /mnt/c/Users/jcf/Desktop/multithread [15:47:18]</span></span><br><span class="line">$ ./a.out</span><br><span class="line">This is son, with pid: 584, aaa: 2(0x7fffc8d7641c), bbb: 2(0x7fffc8d76420)</span><br><span class="line">This is Father, with pid: 583, aaa: 2(0x7fffc8d7641c), bbb: 1(0x7fffc8d76420)</span><br><span class="line">Son<span class="string">'s pid: 584</span></span><br></pre></td></tr></table></figure>
+
+<p>原因是 vfork 不同于 fork 的一点是，创建出来的子进程直接共享父进程的数据段，当子进程跑完之后，他会像一个正常的进程一样对自己的栈空间等等做回收，则之后当父进程开始执行的时候自身的内存数据就被子进程破坏掉了一部分，这也是为什么前面第一次父进程的 aaa 输出来的结果是不对的，而加上 <code>exit(0);</code> 之后，父进程可以正常输出 2。</p>
+<p>话说网上说 vfork 出来的子进程如果用 return 来返回的话会出现很奇怪的 bug，不过我这里测试的时候没有见到，可能跟 gcc 和系统库的版本有关系。</p>
+<p>那么为什么会有 vfork 这个看上去有点问题的实现呢？</p>
+<p>这就需要提到另外一个系统接口 exec 了。exec 的作用是拿另外一个程序的代码来替换到当前进程的正文、数据和堆栈，简单地说就是用来启动一个新程序。</p>
+<blockquote>
+<p>exec 的接口实际上是一套，一共 6 个函数，具体的这里先不展开了。</p>
+</blockquote>
+<p>vfork 自身设计的目标是为 exec 服务的，当需要创建一个新进程来执行一段完全不同的代码时，vfork 直接共享父进程地址空间的做法是<strong>开销最小的</strong>，即保证<strong>先有一个子进程</strong>，然后调用 exec 来载入一段新的代码并且创建自己的独立地址空间，<strong>在子进程开始新程序或者退出之前，内核保证父进程一直处于阻塞状态</strong>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID	: Chen Fan</span></span><br><span class="line"><span class="comment">LANG	: GCC</span></span><br><span class="line"><span class="comment">PROG	: </span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> aaa = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">pid_t</span> fpid = vfork();</span><br><span class="line">    <span class="keyword">int</span> bbb = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (fpid &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        perror(<span class="string">"Fork Error!"</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (fpid == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        aaa++;</span><br><span class="line">        bbb++;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"This is son, with pid: %d, aaa: %d(%p), bbb: %d(%p)\n"</span>, getpid(), aaa, &amp;aaa, bbb, &amp;bbb);</span><br><span class="line">        execv(<span class="string">"hello.out"</span>, <span class="literal">NULL</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> </span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"This is Father, with pid: %d, aaa: %d(%p), bbb: %d(%p)\n"</span>, getpid(), aaa, &amp;aaa, bbb, &amp;bbb);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"Son's pid: %d\n"</span>, fpid);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果大概是这样：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># jcf @ J-CF-MSI in /mnt/c/Users/jcf/Desktop/multithread [16:07:41] C:1</span></span><br><span class="line">$ gcc test.c</span><br><span class="line">test.c: In <span class="keyword">function</span> ‘main’:</span><br><span class="line">test.c:27:9: warning: null argument <span class="built_in">where</span> non-null required (argument 2) [-Wnonnull]</span><br><span class="line">         execv(<span class="string">"hello.out"</span>, NULL);</span><br><span class="line">         ^</span><br><span class="line"></span><br><span class="line"><span class="comment"># jcf @ J-CF-MSI in /mnt/c/Users/jcf/Desktop/multithread [16:09:07]</span></span><br><span class="line">$ ./a.out</span><br><span class="line">This is son, with pid: 654, aaa: 2(0x7fffec2f627c), bbb: 2(0x7fffec2f6280)</span><br><span class="line">This is Father, with pid: 653, aaa: 2(0x7fffec2f627c), bbb: 1(0x7fffec2f6280)</span><br><span class="line">Son<span class="string">'s pid: 654</span></span><br><span class="line"><span class="string">Hello World</span></span><br></pre></td></tr></table></figure>
+
+<p>最后是 clone，先看下 man 里面的定义：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Prototype for the glibc wrapper function */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _GNU_SOURCE</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sched.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">clone</span><span class="params">(<span class="keyword">int</span> (*fn)(<span class="keyword">void</span> *), <span class="keyword">void</span> *child_stack,</span></span></span><br><span class="line"><span class="function"><span class="params">          <span class="keyword">int</span> flags, <span class="keyword">void</span> *arg, ...</span></span></span><br><span class="line"><span class="function"><span class="params">          <span class="comment">/* pid_t *ptid, void *newtls, pid_t *ctid */</span> )</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* For the prototype of the raw system call, see NOTES */</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>fn 是需要执行的函数指针，即 clone 出来的子进程需要执行的函数内容。</p>
+</li>
+<li><p>child_stack 就明显是给子进程分配的系统堆栈空间的位置。</p>
+</li>
+<li><p>flags 用于描述子进程需要从父进程中继承哪些部分的内容，因此通过这个值可以控制产生进程、线程、甚至非父子关系而是兄弟关系的进程等等，功能强大。</p>
+</li>
+<li><p>后面的就是传入新进程中的参数了</p>
+</li>
+</ul>
+<p>测试代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID	: Chen Fan</span></span><br><span class="line"><span class="comment">LANG	: GCC</span></span><br><span class="line"><span class="comment">PROG	: </span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _GNU_SOURCE</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sched.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">hello</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"This is: %d, Hello World\n"</span>, getpid());</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">void</span>* <span class="built_in">stack</span> = <span class="built_in">malloc</span>(<span class="number">8192</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> pid = clone(&amp;hello, (<span class="keyword">char</span>*)<span class="built_in">stack</span>+<span class="number">8192</span>, CLONE_PARENT, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Father pid: %d, new pid: %d\n"</span>, getpid(), pid);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面这份代码中有两个地方需要额外注意一下：</p>
+<ol>
+<li>在 &lt;sched.h&gt; 头文件引用前要加上 <code>#define _GNU_SOURCE</code> 的宏，表明下文代码不可移植，可能会用到一些非 GNU 标准的内容（例如 clone）。</li>
+<li>clone() 中的第二个参数指定的是栈空间，然后因为<strong>栈是反向增长的！！</strong>，所以这里需要传入申请的空间的尾部。</li>
+</ol>
+<p>结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># jcf @ J-CF-MSI in /mnt/c/Users/jcf/Desktop/multithread [16:46:24]</span></span><br><span class="line">$ gcc test.c</span><br><span class="line"></span><br><span class="line"><span class="comment"># jcf @ J-CF-MSI in /mnt/c/Users/jcf/Desktop/multithread [16:46:54]</span></span><br><span class="line">$ ./a.out</span><br><span class="line">Father pid: 989, new pid: 990</span><br><span class="line">This is: 990, Hello World</span><br></pre></td></tr></table></figure>
+
+<p>这三个接口的最底层涉及到的都是 <code>do_fork()</code> 这个调用，只是传入的参数不同，clone 可以认为就是个 <code>do_fork()</code> 的 API 外衣。</p>
+<h2 id="pthreads"><a href="#pthreads" class="headerlink" title="pthreads"></a>pthreads</h2><p>pthreads 的全称应该是 POSIX Threads，是 POSIX 的线程标准，它定义了一套 C 语言标准的线程控制 API，由一个 &lt;pthread.h&gt; 的头文件和一个线程库来实现，主要包含了：<strong>线程管理、互斥锁、条件变量、线程同步</strong>等等这些线程操作的 API。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID	: Chen Fan</span></span><br><span class="line"><span class="comment">LANG	: GCC</span></span><br><span class="line"><span class="comment">PROG	: </span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span>* <span class="title">hello</span><span class="params">(<span class="keyword">void</span>* arg)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"This is: %d, Hello World\n"</span>, getpid());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">pthread_t</span> tt;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (pthread_create(&amp;tt, <span class="literal">NULL</span>, hello, <span class="literal">NULL</span>))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"Thread Create Error\n"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    pthread_join(tt, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[Running] <span class="built_in">cd</span> <span class="string">"c:\Users\jcf\Desktop\multithread\" &amp;&amp; gcc test.c -o test &amp;&amp; "</span>c:\Users\jcf\Desktop\multithread\"<span class="built_in">test</span></span><br><span class="line">This is: 18308, Hello World</span><br></pre></td></tr></table></figure>
+
+<p>话说从使用方式上来看，<code>pthread_create()</code> 的接口跟 clone 就特别像，大概率底层实现就是用 clone 做的，不过传入的线程函数的格式不太一样。</p>
+<p>pthread 也提供了互斥锁和条件变量这些结构： <code>pthread_mutex_t</code> 、<code>pthread_cond_t</code>。具体的使用方式跟后面的差别不大，下文再整理。</p>
+<p>头文件 &lt;semaphore.h&gt; 中也提供了信号量的支持。</p>
+<h2 id="C11"><a href="#C11" class="headerlink" title="C11"></a>C11</h2><p>C11 之后，标准库里面提供了线程支持，包含在头文件 &lt;threads.h&gt; 中（这下可以在 cppreference 里面查到啦）。</p>
+<p>基本也就是线程创建、等待、互斥、条件变量等等的支持，感觉看上去跟 pthread 基本一致。</p>
+<blockquote>
+<p>而且不知道为什么，虽然在标准库里面查到了这个库，但是似乎用的人特别少。</p>
+<p>那 C 的部分还是用 pthread 吧。</p>
+</blockquote>
+<h1 id="C-Format-1"><a href="#C-Format-1" class="headerlink" title="C++ Format"></a>C++ Format</h1><ul>
+<li><a href="https://www.zhihu.com/question/36236334" target="_blank" rel="noopener">【学习c++多线程编程主要用pthread还是c++11中的thread类？】</a></li>
+</ul>
+<p>从知乎讨论上面来看，大家对 C++11 的 thread 意见还是比较大的。</p>
+<hr>
+<p>C++ 这部分……其实涉及到的东西非常多，需要一堆不同的库联合起来一起用：</p>
+<p>线程支持库 &lt;thread&gt; 提供了线程创建、调度、等待等等一系列管理操作；</p>
+<p>互斥库 &lt;mutex&gt; 提供了基本的互斥量 mutex，RAII 的锁控制方式 lock_guard 和 unique_lock 等等；</p>
+<p>条件变量库 <condition_variable> 提供了条件变量的支持；</p>
+<p>异步支持库 &lt;future&gt; 提供了像 promise、future、async 等等这种异步语义（在 Nodejs 里面用过，之前还真没听说 C++ 里面还带这种玩意）；</p>
+<p>原子操作库 &lt;atomic&gt; 提供了一系列与原子操作相关的支持；</p>
+<p>另外 C++ 中任何可以被调用的东西都是<strong>函数对象</strong>，前面用来创建线程用的目标函数也需要由函数对象库 &lt;functional&gt; 来管理，std::bind、std::invoke 等等这些管理参数调用，也可以用 lambda 表达式等等。</p>
+<blockquote>
+<p>话说 &lt;thread&gt; 库是不是也还是 pthread 的封装？？？</p>
+</blockquote>
+<h2 id="functional"><a href="#functional" class="headerlink" title="functional"></a>functional</h2><p>有关 <code>std::function</code> 和 Lambda 表达式，很早之前稍微有记过一些：</p>
+<ul>
+<li><a href="/2017/02/17/2017-02-17-cppnew/">【C++11 及之上的一些新东西】</a></li>
+</ul>
+<h2 id="mutex-lock-guard-unique-lock"><a href="#mutex-lock-guard-unique-lock" class="headerlink" title="mutex, lock_guard, unique_lock"></a>mutex, lock_guard, unique_lock</h2><p>C++11 中的基础互斥锁结构是 <code>std::mutex</code>，用法应该基本跟 pthread 的一样。&lt;mutex&gt; 中额外还提供了两个符合 RAII 标准的锁控制封装，以更加异常安全的方式来管理互斥锁。</p>
+<p><code>std::lock_guard</code> 就是个简单的互斥封装容器，构造时锁定给定的锁，然后析构的时候自动释放。事实上它能操作的锁不一定只限于 <code>std::mutex</code>，任何有 <code>lock()</code> 和 <code>un_lock()</code> 两个成员函数的对象都可以。</p>
+<p><code>std::unique_lock</code> 功能更多一点。构造时可选地对传入的锁上锁（也可以选择不锁），析构时自动释放。并且同时它还提供了 <code>lock()</code>、<code>try_lock()</code>、<code>unlock()</code> 等等这些成员函数，使用起来就更灵活了，除了离开作用域自动析构释放这一点之外，在作用域中还可以手动控制加锁解锁。</p>
+<h2 id="condition-variable"><a href="#condition-variable" class="headerlink" title="condition_variable"></a>condition_variable</h2><p>条件变量需要结合互斥锁一起使用，这里的 <code>std::condition_variable</code> 尤其在 wait 的时候必须配合 <code>std::unique_lock</code> 来用。</p>
+<p>条件变量的核心操作是等待（wait）和唤醒（notify），通常情况下，需要在条件变量上等待的线程需要：</p>
+<ol>
+<li>首先需要获得 <code>std::unique_lock&lt;std::mutex&gt;</code> 锁（重要！！）；</li>
+<li>执行 <code>wait()</code>、<code>wait_for()</code> 或者 <code>wait_until()</code> ，这三个函数需要把前面的 unique_lock 作为参数传入，执行时将原子地释放传入的 unique_lock，然后挂起当前线程进入等待状态；</li>
+<li>当条件变量被其他线程唤醒（notify）或者超时（对于 wait_for、wait_until）时，当前线程结束等待状态，<strong>unique_lock 自动获得锁</strong>，然后往下继续执行。</li>
+</ol>
+<p>在条件变量上执行唤醒操作的线程需要：</p>
+<ol>
+<li>首先同样要获得锁，这里不是一定要用 <code>std::unique_lock&lt;std::mutex&gt;</code>，其他方式管理也行；</li>
+<li>可以对用于判断的其他数据进行操作；</li>
+<li>对条件变量执行 <code>notify_one()</code> 或者 <code>notify_all()</code>，则其他处于等待状态的线程会被唤醒。</li>
+</ol>
+<p>文档中对 <code>notify_one</code> 的描述是会唤醒<strong>一个</strong>等待的线程，但是并不一定是哪一个，跟进入 wait 状态的线程的先后顺序无关，<code>notify_all</code> 则是唤醒<strong>当前正处于等待状态中的所有线程</strong>。</p>
+<p>由于 wait 操作本身自带对 unique_lock 的加锁解锁操作，因此 notify 这边也需要注意前面这个 mutex 锁的状况，<strong>必须保证 wait 在调用的时候 mutex 是锁上的，然后 wait 被唤醒的时候锁是开着的</strong>。如果 wait 唤醒时试图获取锁失败则会<strong>被阻塞在等互斥锁的状态</strong>，这个下面有测试。</p>
+<ul>
+<li><a href="https://stackoverflow.com/questions/13099660/c11-why-does-stdcondition-variable-use-stdunique-lock" target="_blank" rel="noopener">C++11: why does std::condition_variable use std::unique_lock?</a></li>
+</ul>
+<p>还有一个重要的注意点是多个线程对某个条件变量的 notify 和 wait 操作可以看成是<strong>对一个原子变量的顺序操作</strong>，这就意味着如果先调用 notify，再调用 wait，则 wait 是不会从唤醒中恢复的。</p>
+<blockquote>
+<p>看上去这个注意点很正常啊，正常就应该是这样的啊。但是实际多线程操作中非常容易出现：自认为 notify 会发生在 wait 以后，实际执行却不是，然后导致死锁的 bug。</p>
+</blockquote>
+<p>Talk is cheap, show me the code!</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID	: Chen Fan</span></span><br><span class="line"><span class="comment">LANG	: G++</span></span><br><span class="line"><span class="comment">PROG	: CV_TEST</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;condition_variable&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;mutex&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;thread&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;chrono&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    mutex cv_m;</span><br><span class="line">    condition_variable cv;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ----------- 1 -----------</span></span><br><span class="line">    <span class="comment">// &#123;</span></span><br><span class="line">    <span class="comment">//     unique_lock&lt;std::mutex&gt; lock(cv_m);</span></span><br><span class="line">    <span class="comment">//     cv.notify_one();</span></span><br><span class="line">    <span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line">    this_thread::sleep_for(chrono::seconds(<span class="number">2</span>));</span><br><span class="line"></span><br><span class="line">    <span class="function">thread <span class="title">th1</span><span class="params">([&amp;cv, &amp;cv_m]</span></span></span><br><span class="line"><span class="function"><span class="params">    &#123;</span></span></span><br><span class="line"><span class="function"><span class="params">        unique_lock&lt;<span class="built_in">std</span>::mutex&gt; lock(cv_m);</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="built_in">printf</span>(<span class="string">"th1 Start Waiting\n"</span>);</span></span></span><br><span class="line"><span class="function"><span class="params">        cv.wait(lock);</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="built_in">printf</span>(<span class="string">"th1 wake up\n"</span>);</span></span></span><br><span class="line"><span class="function"><span class="params">    &#125;)</span></span>;</span><br><span class="line"></span><br><span class="line">    this_thread::sleep_for(chrono::seconds(<span class="number">2</span>));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ----------- 2 -----------</span></span><br><span class="line">    &#123;</span><br><span class="line">        unique_lock&lt;<span class="built_in">std</span>::mutex&gt; lock(cv_m);</span><br><span class="line">        cv.notify_one();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ----------- 3 -----------</span></span><br><span class="line">    <span class="comment">// cv_m.lock();</span></span><br><span class="line">    <span class="comment">// cv.notify_one();</span></span><br><span class="line">    <span class="comment">// cv_m.unlock();</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// ----------- 4 -----------</span></span><br><span class="line">    <span class="comment">// cv_m.lock();</span></span><br><span class="line">    <span class="comment">// cv.notify_one();</span></span><br><span class="line">    <span class="comment">// this_thread::sleep_for(chrono::seconds(2));</span></span><br><span class="line">    <span class="comment">// cv_m.unlock();</span></span><br><span class="line"></span><br><span class="line">    th1.join();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>做了个小测试，对于上面打上标记的 4 块代码：</p>
+<ol>
+<li>中间加了个 sleep 2 秒来确保先调用 notify，然后 wait，妥妥的死锁！</li>
+<li>确保先调用 wait，然后 notify，正常工作！</li>
+<li>这么写也是可以正常工作的，但是如果把下面那段 <code>cv_m.unlock()</code> 删掉，则结果就会死锁！！！原因恰恰是在于 wait 被唤醒的时候要首先试图获得锁，由于 cv_m 这时候是锁着的，然后 wait 线程就被阻塞在获取互斥锁的状态了。</li>
+<li>为了确认 3 里面的这一点，我又写了 4 这个测试。从这里可以明确的是，notify 操作之后，wait 线程虽然仍然阻塞，但是这个阻塞状态跟前面线程挂起的等待状态是不同的，而是卡在 cv_m 这个锁上。</li>
+</ol>
+<p>所以看上去最好的方式是 notify 的时候根本就别管锁？如果不上锁，不就没这么多麻烦了吗……事实上，更好的写法应该是这样的：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID	: Chen Fan</span></span><br><span class="line"><span class="comment">LANG	: G++</span></span><br><span class="line"><span class="comment">PROG	: CV_TEST</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;condition_variable&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;mutex&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;thread&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;chrono&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    mutex cv_m;</span><br><span class="line">    condition_variable cv;</span><br><span class="line">    <span class="keyword">bool</span> ready = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ----------- 1 -----------</span></span><br><span class="line">    <span class="comment">// &#123;</span></span><br><span class="line">    <span class="comment">//     lock_guard&lt;mutex&gt; lock(cv_m);</span></span><br><span class="line">    <span class="comment">//     ready = true;</span></span><br><span class="line">    <span class="comment">//     cv.notify_one();</span></span><br><span class="line">    <span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line">    this_thread::sleep_for(chrono::seconds(<span class="number">2</span>));</span><br><span class="line"></span><br><span class="line">    <span class="function">thread <span class="title">th1</span><span class="params">([&amp;cv, &amp;cv_m, &amp;ready]</span></span></span><br><span class="line"><span class="function"><span class="params">    &#123;</span></span></span><br><span class="line"><span class="function"><span class="params">        unique_lock&lt;mutex&gt; lock(cv_m);</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="built_in">printf</span>(<span class="string">"th1 Start Waiting\n"</span>);</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="comment">//cv.wait(lock, [&amp;ready]&#123;return ready;&#125;);</span></span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">while</span> (!ready) cv.wait(lock);</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="built_in">printf</span>(<span class="string">"th1 wake up\n"</span>);</span></span></span><br><span class="line"><span class="function"><span class="params">    &#125;)</span></span>;</span><br><span class="line"></span><br><span class="line">    this_thread::sleep_for(chrono::seconds(<span class="number">2</span>));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ----------- 2 -----------</span></span><br><span class="line">    &#123;</span><br><span class="line">        lock_guard&lt;mutex&gt; lock(cv_m);</span><br><span class="line">        ready = <span class="literal">true</span>;</span><br><span class="line">        cv.notify_one();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    th1.join();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>三种 wait 函数均有一种附加条件的多参数调用方式，等同于在一个 while 循环中调用单参数版的 wait 函数。另外用一个 ready 变量标识等待情况，在 notify 时，cv_m 这个锁实际上是用于保护这个 ready 变量用的。用这种方式写则无论 notify 代码块发生在 wait 线程前还是发生在之后，wait 线程均会正常返回了。</p>
+<h2 id="future"><a href="#future" class="headerlink" title="future"></a>future</h2><p>这个头文件里面的内容很有意思，核心的类主要是 <code>std::promise</code>、<code>std::packaged_task</code>、<code>std::future</code> 这几个。</p>
+<p><code>std::future</code> 是一个对异步操作结果的封装类，一般需要配合 <code>std::async</code>、<code>std::packaged_task</code> 和 <code>std::promise</code> 的异步操作使用。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID   : Chen Fan</span></span><br><span class="line"><span class="comment">LANG   : G++</span></span><br><span class="line"><span class="comment">PROG   : future_test</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;future&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;chrono&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">task</span><span class="params">(<span class="keyword">int</span> i)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    this_thread::sleep_for(chrono::seconds(<span class="number">1</span>));</span><br><span class="line">    <span class="keyword">return</span> i;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">promise_task</span><span class="params">(future&lt;<span class="keyword">int</span>&gt;&amp; future_int)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> x = future_int.get();</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; x &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// ----------- future + async -----------</span></span><br><span class="line">    future&lt;<span class="keyword">int</span>&gt; a;</span><br><span class="line">    a = async(task, <span class="number">10</span>);</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; a.get() &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ----------- future + packaged_task -----------</span></span><br><span class="line">    packaged_task&lt;<span class="keyword">int</span>(<span class="keyword">int</span>)&gt; b_pack(task);</span><br><span class="line">    future&lt;<span class="keyword">int</span>&gt; b = b_pack.get_future();</span><br><span class="line">    b_pack(<span class="number">20</span>);</span><br><span class="line">    <span class="comment">//thread thb(move(b_pack), 20);</span></span><br><span class="line">    <span class="comment">//thb.join();</span></span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; b.get() &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ----------- future + promise -----------</span></span><br><span class="line">    promise&lt;<span class="keyword">int</span>&gt; c_prom;</span><br><span class="line">    future&lt;<span class="keyword">int</span>&gt; c = c_prom.get_future();</span><br><span class="line">    <span class="function">thread <span class="title">thc</span><span class="params">(promise_task, ref(c))</span></span>;</span><br><span class="line">    this_thread::sleep_for(chrono::seconds(<span class="number">1</span>));</span><br><span class="line">    c_prom.set_value(<span class="number">30</span>);</span><br><span class="line">    thc.join();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>std::async</code> 的作用是在另外一个线程中异步（默认操作，也可以设置在调用线程中同步执行）地执行给定的函数，函数执行的返回值则是由一个 <code>std::future</code> 对象来接收。</p>
+<p><code>std::packaged_task</code> 则是一个可调用目标（函数、Lambda表达式或者其他函数对象，即 <code>std::function</code> 的对象）的类模板封装，这个封装主要也就是把函数对象的执行和返回值给分开。package_task 对象可以直接加参数调用，或者放在另外一个线程中调用，结果会在函数体执行完毕之后存到对应的 future 结构中。</p>
+<p>最后是 <code>std::promise</code>，这个对象感觉有点像 placeholder 占位符的作用。promise 通过 <code>set_value()</code> 来提供数据，在 future 绑定的 promise 准备完成之前，future 的 <code>get()</code> 会阻塞所在的线程。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/09/10/2018-09-10-multithreadsproject/" rel="bookmark">几个多线程的练手 case</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Multithreads/" rel="tag"># Multithreads</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/09/04/2018-09-04-cache/" rel="prev" title="（试图）深入理解 Cache">
+      <i class="fa fa-chevron-left"></i> （试图）深入理解 Cache
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/09/10/2018-09-10-multithreadsproject/" rel="next" title="几个多线程的练手 case">
+      几个多线程的练手 case <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#C-Format"><span class="nav-text">C Format</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#fork-vfork-clone"><span class="nav-text">fork(), vfork(), clone()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pthreads"><span class="nav-text">pthreads</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C11"><span class="nav-text">C11</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#C-Format-1"><span class="nav-text">C++ Format</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#functional"><span class="nav-text">functional</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mutex-lock-guard-unique-lock"><span class="nav-text">mutex, lock_guard, unique_lock</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#condition-variable"><span class="nav-text">condition_variable</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#future"><span class="nav-text">future</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '02d8992cc2fa3d6b8f0a96360d788c16',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

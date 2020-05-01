@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="感觉我也是醉醉的，人比较懒，愿意打字都不愿意动笔了……  第1章 绪论交换所谓交换，就是在通信网上，负责在通信的源和目的终端之间建立通信信道，传送通信信息的机制，也就是根据目的地，在源和目的终端之间传送通信信息。网内的任一个用户可以按着自己的要求与网内的其他用户进行信息交换">
+<meta property="og:type" content="article">
+<meta property="og:title" content="现代交换原理 复习笔记 部分">
+<meta property="og:url" content="https://jcf94.com/2015/05/28/2015-05-28-xiandaijiaohuan/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="感觉我也是醉醉的，人比较懒，愿意打字都不愿意动笔了……  第1章 绪论交换所谓交换，就是在通信网上，负责在通信的源和目的终端之间建立通信信道，传送通信信息的机制，也就是根据目的地，在源和目的终端之间传送通信信息。网内的任一个用户可以按着自己的要求与网内的其他用户进行信息交换">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-05-28T15:56:10.000Z">
+<meta property="article:modified_time" content="2018-03-07T06:56:17.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="复习笔记">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2015/05/28/2015-05-28-xiandaijiaohuan/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>现代交换原理 复习笔记 部分 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2015/05/28/2015-05-28-xiandaijiaohuan/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          现代交换原理 复习笔记 部分
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-05-28 23:56:10" itemprop="dateCreated datePublished" datetime="2015-05-28T23:56:10+08:00">2015-05-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-03-07 14:56:17" itemprop="dateModified" datetime="2018-03-07T14:56:17+08:00">2018-03-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Bachelor-of-Engineering/" itemprop="url" rel="index"><span itemprop="name">Bachelor-of-Engineering</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>感觉我也是醉醉的，人比较懒，愿意打字都不愿意动笔了……</p>
+<hr>
+<h2 id="第1章-绪论"><a href="#第1章-绪论" class="headerlink" title="第1章 绪论"></a>第1章 绪论</h2><h3 id="交换"><a href="#交换" class="headerlink" title="交换"></a>交换</h3><p>所谓交换，就是在通信网上，负责在通信的源和目的终端之间建立通信信道，传送通信信息的机制，也就是根据目的地，在源和目的终端之间传送通信信息。网内的任一个用户可以按着自己的要求与网内的其他用户进行信息交换</p>
+<a id="more"></a>
+
+<ul>
+<li><p>交换式通信网通信过程</p>
+<blockquote>
+<ol>
+<li>呼叫建立阶段</li>
+<li>消息传输阶段</li>
+<li>释放阶段</li>
+</ol>
+</blockquote>
+</li>
+<li><p>交换方式</p>
+<blockquote>
+<p>电路交换 CS （Circuit Switch）<br>报文交换 MS （Message Switch）<br>分组交换 PS （Package Switch）</p>
+<blockquote>
+<p>数据报 Datagram<br>虚电路 VC (Virtual Circuit)</p>
+<blockquote>
+<p>交换虚电路 SVC （Switching Virtual Circuit）<br>永久虚电路 PVC （Permanent Virtual Circuit）</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</li>
+</ul>
+<p>|分类|电路交换|报文交换|分组交换|<br>|-<br>|方式|通信之前先建立通路，通信时通路独占，通信结束，通路释放|无需建立通路（无连接）|将报文分成若干个报文组（packet)，每个报文组要加上地址、编号、校验码，然后以报文组为存储转发单位逐节点转发，到达目的地再按编号组装成原报文|<br>|接续时间|较长|较短|较短|<br>|传输时延|短|长，偏差很大|较短|<br>|数据可靠性|一般|较高|高<br>|对业务过载的反应|拒绝接收呼叫|信息存储在交换机中，传输时延加大|减小用户输入信息流量（流量控制），时延加大|<br>|异种终端之间的相互通信|不可|可|可|<br>|电路利用率|低|高|高|<br>|交换机成本|较低|较高|较高|<br>|实时会话业务|适用|不适用|轻负载下适用|</p>
+<ul>
+<li>分组交换<blockquote>
+<p>基于<strong>统计时分复用</strong>，实时性较好，线路利用率高。</p>
+<ol>
+<li>数据报方式:以分组为基本单位逐节点转发，且不同节点可沿不同的路径传输，类似报文交换。</li>
+<li>虚电路:首先网络在通信两端建立逻辑连接，然后用户数据以分组为单位沿该路径顺序传送到达终点（逐节点转发）。类似于电路交换，但通路不是一直占用。</li>
+</ol>
+</blockquote>
+</li>
+</ul>
+<h3 id="程控交换机"><a href="#程控交换机" class="headerlink" title="程控交换机"></a>程控交换机</h3><ul>
+<li><p>交换机网络接续方式</p>
+<blockquote>
+<ol>
+<li>空分</li>
+<li>时分</li>
+</ol>
+</blockquote>
+</li>
+<li><p>控制方式</p>
+<blockquote>
+<ol>
+<li>集中控制</li>
+<li>分级控制</li>
+<li>全分散控制</li>
+</ol>
+</blockquote>
+</li>
+<li><p>五级长途电话网</p>
+<blockquote>
+<ol>
+<li>省间中心 C1</li>
+<li>省中心 C2</li>
+<li>地区中心 C3</li>
+<li>县中心 C4</li>
+<li>本地端局 C5</li>
+</ol>
+</blockquote>
+</li>
+<li><p>三级国际电话网</p>
+<blockquote>
+<ol>
+<li>国际中心局 CT1：各CT1之间均有直达链路</li>
+<li>CT2</li>
+<li>接口局 CT3</li>
+</ol>
+</blockquote>
+</li>
+<li><p>路由分类</p>
+<blockquote>
+<ol>
+<li>基干路由：一部分是C1级交换中心之间的低呼损电路群；另一部分是同一交换区内相邻级之间的低呼损电路群。基干路由上的话务量不允许溢出</li>
+<li>直达路由：先选择高效直达路由。当高效直达路由忙时，选择迂回路由。选择的顺序是“由远而近”，即先在被叫端“自下而上”选择。然后在主叫端“自上而下”选择。最后选择最终路由。</li>
+</ol>
+</blockquote>
+</li>
+<li><p>本地电话网</p>
+<blockquote>
+<ol>
+<li>去话汇接</li>
+<li>来话汇接</li>
+<li>来去话汇接</li>
+<li>集中汇接</li>
+<li>主辅汇接</li>
+</ol>
+</blockquote>
+</li>
+</ul>
+<h2 id="第2章-交换机理论基础"><a href="#第2章-交换机理论基础" class="headerlink" title="第2章 交换机理论基础"></a>第2章 交换机理论基础</h2><ul>
+<li>话务量<br>考察时间内各次服务时间总和<br>Y表示话务量，T表示时间总和，<br>$$A= {Y\over T}=n{S\over T}=λS$$<br>$$λ={n\over T}$$</li>
+</ul>
+<h2 id="第3章-信令系统"><a href="#第3章-信令系统" class="headerlink" title="第3章 信令系统"></a>第3章 信令系统</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><ul>
+<li><p>信令<br>信令是各交换局在完成呼叫接续中使用的一种通信语言，它是控制交换机产生动作的命令。</p>
+</li>
+<li><p>信令的分类</p>
+<blockquote>
+<ol>
+<li>按工作区域分</li>
+</ol>
+</blockquote>
+<p>1) 用户线信令<br>2) 局间信令<br>3) 交换机内部信令</p>
+<blockquote>
+<ol start="2">
+<li>按传送方向分</li>
+</ol>
+</blockquote>
+<p>1) 前向信令<br>2) 后向信令</p>
+<blockquote>
+<ol start="3">
+<li>按功能分</li>
+</ol>
+</blockquote>
+<p>1) 监视信令（线路信令）：用来监视或改变线路上的呼叫状态或条件<br>2) 选择信令（记发器信令）：由主叫用户发出的数字信号（电话号码），即被叫用户的地址信息<br>3) 操作信令（管理信令）</p>
+<blockquote>
+<ol start="4">
+<li>按传播途径分</li>
+</ol>
+</blockquote>
+<p>1) <strong>随路信令（带内信令）</strong>：通过话路传送的信令<br>2) <strong>公共信道信令（带外信令）</strong>：信令传送和话路分开的信令</p>
+</li>
+<li><p>信令的传送方式</p>
+<blockquote>
+<ol>
+<li>端到端：对电路质量要求较高</li>
+<li>逐段转发：对线路要求较低</li>
+<li>混合方式：中国1号记发器信令在劣质电路中使用逐段转发方式，在优质电路中使用端到端方式，No.7信令通常使用逐段转发方式但也可提供端到端信令。</li>
+</ol>
+</blockquote>
+</li>
+<li><p>控制方式</p>
+<blockquote>
+<ol>
+<li>非互控（脉冲方式）：设备简单，但可靠性差</li>
+<li>半互控方式：发端每发送一组信令之后必须受到确认后才能再发</li>
+<li>全互控方式：连续发送，不中断，直到受到证实之后才停止。抗干扰能力强，可靠性好，但发码速度慢<br>中国1号记发器信令使用<strong>全互控方式</strong>，保证可靠性，但影响了速度；No.7信令使用非互控方式，速度快，同时采用一些措施来保证可靠性。</li>
+</ol>
+</blockquote>
+</li>
+</ul>
+<h3 id="中国No-1信令"><a href="#中国No-1信令" class="headerlink" title="中国No.1信令"></a>中国No.1信令</h3><p>中国1号信令是一种<strong>随路信令</strong>。<br>方式分为线路信令和记发器信令。<br>数据类型分为模拟型线路信令（直流型线路信令、带内单频信令）和数字型线路信令。 </p>
+<ul>
+<li><p>带内单频线路信令</p>
+</li>
+<li><p><em>单频2600Hz*</em>，基本脉冲为<strong>长脉冲600ms</strong>，<strong>短脉冲150ms</strong>，两信令<strong>最小标称间隔300ms</strong>。</p>
+</li>
+<li><p>局间数字型线路信令<br>一个复帧由<strong>16</strong>个子帧组成，记为<strong>F0~F15</strong><br>每一个子帧有<strong>32</strong>个时隙，<strong>256bit</strong>，<strong>T=125us</strong>，记为<strong>TS0~TS31</strong><br>每一个时隙包含<strong>8bit</strong>二进制码字</p>
+</li>
+<li><p><em>TS0*</em>用于收发端同步，称为帧同步时隙，也称为帧定位码组</p>
+</li>
+<li><p><em>TS1<del>TS15以及TS17</del>TS31*</em>是话音时隙</p>
+</li>
+<li><p><em>TS16*</em>用来传送复帧同步及数字型线路信令，称为信令时隙。一路话音信号的线路信令只需要<strong>4bit</strong>，即一个<strong>TS16</strong>时隙可以传送两路。</p>
+</li>
+<li><p>No.1记发器信令 RS（Resister Signal）</p>
+</li>
+<li><p><em>多频互控方式信令，MFC（Multiple Frequency Control）*</em>，传送方式为<strong>端到端</strong>，劣质电路上也可采用<strong>逐段转发</strong>方式，控制方式为<strong>全互控</strong>。</p>
+</li>
+</ul>
+<p>|组别|名称|基本含义|容量|<br>|-<br>|I|KA|主叫用户类别|15|<br>|I|KC|长途接续类别|5|<br>|I|KE|市内接续类别|5|<br>|I|数字信令|0~9|10<br>|II|KD|发端呼叫类别|6<br>|A|A|收号状态和接续状态|6<br>|B|KB|被叫用户状态|6</p>
+<ul>
+<li>前向I组和后向A组互控，前向II组和后向B组互控</li>
+</ul>
+<h3 id="No-7-信令"><a href="#No-7-信令" class="headerlink" title="No.7 信令"></a>No.7 信令</h3><p>局间的NO.7信令链路是由两端的信令终端设备和它们之间的数据链路组成。<br>最适合采用64kbit/s的数字信道，也适合模拟信道和较低速率下的工作，适合由数字程控交换机和数字传输设备所组成的综合数字网。<br>高可靠性。<br><strong>公共信道信令</strong>。<br>用于支持<strong>蜂窝移动通信</strong>、<strong>PCN</strong>、<strong>ATM</strong>等，用于支持国际网和国内网。</p>
+<hr>
+<ul>
+<li>No.7信令网的基本组成部件有<strong>信令点SP</strong>、<strong>信令转接点STP</strong>和<strong>信令链路SL</strong></li>
+</ul>
+<hr>
+<ul>
+<li>SP是处理控制消息的节点，产生消息的信令点为该消息的起源点，消息到达的信令点为该消息的目的地节点。<br>信令点编码有两种：</li>
+<li><em>14位（国际）*</em>：3位大区、8位区域网、3位信号点</li>
+<li><em>24位（国内）*</em>：8位主信令区、8位分信令区、8位信令点<br>源信令点编码<strong>OPC(Origin Point Code)</strong>，目的信令点编码记为<strong>DPC(Destination Point Code)</strong>。</li>
+</ul>
+<hr>
+<ul>
+<li><strong>信令转接点STP</strong>分为综合型和独立型两种。独立型STP是只具有<strong>消息传递部分MTP</strong>和<strong>信令连接控制部分SCCP</strong>功能的信令转接点设备；综合型STP是除了具有消息传递部分MTP和信令连接控制部分SCCP的功能外，还具有<strong>用户部分</strong>功能(例如TUP/ISUP、TCAP、INAP)的信令转接点设备。</li>
+</ul>
+<hr>
+<ul>
+<li><strong>信令链路SL</strong>连接各个信令点或信令转接点<br>在两个相邻信令点之间传送信令消息的链路称为信令链路。<br>相同属性的信令链路组成一组链路集。<br>到同一局向的所有链路可属一个链路集，也可属多个链路集；但两个相邻的信令点之间的信令链路只能属于一个链路集。<br>对于相邻两个信令点之间的所有链路，都有一个统一编号，称为<strong>信令链路编码SLC(Signalling Link Code)</strong>。</li>
+</ul>
+<hr>
+<ul>
+<li>信令链路的连接方式<br>根据通话电路和信令链路的关系，可采用三种工作方式：</li>
+</ul>
+<ol>
+<li><strong>直连工作方式</strong>：信令链路直接连接两个SP，信令消息直达。</li>
+<li><strong>准直联工作方式</strong>：信令消息可能会通过STP转接，路径是<strong>预先设定好</strong>的。</li>
+<li><strong>完全分离工作方式</strong>：可能会有多条转接路径，而路由是<strong>动态分配</strong>的。</li>
+</ol>
+<hr>
+<ul>
+<li>协议集<br>No.7信令的基本功能结构由<strong>消息传递部分(MTP)（底层）</strong>和<strong>用户部分(UP)（高层）</strong>组成。</li>
+</ul>
+<hr>
+<ul>
+<li>消息传递部分 MTP<br>主要是在信令网中提供<strong>可靠的</strong>信令消息传递，并在系统和信令网故障情况下，具有为保证可靠的信息传送而作出响应并采取必要措施的能力。<br>它由三个功能级组成：</li>
+</ul>
+<ol>
+<li><strong>信令数据链路功能(MTP1)</strong>：相当于<strong>物理层</strong>，定义了数字信令链路的物理、电气及功能特性</li>
+<li><strong>信令链路控制功能(MTP2)</strong>：相当于<strong>数据链路层</strong>，提供<strong>流量控制</strong>、<strong>消息顺序确认</strong>及<strong>检错重传</strong>功能</li>
+<li><strong>信令网络功能(MTP3)</strong>：相当于<strong>网络层</strong>，提供<strong>路由功能</strong></li>
+</ol>
+<hr>
+<ul>
+<li>用户部分 UP<br>定义了通信网的各类用户(业务)所需要的信令及其编码，规定用户部分(UP)与消息传递部分（MTP）之间的信号传输关系。控制各种基本呼叫的建立和释放。</li>
+</ul>
+<ol>
+<li><strong>ISDN用户部分ISUP、电话用户部分TUP、数据用户部分DUP</strong>：一般都用ISUP替代全部。</li>
+<li><strong>信令连接控制部分SCCP</strong>：本身相当于<strong>传输层</strong>，但是与<strong>MTP-3共同组成网络层</strong>，<strong>与MTP共同组成网络业务部分NSP</strong>。加强消息传递功能。</li>
+<li><strong>事务处理能力应用部分TCAP</strong>：提供节点之间的传递信息的手段以及对相互独立的各种应用提供通用的业务</li>
+<li><strong>TC用户</strong>：指各种应用，目前有智能网应用部分(INAP)、移动应用部分(MAP)、运行维护管理应用部分(OMAP)</li>
+</ol>
+<hr>
+<ul>
+<li>CCS7信令单元格式<br>信令消息是以<strong>信号单元</strong>的方式传送，而<br>且采用<strong>不等长信号单元</strong>。以<strong>8bit</strong>为长度单位<br>它有三种信号单元：</li>
+</ul>
+<ol>
+<li><strong>消息信令单元MSU</strong>：用来传送<strong>第三级以上</strong>的各层发送的信息。</li>
+<li><strong>链路状态信令单元LSSU</strong>：用来传送信令链路状态</li>
+<li><strong>填充信令单元FISU</strong>：是在信令链路上没有消息要传送时，向对端发送的空信号，用来维持信令链路的通信状态，同时可证实对端发来的信令单元。</li>
+</ol>
+<ul>
+<li><p><strong>信令信息字段 SIF(Signalling Information Field)</strong>是MSU特有的，长度为<strong>2~272个8位组</strong>，包含路由标记和信令数据，就是实际发送的消息。</p>
+</li>
+<li><p>LSSU和FISU都由信令链路功能级生成及处理。</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>电话用户部分TUP<br>电话用户消息的内容是在消息信令单元MSU中的<strong>信令信息字段SIF</strong>中传送的。由<strong>标记、标题码和信令信息</strong>三部分组成。</li>
+</ul>
+<ol>
+<li>初始地址消息<strong>IAM（无附加）</strong>或<strong>IAI（附加信息）</strong>：含有下一个交换局为建立呼叫、确定路由所需的有关信息。初始地址消息蕴含了占用电路的功能</li>
+<li>后序地址消息<strong>SAM（一次传多位）</strong>和<strong>SAO（一次传一位）</strong>：传送剩余的被叫号码。</li>
+<li>地址全消息<strong>ACM</strong></li>
+<li>地址不全消息<strong>ADI</strong></li>
+<li>被叫用户状态：用户市忙<strong>SLB</strong>、用户长忙<strong>STB</strong>、线路不工作<strong>LOS</strong>、空号<strong>UNN</strong>和发送专用信息音<strong>SST</strong></li>
+<li>应答信号<strong>ANC（计费）</strong>、<strong>ANN（免费）</strong></li>
+<li>后向拆线信号<strong>CBK</strong>、前向拆线信号<strong>CLF</strong></li>
+</ol>
+<p>首先发送：</p>
+<p>|内容|空|CIC|OPC|DPC<br>|-<br>|长度|4|12|24|24</p>
+<ul>
+<li>话音电路标识CIC</li>
+</ul>
+<hr>
+<ul>
+<li>ISDN用户部分ISUP<br>ISUP可以全面支持ISDN用户的基本承载业务和补充业务，而且可以<strong>完全实现TUP（电话用户部分）和DUP（数据用户部分）</strong>的功能</li>
+</ul>
+<p>首先发送：</p>
+<p>|内容|空|SLS|OPC|DPC<br>|-<br>|长度|4|12|24|24</p>
+<ul>
+<li>信令链路选择SLS</li>
+</ul>
+<hr>
+<ol>
+<li>初始地址消息<strong>IAM（无附加）</strong>或<strong>IAI（附加信息）</strong>：含有下一个交换局为建立呼叫、确定路由所需的有关信息。初始地址消息蕴含了占用电路的功能</li>
+<li>后序地址消息<strong>SAM（一次传多位）</strong>和<strong>SAO（一次传一位）</strong>：传送剩余的被叫号码。</li>
+<li>地址全消息<strong>ACM</strong></li>
+<li>地址不全消息<strong>ADI</strong></li>
+<li>被叫用户状态：用户市忙<strong>SLB</strong>、用户长忙<strong>STB</strong>、线路不工作<strong>LOS</strong>、空号<strong>UNN</strong>和发送专用信息音<strong>SST</strong></li>
+<li>应答信号<strong>ANC（计费）</strong>、<strong>ANN（免费）</strong></li>
+<li>后向拆线信号<strong>CBK</strong>、前向拆线信号<strong>CLF</strong></li>
+</ol>
+<p>|—|ISUP|TUP<br>|-<br>|初始地址消息|IAM|IAM/IAI<br>|后序地址消息（重叠发送时）||SAM/SAO<br>|地址全消息|ACM|ACM<br>|地址不全消息|ADI|ADI<br>|应答信号|ANM|ANC/ANN<br>|故障信号|包含在REL中|SLB/STB/LOS/UNN<br>|挂机信号||CBK（后向）<br>|拆线信号|REL（链路清除）|CLF（前向）<br>|拆线证实|RLC|RLG</p>
+<h2 id="第4章-数字程控交换原理与技术"><a href="#第4章-数字程控交换原理与技术" class="headerlink" title="第4章 数字程控交换原理与技术"></a>第4章 数字程控交换原理与技术</h2><ul>
+<li>交换机的基本组成</li>
+</ul>
+<ol>
+<li>话路部分<br>用户电路<br>中继器<br>交换网络<br>信令设备</li>
+<li>控制系统</li>
+</ol>
+<hr>
+<ul>
+<li>控制方式</li>
+</ul>
+<ol>
+<li>集中控制</li>
+<li>分散控制：资源分散，控制功能集中<br>1) 分级控制：上下级结构、每个层次的处理机处理一部分内容<br>2) 全分散控制：平行结构、将系统划分为几个模块，每个模块相互通信，相互配合<br>3) 基于容量分担的全分散控制：综合上两个、在平行结构中分层<br>容量分担：资源分散、功能集中<br>功能分担：资源集中、功能分散<br>话务分担：<br>容量分担：</li>
+</ol>
+<p>|—|集中控制|分散控制|<br>|-<br>|优点|处理机能够及时掌握、了解整个系统的运行状态，使用和管理系统的全部资源，不会出现资源争夺的冲突|任何一个模块故障，整体仍然能够运行，扩容方便，灵活<br>|缺点|灵活性差，经济性差（处理级复杂、昂贵），软件庞大，维护困难|各部分独立，可能会出现资源冲突，公共资源难以共享，单独模块的容量过小<br>|适合|小容量交换机|</p>
+<hr>
+<ul>
+<li>处理机的冗余配置</li>
+</ul>
+<ol>
+<li>重要的进行1+1配置</li>
+<li>不重要的进行n+1配置</li>
+</ol>
+<ul>
+<li>1+1的三种方式</li>
+</ul>
+<p>|—|同步双工|双机互助（话务分担）|主/备用<br>|-<br>|特点|两机同步工作，比较执行结果|各自独立工作，一旦一台出错，另一台承担全部工作|一台联机一台备用，一旦出故障则主/备用切换<br>|优点|对硬件故障反应快|过负荷能力强，对软件故障有容错能力，可一台服务一台调试升级|实现简单，热备用时备用机保存主机的相关数据，可以随时接替工作<br>|缺点|对软件无容错能力，需要不停复核，降低了效率|为避免双机争抢资源，双机通信频繁，软件复杂，对硬件故障反应速度不如同步双工|冷备用切换时会产生延误或者连接中断等</p>
+<hr>
+<p>4.3.1</p>
+<hr>
+<ul>
+<li><p>程控交换机的硬件结构<br>程控交换机的硬件包括<strong>话路系统</strong>、<strong>中央处理系统（控制系统）</strong>，<strong>维护与操作系统</strong>三部分</p>
+</li>
+<li><p>用户电路的七大功能，被称为：BORSCHT</p>
+</li>
+</ul>
+<p>|B|Battery Feed|馈电<br>|-<br>|O|Overvoltage|过压保护<br>|R|Ring|振铃<br>|S|Supervision|监视<br>|C|CODEC&amp;filter|编解码和滤波<br>|H|Hybrid|混合<br>|T|Test|测试</p>
+<hr>
+<ul>
+<li><p>交换网络结构<br>交换网络是由若干个交换单元按照一定的<strong>拓扑结构</strong>和<strong>控制方式</strong>构成的网络</p>
+</li>
+<li><p>交换网络的<strong>三个基本要素</strong><br>交换单元、不同交换单元间的拓扑连接和控制方式</p>
+</li>
+<li><p>多级交换网络的拓扑结构可用三个参数来说明：</p>
+</li>
+</ul>
+<ol>
+<li>每个交换单元的容量。</li>
+<li>交换单元的级数。</li>
+<li>交换单元间的连接通路(链路)</li>
+</ol>
+<ul>
+<li><p>内部阻塞<br>从交换网络不同输入端来的信息在交换网络中交换时发生的对同一公共资源发生争抢的情况。在竞争资源时失败的信息会被阻塞，直到公共资源被释放。</p>
+</li>
+<li><p>内部阻塞概率</p>
+</li>
+</ul>
+<p>$$a={A \over n*m}$$</p>
+<ul>
+<li>无阻塞网络 <strong>Clos网络</strong> 输入m*n 输出 j*k</li>
+</ul>
+<p>|—|第一级|第二级|第三级|<br>|-<br>|个数|m|n+j-1|k|<br>|入线数|n|m|n+j-1|<br>|出线数|n+j-1|k|j|</p>
+<ul>
+<li>中间一级可以继续拆分</li>
+</ul>
+<hr>
+<ul>
+<li><p>空分交换机/空间接线器<br>用来实现多个输入复用线与多个输出复用线之间的空间交换，而不改变其时隙位置</p>
+</li>
+<li><p>基本结构</p>
+</li>
+</ul>
+<ol>
+<li>交叉点矩阵：开关阵列</li>
+<li>控制存储器</li>
+</ol>
+<ul>
+<li>时分交换机<br>共享存储器型的交换单元</li>
+</ul>
+<ol>
+<li>话音存储器SM：用于存储话音信号</li>
+<li>控制存储器CM：用于存储控制命令字</li>
+</ol>
+<ul>
+<li>TST网络<br>TST网络是在电路交换系统中经常使用的一种交换网<br>络，它是三级交换网络，两侧为T接线器，中间一级为S接线<br>器，S级的出入线数决定于两侧T接线器的数量。</li>
+</ul>
+<ol>
+<li>第1级，T接线器：负责输入母线的时隙交换。</li>
+<li>S接线器：负责母线之间的空间交换。</li>
+<li>第2级，T接线器：负责输出母线的时隙交换</li>
+</ol>
+<ul>
+<li>常用的有<br>$TS^nT$、$ST^nS$、T/结合、TTT等</li>
+</ul>
+<hr>
+<ul>
+<li>交换软件中使用的语言</li>
+</ul>
+<ol>
+<li>规范描述语言SDL：用于系统设计阶段，用来说明对程控交换机的各种功能要求和技术规范，并描述功能和状态的变化情况；</li>
+<li>高级语言和汇编语言：用来编写软件程序；</li>
+<li>人机对话语言MML：主要用于人机对话，在软件测试和运行维护阶段使用</li>
+</ol>
+<hr>
+<ul>
+<li>局数据</li>
+</ul>
+<ol>
+<li>配置数据</li>
+<li>路由和中继规则</li>
+<li>No.7信令数据</li>
+<li>计费数据</li>
+<li>新业务提供情况</li>
+</ol>
+<ul>
+<li>用户数据</li>
+</ul>
+<ol>
+<li>用户电话号码、用户设备号码</li>
+<li>用户线类别</li>
+<li>话机类别</li>
+<li>用户的服务等级</li>
+<li>用户对新业务的使用权及已经登记的新业务</li>
+<li>用户计费数据</li>
+</ol>
+<hr>
+<ul>
+<li>程控交换机中操作系统主要功能是：</li>
+</ul>
+<ol>
+<li>任务调度</li>
+<li>存储器管理</li>
+<li>进程之间的通信、处理机之间通信</li>
+<li>定时管理</li>
+<li>系统监督和恢复</li>
+<li>I／O设备管理、文件管理等</li>
+</ol>
+<ul>
+<li><p>优先级<br>按照对实时性要求的不同，程序的优先级大致可分为<strong>中断级、时钟级和基本级</strong></p>
+</li>
+<li><p>比特型时间表<br>一个时间表所能调度的程序数等于该时间表的列数，时间表能够支持的不同周期数等于时间表行数n的不同因子数</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>呼叫处理的过程</li>
+</ul>
+<ol>
+<li>输入处理：负责采集话路设备的状态信息的变化和有关信息，只负责检测事件而不进行处理。本质上是软件和硬件之间的接口程序，和硬件设备直接联系，通过周期性的扫描程序实现状态信息的采集。</li>
+<li>内部处理：主要任务是分析收集的信息和各类发生的事件，分配资源，并根据所发生的时间及与该事件有关进程的当前状态决定下一步的动作。由于对时间没有严格要求，一般情况下，采用队列方式来完成。</li>
+<li>输出处理：依据内部分析的结果完成对话路设备的驱动。如交换网络的接续、向用户发生各种信令音等</li>
+</ol>
+<h2 id="第5章-分组交换原理与技术"><a href="#第5章-分组交换原理与技术" class="headerlink" title="第5章 分组交换原理与技术"></a>第5章 分组交换原理与技术</h2><h2 id="第6章-ATM原理与技术"><a href="#第6章-ATM原理与技术" class="headerlink" title="第6章 ATM原理与技术"></a>第6章 ATM原理与技术</h2>
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/05/30/2015-05-30-shuzishipin/" rel="bookmark">数字视频 复习笔记</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/06/19/2015-06-19-zhuanye/" rel="bookmark">专业知识整理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/06/27/2015-06-27-weibojishuyutianxian/" rel="bookmark">微波技术与天线 复习笔记</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/07/01/2015-07-01-xinhaoxiangguan/" rel="bookmark">信号相关专业复习</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/07/05/2015-07-05-fft/" rel="bookmark">快速傅里叶变换FFT算法的用途</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%A4%8D%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 复习笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/05/28/2015-05-28-diary/" rel="prev" title="通宵那些事">
+      <i class="fa fa-chevron-left"></i> 通宵那些事
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/05/30/2015-05-30-shuzishipin/" rel="next" title="数字视频 复习笔记">
+      数字视频 复习笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#第1章-绪论"><span class="nav-text">第1章 绪论</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#交换"><span class="nav-text">交换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#程控交换机"><span class="nav-text">程控交换机</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第2章-交换机理论基础"><span class="nav-text">第2章 交换机理论基础</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第3章-信令系统"><span class="nav-text">第3章 信令系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#中国No-1信令"><span class="nav-text">中国No.1信令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#No-7-信令"><span class="nav-text">No.7 信令</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第4章-数字程控交换原理与技术"><span class="nav-text">第4章 数字程控交换原理与技术</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第5章-分组交换原理与技术"><span class="nav-text">第5章 分组交换原理与技术</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第6章-ATM原理与技术"><span class="nav-text">第6章 ATM原理与技术</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '926c9f886192a7d44ddbbeb16ac70fa9',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

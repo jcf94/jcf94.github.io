@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="刚刚跟实验室的一个博士生师兄联系上了，研究生入学前本来漫无目的的乱学过程终于稍微找到点方向。虽然还没决定以后具体要做体系结构方向的哪一块内容，至少先走一步学一步吧。 师兄是主要做并行程序优化的，估计老师也是看我以前编程方面还可以才给我推荐的这个方向。 下一阶段开始学习并行编程：mpi和openmp 先从mpi开始吧。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="并行编程 MPI初探">
+<meta property="og:url" content="https://jcf94.com/2015/11/03/2015-11-03-mpi/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="刚刚跟实验室的一个博士生师兄联系上了，研究生入学前本来漫无目的的乱学过程终于稍微找到点方向。虽然还没决定以后具体要做体系结构方向的哪一块内容，至少先走一步学一步吧。 师兄是主要做并行程序优化的，估计老师也是看我以前编程方面还可以才给我推荐的这个方向。 下一阶段开始学习并行编程：mpi和openmp 先从mpi开始吧。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-11-03T04:32:30.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="并行编程">
+<meta property="article:tag" content="MPI">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2015/11/03/2015-11-03-mpi/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>并行编程 MPI初探 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2015/11/03/2015-11-03-mpi/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          并行编程 MPI初探
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-11-03 12:32:30" itemprop="dateCreated datePublished" datetime="2015-11-03T12:32:30+08:00">2015-11-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Parallel/" itemprop="url" rel="index"><span itemprop="name">Parallel</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>刚刚跟实验室的一个博士生师兄联系上了，研究生入学前本来漫无目的的乱学过程终于稍微找到点方向。虽然还没决定以后具体要做体系结构方向的哪一块内容，至少先走一步学一步吧。</p>
+<p>师兄是主要做并行程序优化的，估计老师也是看我以前编程方面还可以才给我推荐的这个方向。</p>
+<p>下一阶段开始学习并行编程：mpi和openmp</p>
+<p>先从mpi开始吧。</p>
+<a id="more"></a>
+
+<h1 id="一些资料"><a href="#一些资料" class="headerlink" title="一些资料"></a>一些资料</h1><ul>
+<li><p>一个MPI的教程站：<a href="http://mpitutorial.com/" target="_blank" rel="noopener">http://mpitutorial.com/</a><br>因为是托管在Github上的，顺手fork过来了：<a href="http://mpi.jcf94.com/" target="_blank" rel="noopener">http://mpi.jcf94.com/</a></p>
+</li>
+<li><p>MPI的完整API：<a href="https://computing.llnl.gov/tutorials/mpi/" target="_blank" rel="noopener">https://computing.llnl.gov/tutorials/mpi/</a></p>
+</li>
+<li><p>MPICH，一个MPI的实现机制，包括编译器和运行器等：<a href="http://www.mpich.org/" target="_blank" rel="noopener">http://www.mpich.org/</a><br>以及MPICH的<a href="http://www.mpich.org/static/downloads/" target="_blank" rel="noopener">各个版本资源</a></p>
+</li>
+</ul>
+<h1 id="MPICH在Windows下的安装"><a href="#MPICH在Windows下的安装" class="headerlink" title="MPICH在Windows下的安装"></a>MPICH在Windows下的安装</h1><p>MPICH官网上提供了整个MPICH2的源码，一般是需要下过来然后在本地进行完整编译，这个等下次移到Ubuntu下面的时候再看一下编译的全过程吧。现在先找现成的安装包用着先。</p>
+<p>最新的版本大概出到了3.x，不过已经编译好了的Windows安装文件似乎最高只到<a href="http://www.mpich.org/static/downloads/1.4.1p1/" target="_blank" rel="noopener">1.4.1</a>。下之，然后安装。</p>
+<hr>
+<p>安装过程中要求输入一串smpd的底层密码，这个应该是在整个MPICH系统中用来传递消息的一个服务。</p>
+<p>装好之后，安装目录里面有用的几个exe有：</p>
+<blockquote>
+<p>mpiexec.exe MPI运行器<br>smpd.exe<br>wmpiconfig.exe 图形界面下的MPICH配置查看器<br>wmpiexec.exe 图形界面下的MPI运行器<br>wmpiregister.exe 图形界面下的MPICH服务注册器</p>
+</blockquote>
+<hr>
+<p>首先还是把bin这个目录加到系统环境变量里面去，这是一般装开发环境时肯定要做的事。</p>
+<p>然后测试smpd服务是否在运行了，没有的话就需要把它安装上并启动起来：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">smpd -install -phrase behappy</span><br></pre></td></tr></table></figure>
+
+<p><code>-phrase</code>后面的这一串就是安装过程中输入的密码串。</p>
+<p>确认已启动后继续。</p>
+<hr>
+<p>启动wmpiregister.exe，这里需要把此时登录Windows系统的用户账户和密码输进去，因为MPICH需要调用管理员的底层权限。</p>
+<p>比较坑的是当时在这里以及后面的测试这一步中卡了很久…</p>
+<p>我现在用的是win10，从win8开始就使用了在线的微软账号进行登录。所以我把微软账号输入到register里面去，结果却死活没办法通过系统的验证。</p>
+<p>后来才知道，如果采用微软账号登录系统，Windows在本地是还有另一个本地账号的用户名来对应的。一般是把登录微软账号前的最后一个本地账号直接作为对应。</p>
+<p>我当时装机的时候应该是没有经过本地账号这一步，所以不知道它写在那里的本地用户名是什么。</p>
+<p>于是切到本地账户，创建了一个本地账户的用户名，再切回微软账号。</p>
+<p>然后用之前的本地账户用户名+微软账号的密码注册到register里面去。</p>
+<hr>
+<p>注册完之后，可以用wmpiexec.exe测试一下，安装目录下example文件夹中有一个测试用的圆周率计算程序cpi.exe。</p>
+<p>测试成功能运行即可。</p>
+<p>不成功的话就需要检查smpd服务是不是正常运行，然后网络有没有被防火墙挡了，用户账户有没有注册到register里面去。</p>
+<h1 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h1><p>网上提到MPI编译需要用到mpigcc之类的东西，然而我在MPICH2的安装目录下根本找不到这玩意的迹象。</p>
+<p>官方文档中建议使用Visual Studio来作为MPI的IDE…然而，这货这么大，我是真心不太想用的感觉（尤其是VC6.0给我留下的印象太差了，不了解现在新版的VS套件的编译标准是不是跟GNU的一样）…</p>
+<p>再仔细搜索之后，原来mpigcc就是调用了gcc的编译指令，这样事情就简单了。</p>
+<p>看一下安装目录下面的文档，果然找到了gcc的说明：<br>README.winbin.rtf</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">For gcc/g77</span><br><span class="line">1)	create a makefile</span><br><span class="line">2)	add –I…mpich2\include</span><br><span class="line">3)	add –L…mpich2\lib</span><br><span class="line">4)	add –lmpi (<span class="keyword">for</span> g77: -lfmpich2g)</span><br><span class="line">5)	add the rules <span class="keyword">for</span> your <span class="built_in">source</span> files</span><br><span class="line">6)	same as 6,7,8 above</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>整个过程很简单，只要在gcc的编译指令后面加上<code>-I</code>开关，把mpi的头文件include包括进来；<code>-L</code>开关，把mpi的函数库lib包括进来；最后指定<code>-lmpi</code>，使用mpi方式进行编译即可。</p>
+<hr>
+<p>这样直接调用gcc和g++就可以对整个完成编译了，只不过运行必须调用mpiexec或者wmpiexec。</p>
+<p>既然gcc的编译这一部分OK了，可以直接把编译命令绑进文本编辑神器Sublime2里面去。</p>
+<h1 id="Sublime2配置"><a href="#Sublime2配置" class="headerlink" title="Sublime2配置"></a>Sublime2配置</h1><p>配置部分跟以前已经记录过的一样：<a href="/2014/10/01/2014-10-01-sublime2/">Sublime 2 配置</a></p>
+<p>在sublime2中找到编译命令的配置文件：</p>
+<blockquote>
+<p>Preference -&gt; Bowser Packages -&gt; /C++/C++.sublime-build</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="string">"cmd"</span>: [<span class="string">"g++"</span>, <span class="string">"<span class="variable">$&#123;file&#125;</span>"</span>, <span class="string">"-o"</span>, <span class="string">"<span class="variable">$&#123;file_base_name&#125;</span>"</span>],</span><br><span class="line">	<span class="string">"file_regex"</span>: <span class="string">"^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$"</span>,</span><br><span class="line">	<span class="string">"working_dir"</span>: <span class="string">"<span class="variable">$&#123;file_path&#125;</span>"</span>,</span><br><span class="line">	<span class="string">"selector"</span>: <span class="string">"source.c, source.c++"</span>,</span><br><span class="line">	<span class="string">"encoding"</span>: <span class="string">"gbk"</span>,</span><br><span class="line">	<span class="string">"variants"</span>:</span><br><span class="line">	[</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="string">"name"</span>: <span class="string">"Run"</span>,</span><br><span class="line">			<span class="string">"cmd"</span>: [<span class="string">"<span class="variable">$&#123;file_base_name&#125;</span>"</span>]</span><br><span class="line">			//<span class="string">"cmd"</span>: [<span class="string">"cmd"</span>, <span class="string">"/c"</span>, <span class="string">"g++"</span>, <span class="string">"<span class="variable">$&#123;file&#125;</span>"</span>, <span class="string">"-o"</span>, <span class="string">"<span class="variable">$&#123;file_path&#125;</span>/<span class="variable">$&#123;file_base_name&#125;</span>"</span>, <span class="string">"&amp;&amp;"</span>, <span class="string">"cmd"</span>, <span class="string">"/c"</span>, <span class="string">"<span class="variable">$&#123;file_path&#125;</span>/<span class="variable">$&#123;file_base_name&#125;</span>"</span>]</span><br><span class="line">		&#125;,</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="string">"name"</span>: <span class="string">"RunInCommand"</span>,</span><br><span class="line">			<span class="string">"cmd"</span>: [<span class="string">"cmd"</span>, <span class="string">"/c"</span>, <span class="string">"start"</span>, <span class="string">"cmd"</span>, <span class="string">"/c"</span>, <span class="string">"<span class="variable">$&#123;file_base_name&#125;</span> &amp; pause"</span>]</span><br><span class="line">		&#125;,</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="string">"name"</span>: <span class="string">"BuildAndRun"</span>,</span><br><span class="line">			<span class="string">"cmd"</span>: [<span class="string">"cmd"</span>, <span class="string">"/c"</span>, <span class="string">"g++"</span>, <span class="string">"<span class="variable">$&#123;file&#125;</span>"</span>, <span class="string">"-o"</span>, <span class="string">"<span class="variable">$&#123;file_base_name&#125;</span>"</span>, <span class="string">"&amp;&amp;"</span>, <span class="string">"start"</span>, <span class="string">"cmd"</span>, <span class="string">"/c"</span>, <span class="string">"<span class="variable">$&#123;file_base_name&#125;</span> &amp; pause"</span>]</span><br><span class="line">		&#125;,</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="string">"name"</span>: <span class="string">"BuildWithMPI"</span>,</span><br><span class="line">			<span class="string">"cmd"</span>: [<span class="string">"g++"</span>, <span class="string">"<span class="variable">$&#123;file&#125;</span>"</span>, <span class="string">"-o"</span>, <span class="string">"<span class="variable">$&#123;file_base_name&#125;</span>"</span>, <span class="string">"-I"</span>, <span class="string">"D:\\Program Files\\MPICH2\\include"</span>, <span class="string">"-L"</span>, <span class="string">"D:\\Program Files\\MPICH2\\lib"</span>, <span class="string">"-lmpi"</span>]</span><br><span class="line">		&#125;</span><br><span class="line">	]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>前面部分保持不变，最后加上一条命令，命名成<code>BuildWithMPI</code>。</p>
+<p>然后选一个没有被使用过的快捷键，加到快捷键注册文件里面去：</p>
+<blockquote>
+<p>Preference -&gt; Key Bindings – User</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">	&#123; <span class="string">"keys"</span>: [<span class="string">"f10"</span>], <span class="string">"command"</span>: <span class="string">"build"</span>, <span class="string">"args"</span>: &#123;<span class="string">"variant"</span>: <span class="string">"RunInCommand"</span>&#125; &#125;,</span><br><span class="line">	&#123; <span class="string">"keys"</span>: [<span class="string">"alt+b"</span>], <span class="string">"command"</span>: <span class="string">"build"</span>, <span class="string">"args"</span>: &#123;<span class="string">"variant"</span>: <span class="string">"BuildWithMPI"</span>&#125; &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>保存好，之后就可以用<code>alt+b</code>来调用附加了MPI编译命令的g++指令了。</p>
+<h1 id="Hello-World-！"><a href="#Hello-World-！" class="headerlink" title="Hello World~！"></a>Hello World~！</h1><p>写个测试程序试试先：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID	: Chen Fan</span></span><br><span class="line"><span class="comment">LANG	: G++</span></span><br><span class="line"><span class="comment">PROG	: mpitest</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;mpi.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;ctime&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"test start:\n"</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> test=<span class="number">0</span>;</span><br><span class="line">	<span class="keyword">time_t</span> t;</span><br><span class="line">	t= time(<span class="literal">NULL</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"start time:%ld\n"</span>,t);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//MPI环境初始化</span></span><br><span class="line">	MPI_Init(<span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//获取进程数量</span></span><br><span class="line">	<span class="keyword">int</span> world_size;</span><br><span class="line">	MPI_Comm_size(MPI_COMM_WORLD, &amp;world_size);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//获取进程号</span></span><br><span class="line">	<span class="keyword">int</span> world_rank;</span><br><span class="line">	MPI_Comm_rank(MPI_COMM_WORLD, &amp;world_rank);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//获取处理器名</span></span><br><span class="line">	<span class="keyword">char</span> processor_name[MPI_MAX_PROCESSOR_NAME];</span><br><span class="line">	<span class="keyword">int</span> name_len;</span><br><span class="line">	MPI_Get_processor_name(processor_name, &amp;name_len);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//Hello world!</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Hello world from processor %s, rank %d out of %d processors\n"</span>,processor_name,world_rank,world_size);</span><br><span class="line"></span><br><span class="line">	test++;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"%d\n"</span>,test);</span><br><span class="line">	t= time(<span class="literal">NULL</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"end time:%ld\n"</span>,t);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"\n"</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//关闭MPI环境</span></span><br><span class="line">	MPI_Finalize();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时普通的编译指令会返回找不到头文件mpi.h，就算找到了也是编译失败。<br><code>alt+b</code>可正常通过编译。</p>
+<p>然后用wmpiexec来运行之，开了4个线程：</p>
+<img data-src=http://jcf94.com/download/2015-11-03-mpi-1.jpg title=Wmpiexec>
+
+<p>结果：</p>
+<img data-src=http://jcf94.com/download/2015-11-03-mpi-2.jpg title=Results>
+
+<hr>
+<p>MPI我还没有真正开始学，不过也可以从这个简单的测试程序中稍微看出一些特点来：</p>
+<ul>
+<li><p>从test这个变量的输出结果来看，4个线程的变量应该是完全独立的，并没有出现同一个变量反复加了4次这种事情。</p>
+</li>
+<li><p>我还特别调用了一下时间函数。从输出结果上来看，四个进程的时间居然真的是同步的！！结束时间和起始时间一样应该是因为中间运行的过程太少了。</p>
+</li>
+<li><p>关闭之后再运行，4个进程的输出的rank先后顺序可能会有些不同。</p>
+</li>
+</ul>
+<p>MPI初探：</p>
+<p>把同一个过程分给多个线程独立执行，相互之间通过一些特殊的调用来进行通信，进程与进程之间是独立的。</p>
+<p>并行编程与普通的编程之间看来应该是会有挺大的差别的，这一点上来看，编程的思路也需要发生挺多变化。</p>
+<h1 id="多机并行"><a href="#多机并行" class="headerlink" title="多机并行"></a>多机并行</h1><p>MPICH除了可以在本地进行多线程并行的运算，还可以通过网络来进行远程多机多线程并行运算。</p>
+<p>这个地方也挺坑的…</p>
+<p>要求多台计算机上register的用户名和密码必须一致，要不然连不上。</p>
+<p>我的两台win10都用的是微软账户，为了测试这个多机并行改了好久的本地账户。</p>
+<p>再然后是要求如果是直接执行的本机的文件的话，要求对方的同样目录下必须有同样的文件，就是说<strong>文件也必须是同步的</strong>。</p>
+<p>完成上面所有的设置之后，然后用wmpiexec调用：</p>
+<img data-src=http://jcf94.com/download/2015-11-03-mpi-3.jpg title=Muti-wmpiexec>
+
+<p>或者用命令行调用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mpiexec -hosts 2 j-cf-yoga 2 j-cf-pc 2 <span class="string">"D:\mpitest.exe"</span></span><br></pre></td></tr></table></figure>
+
+<p>如果网络和设置都是正常的，应该能得到这样的结果：</p>
+<img data-src=http://jcf94.com/download/2015-11-03-mpi-4.jpg title=Muti-results>
+
+<p>多机并行完成。</p>
+<h1 id="并行的效率问题"><a href="#并行的效率问题" class="headerlink" title="并行的效率问题"></a>并行的效率问题</h1><p>这里测试了一下多个线程之间的效率比较情况：</p>
+<img data-src=http://jcf94.com/download/2015-11-03-mpi-5.jpg title=Muti-Processor>
+
+<p>可以比较明显地看到同样对于<code>9999999999</code>精度的求圆周率计算：</p>
+<p>单线程花了10.7s，2线程5.41秒，4线程2.78秒，8线程以上效率就不会再怎么增加了</p>
+<p>不知道是不是我的CPU只有4核的原因，还是与这个算圆周率的程序本身有关…进行到这里，已经非常能够体会到并行编程与普通程序之间的差别了：</p>
+<p>并行程序必须要能够考虑到任务的划分、多线程之间的通讯等等，只是把原本的单线程程序拿来扔给多线程执行的话，效率根本不能增加，只是把相同的代码重复执行好多遍而已。</p>
+<p>要想做到多线程，需要学的东西还很多。</p>
+<hr>
+<p>然后是双机并行进行圆周率计算，两台电脑（Y480 i5-3210 以及 Yoga3_11 5Y10），双机8线程的时候能在1.7s左右完成上面的那个运算。</p>
+<p>这里要再记一下的是，win10上面的防火墙太坑了…明明设了例外，还是会把通信线程给挡掉，发出指令的那一台机子需要关闭所有防火墙。回头再好好研究下。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/11/14/2015-11-14-mpi/" rel="bookmark">MPI小结</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/11/20/2015-11-20-openmp/" rel="bookmark">共享内存系统并行 OpenMP</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/08/16/2015-08-16-compilers/" rel="bookmark">编译原理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/09/09/2015-09-09-cod/" rel="bookmark">计算机组成与设计.硬件/软件接口 学习笔记（一）</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/10/23/2015-10-23-virtualmemory/" rel="bookmark">硬件/软件接口 Virtual Memory</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 学习笔记</a>
+              <a href="/tags/%E5%B9%B6%E8%A1%8C%E7%BC%96%E7%A8%8B/" rel="tag"># 并行编程</a>
+              <a href="/tags/MPI/" rel="tag"># MPI</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/10/26/2015-10-26-suiji/" rel="prev" title="随机信号 复习笔记">
+      <i class="fa fa-chevron-left"></i> 随机信号 复习笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/11/04/2015-11-04-book/" rel="next" title="我的书单整理">
+      我的书单整理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一些资料"><span class="nav-text">一些资料</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MPICH在Windows下的安装"><span class="nav-text">MPICH在Windows下的安装</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#编译"><span class="nav-text">编译</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Sublime2配置"><span class="nav-text">Sublime2配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Hello-World-！"><span class="nav-text">Hello World~！</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#多机并行"><span class="nav-text">多机并行</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#并行的效率问题"><span class="nav-text">并行的效率问题</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'c4c8ac945737540688ca36c248f0e2a9',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

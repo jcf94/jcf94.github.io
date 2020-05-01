@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="这将会是你踏入高级数据结构的第一步。   终于要开始给队里面讲这种比较高级的数据结构了，也趁此机会自己好好理理。 首先要讲的是这个： 二叉搜索树 二叉搜索树又叫二叉排序树，它的定义很简单：  这是一棵二叉树  令x为二叉树中某个结点上表示的值，那么其左子树上所有结点的值都要不大于x，其右子树上所有结点的值都要不小于x">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Size Balanced Tree">
+<meta property="og:url" content="https://jcf94.com/2015/06/19/2015-06-19-sbt/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="这将会是你踏入高级数据结构的第一步。   终于要开始给队里面讲这种比较高级的数据结构了，也趁此机会自己好好理理。 首先要讲的是这个： 二叉搜索树 二叉搜索树又叫二叉排序树，它的定义很简单：  这是一棵二叉树  令x为二叉树中某个结点上表示的值，那么其左子树上所有结点的值都要不大于x，其右子树上所有结点的值都要不小于x">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2015-06-19-sbt-1.png">
+<meta property="og:image" content="http://jcf94.com/download/2015-06-19-sbt-2.png">
+<meta property="og:image" content="http://jcf94.com/download/2015-06-19-sbt-3.png">
+<meta property="og:image" content="http://jcf94.com/download/2015-06-19-sbt-4.png">
+<meta property="og:image" content="http://jcf94.com/download/2015-06-19-sbt-5.png">
+<meta property="og:image" content="http://jcf94.com/download/2015-06-19-sbt-6.png">
+<meta property="article:published_time" content="2015-06-19T09:27:28.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="SBT">
+<meta property="article:tag" content="平衡树">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2015-06-19-sbt-1.png">
+
+<link rel="canonical" href="https://jcf94.com/2015/06/19/2015-06-19-sbt/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Size Balanced Tree | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2015/06/19/2015-06-19-sbt/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Size Balanced Tree
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-06-19 17:27:28" itemprop="dateCreated datePublished" datetime="2015-06-19T17:27:28+08:00">2015-06-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">算法学习</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote class="blockquote-center">
+这将会是你踏入高级数据结构的第一步。
+</blockquote>
+
+<p>终于要开始给队里面讲这种比较高级的数据结构了，也趁此机会自己好好理理。</p>
+<p>首先要讲的是这个：</p>
+<h1 id="二叉搜索树"><a href="#二叉搜索树" class="headerlink" title="二叉搜索树"></a>二叉搜索树</h1><hr>
+<p>二叉搜索树又叫二叉排序树，它的定义很简单：</p>
+<ol>
+<li><p>这是一棵二叉树</p>
+</li>
+<li><p>令x为二叉树中某个结点上表示的值，那么其左子树上所有结点的值都要不大于x，其右子树上所有结点的值都要不小于x</p>
+</li>
+</ol>
+<a id="more"></a>
+
+<p>存储结构一般用链表或者结构体数组模拟链表等等均可。</p>
+<p><strong>中序遍历</strong>二叉排序树可得到一个关键字的有序序列，一个无序序列可以通过构造一棵二叉排序树变成一个有序序列，构造树的过程也可以看成是<strong>对无序序列进行排序</strong>的过程。</p>
+<p>基本操作有几种：</p>
+<ul>
+<li>插入</li>
+</ul>
+<p>每次插入的新的结点都是二叉排序树上新的叶子结点，在进行插入操作时，不必移动其它结点，只需改动某个结点的指针，由空变为非空即可。</p>
+<ul>
+<li>查找</li>
+</ul>
+<p>根据查找值的大小与当前子树的根节点相比，更小就找左边，更大就找右边，知道找到目标或者返回无结果。</p>
+<ul>
+<li>子树中的最大/最小值</li>
+</ul>
+<p>从根开始走到最左边是最小，走到最右边是最大。</p>
+<ul>
+<li>前驱或后继</li>
+</ul>
+<p>查找比当前点小的最大值（前驱）或比当前点更大的最小值（后继）。考虑左子树的最大值和右子树的最小值，若没有左右子树则考虑父节点。</p>
+<ul>
+<li>删除</li>
+</ul>
+<p>删除的第一步是要先找到该节点，然后在子树中找个前驱或者后继来替换掉该结点即可。</p>
+<p>搜索，插入，删除的复杂度等于树高，因此一般的操作都是O(logn)的。</p>
+<p>思想其实很简单，具体的实现就不贴代码了，因为确实也比较简单。</p>
+<h2 id="普通的二叉搜索树存在的问题"><a href="#普通的二叉搜索树存在的问题" class="headerlink" title="普通的二叉搜索树存在的问题"></a>普通的二叉搜索树存在的问题</h2><hr>
+<blockquote>
+<p><strong>！！！树高并不稳定！！！</strong><br>或者说，<strong>不平衡</strong></p>
+</blockquote>
+<p>考虑一组本来就有序的数列，将其插入二叉搜索树，结果就是二叉树会退化成一条链，所有结点只有右子树，左子树是空的。</p>
+<p>因而预期的O(logn)的操作会退化成O(n)，数据稍大点这种结构就悲剧了。</p>
+<p>为了解决这个问题，机智的人类想出了改进方案：</p>
+<h1 id="平衡树"><a href="#平衡树" class="headerlink" title="平衡树"></a>平衡树</h1><hr>
+<p>平衡树是在二叉查找树的基础上，增加维护操作，使得二叉查找树保持左右子树<strong>平衡</strong>，以最大限度地保证整体的效率。这种结构就叫做<strong>平衡树</strong>。</p>
+<p>当然，维护也是需要消耗时间的，一般来说维护消耗的时间越长，树越平衡。具体的还要看实际情况。</p>
+<p>一般常见的平衡树有不少种：红黑树、AVL树、SBT、Treap、Splay等等。</p>
+<p>它们的基本思想都是通过结点的左右旋来保持原本二叉搜索树的性质不变，然后高效完成。区别就是保持平衡的方式不同。</p>
+<p>比如红黑树是把结点分成红黑两种，然后各种旋转稳定，貌似效率相当高，然而实现比较麻烦。</p>
+<p>Treap是用优先级的思想，在树上加上堆($Treap=Tree+Heap$)。</p>
+<p>相比起来Splay比较特殊，Splay其实并不是一棵严格意义上的平衡树，因为它的操作并不是主要为了保证左右平衡的，它的特点主要是结构比较灵活，可以用来处理一些正常平衡树完成不了的问题，缺点就是<strong>常数大</strong>，效率可能不高。嗯，这是后话。</p>
+<p>今天的重点是这个：</p>
+<h1 id="SBT"><a href="#SBT" class="headerlink" title="SBT"></a>SBT</h1><hr>
+<p>节点大小平衡树(Size Balanced Tree)是一种自平衡二叉查找树。</p>
+<p>它是由中国广东中山纪念中学的<strong><a href="http://baike.baidu.com/link?url=IMXNAlg4eSURJj4WnvexBcdQkQzxLN0M9NpkZWjiNq-Kg6uT5dxXOjmso69yfdyExqG9gGD4RthT7Nz7n5Oy5K" target="_blank" rel="noopener">陈启峰</a></strong>（也是个神人，本来那年拿到了北美地区的ACM冠军，结果封神之路上遇到了Watashi）发明的。陈启峰于2006年底完成论文《[Size Balanced Tree](<a href="http://jcf94.com/download/2015-06-19-sbt-Qifeng-Chen《Size">http://jcf94.com/download/2015-06-19-sbt-Qifeng-Chen《Size</a> Balanced Tree》.pdf)》，并在2007年的全国青少年信息学奥林匹克竞赛冬令营中发表。</p>
+<p>相比红黑树、AVL树等自平衡二叉查找树，SBT更易于实现。据陈启峰在论文中称，SBT是“目前为止速度最快的高级二叉搜索树”。</p>
+<h2 id="旋转"><a href="#旋转" class="headerlink" title="旋转"></a>旋转</h2><p>首先是所有平衡树中都会用到的旋转操作，平衡树需要不断改变树的结构，但是改变结构的同时又必须保证的是整棵树的二叉查找树性质<strong>不能被破坏掉</strong>（要是二叉查找树性质都没了，下面就不用玩了）。</p>
+<p>调整方式就是逐点进行左旋或者右旋：</p>
+<p><img data-src="http://jcf94.com/download/2015-06-19-sbt-1.png" alt="rotate"></p>
+<p>以上图作为例子，左右旋实现起来其实也很简单，就是交换一下x、y的父子关系，然后调整B子树的连接情况，且能够保证整体的二叉搜素性质不改变。</p>
+<h2 id="SBT的特殊性质"><a href="#SBT的特殊性质" class="headerlink" title="SBT的特殊性质"></a>SBT的特殊性质</h2><p>我们给二叉搜索树的结点增加一个size域，用来保存以该节点为根的子树中一共有多少个结点。</p>
+<p>上面说了，SBT是通过结点大小(Size)来调整整棵树的平衡性的，它相比一般的二叉搜索树多出来的性质有两条：</p>
+<p>对于SBT中的每一个结点t，有：</p>
+<ol>
+<li><p>$size[right[t]]&gt;=size[left[left[t]]],size[right[left[t]]]$</p>
+</li>
+<li><p>$size[left[t]]&gt;=size[left[right[t]]],size[right[right[t]]]$</p>
+</li>
+</ol>
+<p><img data-src="http://jcf94.com/download/2015-06-19-sbt-2.png" alt="maintain"></p>
+<p>以上图为例，性质是：</p>
+<ol>
+<li>$size[R]&gt;=size[A]$</li>
+<li>$size[R]&gt;=size[B]$</li>
+<li>$size[L]&gt;=size[C]$</li>
+<li>$size[L]&gt;=size[D]$</li>
+</ol>
+<h2 id="如何维护这种性质？Maintain-amp-t"><a href="#如何维护这种性质？Maintain-amp-t" class="headerlink" title="如何维护这种性质？Maintain(&amp; t)"></a>如何维护这种性质？Maintain(&amp; t)</h2><p><strong>为了便于说明，以下部分左右旋与Maintain函数的参数传递均为实参</strong></p>
+<p>我们从上图开始，把整棵树的结构分成几种情况来看：</p>
+<h3 id="Case-1：size-left-left-t-gt-size-right-t"><a href="#Case-1：size-left-left-t-gt-size-right-t" class="headerlink" title="Case 1：size[left[left[t]]]&gt;size[right[t]]"></a>Case 1：size[left[left[t]]]&gt;size[right[t]]</h3><ul>
+<li>首先对t进行右旋，此时t更新成了原图中的L</li>
+</ul>
+<p>得到如下的结果：</p>
+<p><img data-src="http://jcf94.com/download/2015-06-19-sbt-3.png" alt="3"></p>
+<ul>
+<li><p>则对于图中的T，其子树不一定满足性质，需要Maintain(T)</p>
+</li>
+<li><p>当T调整完之后，T的子树与L可能也不一定满足性质，需要再次Maintain(L)</p>
+</li>
+</ul>
+<p>该过程的伪代码为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">If size[left[left[t]]]&gt;size[right[t]] then</span><br><span class="line">	Right-Rotate(t)</span><br><span class="line">	Maintain(right[t])</span><br><span class="line">	Maintain(t)</span><br></pre></td></tr></table></figure>
+
+<h3 id="Case-2-size-right-left-t-gt-size-right-t"><a href="#Case-2-size-right-left-t-gt-size-right-t" class="headerlink" title="Case 2: size[right[left[t]]]&gt;size[right[t]]"></a>Case 2: size[right[left[t]]]&gt;size[right[t]]</h3><p>这种情况要稍微复杂一些：</p>
+<p>我们把原图中的B再往下画一层：</p>
+<p><img data-src="http://jcf94.com/download/2015-06-19-sbt-4.png" alt="4"></p>
+<ul>
+<li>首先对L进行左旋</li>
+</ul>
+<p>得到：</p>
+<p><img data-src="http://jcf94.com/download/2015-06-19-sbt-5.png" alt="5"></p>
+<ul>
+<li>再右旋T</li>
+</ul>
+<p>得到：</p>
+<p><img data-src="http://jcf94.com/download/2015-06-19-sbt-6.png" alt="6"></p>
+<ul>
+<li><p>经过上面两步操作之后，整棵树的结构可以说是完全改变了，具体形态也可能变得难以预测。但是根据左右旋的性质，我们可以保证上图的结果中A、E、F、R都是性质完好的SBT，所以只要分别Maintain(L)和Maintain(T)即可。</p>
+</li>
+<li><p>经过上面那一步，我们能保证L和T以及其子树都是性质完好了，但是它们之间的任然不能确保，所以需要再Maintain(B)一次</p>
+</li>
+</ul>
+<p>该过程的伪代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">If s[right[left[t]]&gt;s[right[t]] then</span><br><span class="line">	Left-Rotate(left[t])</span><br><span class="line">	Right-Rotate(t)</span><br><span class="line">	Maintain(left[t])</span><br><span class="line">	Maintain(right[t])</span><br><span class="line">	Maintain(t)</span><br></pre></td></tr></table></figure>
+
+<h3 id="Case-3-size-right-right-t-gt-size-left-t"><a href="#Case-3-size-right-right-t-gt-size-left-t" class="headerlink" title="Case 3: size[right[right[t]]]&gt;size[left[t]]"></a>Case 3: size[right[right[t]]]&gt;size[left[t]]</h3><p>情况与第一种类似，刚好相反</p>
+<h3 id="Case-4-size-left-right-t-gt-size-left-t"><a href="#Case-4-size-left-right-t-gt-size-left-t" class="headerlink" title="Case 4: size[left[right[t]]]&gt;size[left[t]]"></a>Case 4: size[left[right[t]]]&gt;size[left[t]]</h3><p>情况与第二种类似，刚好相反</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>按照上述说明，Maintain函数就是四个if语句分开即可，但是中间可能会有一些不必要的操作，故作者在[论文]((<a href="http://jcf94.com/download/2015-06-19-sbt-Qifeng-Chen《Size">http://jcf94.com/download/2015-06-19-sbt-Qifeng-Chen《Size</a> Balanced Tree》.pdf))中也对其进行了改进。</p>
+<p>可以发现1、2与3、4的判断是可以分开的，于是可以添加一个标记参数，已确定接下来的Maintain中需要检查哪一边</p>
+<p>改进之后的伪代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Maintain (t,flag)</span><br><span class="line">	If flag&#x3D;false then</span><br><span class="line">		If size[left[left[t]]]&gt;size[right[t]] then</span><br><span class="line">			Right-Rotate(t)</span><br><span class="line">		Elseif size[right[left[t]]&gt;size[right[t]] then</span><br><span class="line">			Left-Rotate(left[t])</span><br><span class="line">			Right-Rotate(t)</span><br><span class="line">		Else exit</span><br><span class="line">	Elseif size[right[right[t]]]&gt;size[left[t]] then</span><br><span class="line">    	Left-Rotate(t)</span><br><span class="line">	Elseif size[left[right[t]]]&gt;size[left[t]] then</span><br><span class="line">		Right-Rotate(right[t])</span><br><span class="line">		Left-Rotate(t)</span><br><span class="line">    Else exit</span><br><span class="line"></span><br><span class="line">    Maintain(left[t],false)</span><br><span class="line">    Maintain(right[t],true)</span><br><span class="line">    Maintain(t,false)</span><br><span class="line">    Maintain(t,true)</span><br></pre></td></tr></table></figure>
+
+<h2 id="愉快地使用SBT"><a href="#愉快地使用SBT" class="headerlink" title="愉快地使用SBT"></a>愉快地使用SBT</h2><p>SBT的核心操作是Maintain，经过上面这么多内容，我想你已经掌握了。</p>
+<p>SBT支持所有普通二叉查找树的操作（显而易见），而有了Maintain，之后所有的操作都是在普通的二叉查找树的基础上加以改进即可，可以衍生出更多有用的操作。</p>
+<ul>
+<li>插入</li>
+</ul>
+<p>正常的二叉查找树插入操作，插入完之后Maintain维护性质</p>
+<ul>
+<li>删除</li>
+</ul>
+<p>直接使用正常的二叉查找树删除操作即可。</p>
+<blockquote>
+<p>你说SBT性质可能会被破坏？</p>
+</blockquote>
+<p>嗯，是的。确实可能会出现这种情况，然而平衡树的操作是为了是的树的平均深度的平衡性。对于删除来说，删除一个结点并不会增加树的深度，所以在这里不用Maintain对整体并不会有什么影响，下次其他操作的Maintain就可以修复这个问题了。</p>
+<ul>
+<li>查找</li>
+</ul>
+<p>与正常的二叉查找树相同</p>
+<ul>
+<li>查找第k大</li>
+</ul>
+<p>由于每个结点的Size域，我们可以快速找出整个数列中第k大的数。根结点是第size[左子树]+1小的数，所以从根结点出发，按照大小关系不断遍历左右子树即可。</p>
+<p>复杂度也是O(logn)的。</p>
+<h2 id="最终代码示例"><a href="#最终代码示例" class="headerlink" title="最终代码示例"></a>最终代码示例</h2><p>这份模板是我自己改过好多遍的，当初学这个的时候特别痛苦。网站找的别人的模板要不就有问题，要不就写得让人觉得很难受。然后找到的几个人的模板还都不一样，参考都累。</p>
+<p>最后自己在纸上推左右旋推了很久才定下来，后来做题的时候又改进过好多遍。</p>
+<p>推荐大家多画图。。。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID	: Chen Fan</span></span><br><span class="line"><span class="comment">LANG	: G++</span></span><br><span class="line"><span class="comment">PROG	: Size Balanced Tree</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MAXN 100010</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> sons[MAXN][<span class="number">2</span>];</span><br><span class="line"><span class="keyword">int</span> size[MAXN],data[MAXN];</span><br><span class="line"><span class="keyword">int</span> sbt=<span class="number">0</span>,sbttail=<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">rotate</span><span class="params">(<span class="keyword">int</span> &amp;t,<span class="keyword">int</span> w)</span> <span class="comment">//rotate(&amp;node,0/1)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> k=sons[t][<span class="number">1</span>-w];</span><br><span class="line">	<span class="keyword">if</span> (!k) <span class="keyword">return</span> ;</span><br><span class="line">	sons[t][<span class="number">1</span>-w]=sons[k][w];</span><br><span class="line">	sons[k][w]=t;</span><br><span class="line">	size[k]=size[t];</span><br><span class="line">	size[t]=size[sons[t][<span class="number">0</span>]]+size[sons[t][<span class="number">1</span>]]+<span class="number">1</span>;</span><br><span class="line">	t=k;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">maintain</span><span class="params">(<span class="keyword">int</span>&amp; t,<span class="keyword">bool</span> flag)</span> <span class="comment">//maintain(&amp;node,flag)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (!t) <span class="keyword">return</span> ;</span><br><span class="line">	<span class="keyword">if</span> (!flag)</span><br><span class="line">		<span class="keyword">if</span> (size[sons[sons[t][<span class="number">0</span>]][<span class="number">0</span>]]&gt;size[sons[t][<span class="number">1</span>]]) rotate(t,<span class="number">1</span>);</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span> (size[sons[sons[t][<span class="number">0</span>]][<span class="number">1</span>]]&gt;size[sons[t][<span class="number">1</span>]]) </span><br><span class="line">		&#123;</span><br><span class="line">			rotate(sons[t][<span class="number">0</span>],<span class="number">0</span>);</span><br><span class="line">			rotate(t,<span class="number">1</span>);</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">return</span> ;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="keyword">if</span> (size[sons[sons[t][<span class="number">1</span>]][<span class="number">1</span>]]&gt;size[sons[t][<span class="number">0</span>]]) rotate(t,<span class="number">0</span>);</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span> (size[sons[sons[t][<span class="number">1</span>]][<span class="number">0</span>]]&gt;size[sons[t][<span class="number">0</span>]])</span><br><span class="line">		&#123;</span><br><span class="line">			rotate(sons[t][<span class="number">1</span>],<span class="number">1</span>);</span><br><span class="line">			rotate(t,<span class="number">0</span>);</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">return</span> ;</span><br><span class="line">	</span><br><span class="line">	maintain(sons[t][<span class="number">0</span>],<span class="literal">false</span>);</span><br><span class="line">	maintain(sons[t][<span class="number">1</span>],<span class="literal">true</span>);</span><br><span class="line">	maintain(t,<span class="literal">false</span>);</span><br><span class="line">	maintain(t,<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">insert</span><span class="params">(<span class="keyword">int</span>&amp; t,<span class="keyword">int</span> v,<span class="keyword">int</span> pos)</span> <span class="comment">//insert(&amp;root,value,pos/0)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (!size[t])</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (!pos)</span><br><span class="line">		&#123;</span><br><span class="line">			sbttail++;</span><br><span class="line">			pos=sbttail;</span><br><span class="line">		&#125;</span><br><span class="line">		data[pos]=v;</span><br><span class="line">		size[pos]=<span class="number">1</span>;</span><br><span class="line">		sons[pos][<span class="number">0</span>]=<span class="number">0</span>;</span><br><span class="line">		sons[pos][<span class="number">1</span>]=<span class="number">0</span>;</span><br><span class="line">		t=pos;</span><br><span class="line">	&#125; <span class="keyword">else</span> </span><br><span class="line">	&#123;</span><br><span class="line">		size[t]++;</span><br><span class="line">		<span class="keyword">if</span> (v&lt;data[t]) insert(sons[t][<span class="number">0</span>],v,pos);</span><br><span class="line">		<span class="keyword">else</span> insert(sons[t][<span class="number">1</span>],v,pos);</span><br><span class="line">		maintain(t,v&gt;=data[t]);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> last; <span class="comment">//last node</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">del</span><span class="params">(<span class="keyword">int</span>&amp; t,<span class="keyword">int</span> v)</span> <span class="comment">//value=del(&amp;root,key)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	size[t]--;</span><br><span class="line">	<span class="keyword">if</span> (v==data[t]||(v&lt;data[t]&amp;&amp;sons[t][<span class="number">0</span>]==<span class="number">0</span>)||(v&gt;data[t]&amp;&amp;sons[t][<span class="number">1</span>]==<span class="number">0</span>))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">int</span> ret=data[t];</span><br><span class="line">		<span class="keyword">if</span> (sons[t][<span class="number">0</span>]==<span class="number">0</span>||sons[t][<span class="number">1</span>]==<span class="number">0</span>) </span><br><span class="line">		&#123;</span><br><span class="line">			last=t;</span><br><span class="line">			t=sons[t][<span class="number">1</span>]+sons[t][<span class="number">0</span>];</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span> data[t]=del(sons[t][<span class="number">0</span>],data[t]+<span class="number">1</span>);</span><br><span class="line">		<span class="keyword">return</span> ret;</span><br><span class="line">	&#125; <span class="keyword">else</span></span><br><span class="line">	<span class="keyword">if</span> (v&lt;data[t]) <span class="keyword">return</span> del(sons[t][<span class="number">0</span>],v);</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">return</span> del(sons[t][<span class="number">1</span>],v);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">delk</span><span class="params">(<span class="keyword">int</span>&amp; t,<span class="keyword">int</span> k)</span> <span class="comment">//value=del(&amp;root,k)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	size[t]--;</span><br><span class="line">	<span class="keyword">if</span> (size[sons[t][<span class="number">0</span>]]+<span class="number">1</span>==k)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">int</span> ret=data[t];</span><br><span class="line">		<span class="keyword">if</span> (sons[t][<span class="number">0</span>]==<span class="number">0</span>||sons[t][<span class="number">1</span>]==<span class="number">0</span>) </span><br><span class="line">		&#123;</span><br><span class="line">			last=t;</span><br><span class="line">			t=sons[t][<span class="number">1</span>]+sons[t][<span class="number">0</span>];</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span> data[t]=delk(sons[t][<span class="number">0</span>],data[t]+<span class="number">1</span>);</span><br><span class="line">		<span class="keyword">return</span> ret;</span><br><span class="line">	&#125; <span class="keyword">else</span></span><br><span class="line">	<span class="keyword">if</span> (k&lt;=size[sons[t][<span class="number">0</span>]]) <span class="keyword">return</span> delk(sons[t][<span class="number">0</span>],k);</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">return</span> delk(sons[t][<span class="number">1</span>],k<span class="number">-1</span>-size[sons[t][<span class="number">0</span>]]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">select</span><span class="params">(<span class="keyword">int</span> t,<span class="keyword">int</span> k)</span> <span class="comment">//node=select(root,k)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (k==size[sons[t][<span class="number">0</span>]]+<span class="number">1</span>) <span class="keyword">return</span> t;</span><br><span class="line">	<span class="keyword">if</span> (k&lt;=size[sons[t][<span class="number">0</span>]]) <span class="keyword">return</span> select(sons[t][<span class="number">0</span>],k);</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">return</span> select(sons[t][<span class="number">1</span>],k<span class="number">-1</span>-size[sons[t][<span class="number">0</span>]]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">search</span><span class="params">(<span class="keyword">int</span> t,<span class="keyword">int</span> x)</span> <span class="comment">//node=search(root,x)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (t==<span class="number">0</span>||x==data[t]) <span class="keyword">return</span> t;</span><br><span class="line">	<span class="keyword">if</span> (x&lt;data[t]) <span class="keyword">return</span> search(sons[t][<span class="number">0</span>],x);</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">return</span> search(sons[t][<span class="number">1</span>],x);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">deb_out</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"-------\n"</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"sbttail=%d sbt=%d\n"</span>,sbttail,sbt);</span><br><span class="line">	<span class="keyword">for</span>	(<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=sbttail;i++)</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"%2d: key=%2d size=%2d left=%2d right=%2d\n"</span>,i,data[i],size[i],sons[i][<span class="number">0</span>],sons[i][<span class="number">1</span>]);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"-------\n"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	sbttail=<span class="number">0</span>;</span><br><span class="line">	sbt=<span class="number">0</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">for</span>	(<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=<span class="number">15</span>;i++) insert(sbt,i,<span class="number">0</span>);</span><br><span class="line">	deb_out();</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//printf("%d\n",del(sbt,8));</span></span><br><span class="line">	insert(sbt,<span class="number">8</span>,<span class="number">0</span>);</span><br><span class="line">	deb_out();</span><br><span class="line">	del(sbt,<span class="number">8</span>);</span><br><span class="line">	del(sbt,<span class="number">8</span>);</span><br><span class="line">	<span class="comment">//printf("%d\n",search(sbt,8));</span></span><br><span class="line">	deb_out();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h2><p>SBT可以用来快速维护一组数的插入、查找、删除、找第k大，然而你会发现只是想要单纯地实现这个功能，C++ STL 中的set就可以做到。哦对了，set不能找第k大……</p>
+<blockquote>
+<p>事实上set里面就是用<strong>红黑树</strong>来进行维护的。。。<br>然而我并不会红黑树。。。<br>然而你们也并不需要会红黑树。。。<br>因为直接用set就好了啊。。。-_-///<br>不用set那么用SBT嘛，这种东西学一个就差不多了</p>
+</blockquote>
+<p>所以虽然SBT效率高，但是扩展性似乎并没有特别强，一般需要用到的也就是只有动态多次求第k的时候。</p>
+<p>真正想要见识一下神器的，请在未来好好研究学习Treap和Splay吧，这两个在应用的时候比SBT的用途广很多。</p>
+<p>如需要模板题练手，请点击页面下方的标签查看详情。</p>
+<p>当然模板可以参考，不过还是不要复制粘贴代码了，最好能自己写一遍。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/03/08/2015-03-08-HDU-4006-The-kth-great-number/" rel="bookmark">HDU 4006 The kth great number 优先队列、平衡树模板题（SBT）</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/03/15/2015-03-15-vijos-p1647/" rel="bookmark">VIJOS P1647 不差钱 SBT</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/03/16/2015-03-16-vijos-p1081/" rel="bookmark">VIJOS P1081 野生动物园 SBT、划分树模板</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/03/23/2015-03-23-HDU-3726-Graph-and-Queries/" rel="bookmark">HDU 3726 Graph and Queries 平衡树+前向星+并查集+离线操作+逆向思维 数据结构大综合题</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/03/12/2015-03-12-NOI-2004-yumendechunayuan/" rel="bookmark">NOI2004 郁闷的出纳员 Splay</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SBT/" rel="tag"># SBT</a>
+              <a href="/tags/%E5%B9%B3%E8%A1%A1%E6%A0%91/" rel="tag"># 平衡树</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/06/19/2015-06-19-zhuanye/" rel="prev" title="专业知识整理">
+      <i class="fa fa-chevron-left"></i> 专业知识整理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/06/25/2015-06-25-baoyan/" rel="next" title="小记">
+      小记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#二叉搜索树"><span class="nav-text">二叉搜索树</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#普通的二叉搜索树存在的问题"><span class="nav-text">普通的二叉搜索树存在的问题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#平衡树"><span class="nav-text">平衡树</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SBT"><span class="nav-text">SBT</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#旋转"><span class="nav-text">旋转</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SBT的特殊性质"><span class="nav-text">SBT的特殊性质</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何维护这种性质？Maintain-amp-t"><span class="nav-text">如何维护这种性质？Maintain(&amp; t)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Case-1：size-left-left-t-gt-size-right-t"><span class="nav-text">Case 1：size[left[left[t]]]&gt;size[right[t]]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Case-2-size-right-left-t-gt-size-right-t"><span class="nav-text">Case 2: size[right[left[t]]]&gt;size[right[t]]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Case-3-size-right-right-t-gt-size-left-t"><span class="nav-text">Case 3: size[right[right[t]]]&gt;size[left[t]]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Case-4-size-left-right-t-gt-size-left-t"><span class="nav-text">Case 4: size[left[right[t]]]&gt;size[left[t]]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#愉快地使用SBT"><span class="nav-text">愉快地使用SBT</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最终代码示例"><span class="nav-text">最终代码示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#后话"><span class="nav-text">后话</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '7f0618638d15fc0631eb9cf2a31b4e0b',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

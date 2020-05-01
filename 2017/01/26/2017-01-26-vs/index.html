@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="曾经我是比较排斥 VS 的，尽管不得不承认这玩意大概是世界上最好的 IDE 无疑。 最新的 2017RC 发布后，观望了半天还是装上了，然后深陷其中无法自拔…oh">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Visual Studio 与 Linux">
+<meta property="og:url" content="https://jcf94.com/2017/01/26/2017-01-26-vs/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="曾经我是比较排斥 VS 的，尽管不得不承认这玩意大概是世界上最好的 IDE 无疑。 最新的 2017RC 发布后，观望了半天还是装上了，然后深陷其中无法自拔…oh">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2017-01-26T02:27:28.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="Visual-Studio">
+<meta property="article:tag" content="wsl">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2017/01/26/2017-01-26-vs/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Visual Studio 与 Linux | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2017/01/26/2017-01-26-vs/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Visual Studio 与 Linux
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2017-01-26 10:27:28" itemprop="dateCreated datePublished" datetime="2017-01-26T10:27:28+08:00">2017-01-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <img data-src=http://jcf94.com/download/2017-01-26-vs-vs.jpg class=full-image />
+
+<p>曾经我是比较排斥 VS 的，尽管不得不承认<strong>这玩意大概是世界上最好的 IDE 无疑</strong>。</p>
+<p>最新的 2017RC 发布后，观望了半天还是装上了，然后深陷其中无法自拔…oh</p>
+<a id="more"></a>
+
+<hr>
+<p>自从微软拥抱开源之后，大动作不少，例如 Win10 中的 Linux 子系统，例如 Visual Studio Code，例如微软在 Github 上的贡献年度第一。</p>
+<p>我也逐渐把 Sublime Text 换成了 VS Code，nodejs 应用感觉要开始爆炸了，哪哪都是 nodejs 写的东西。</p>
+<p>要说当初为什么不想用 VS 那一系的东西，原因不少，可能其中有一些是没啥用的强迫症：</p>
+<ul>
+<li><p>我平时习惯的编译系统是 GNU 的，VS 一系的 C 语言标准略有区别，虽然其实也能在 VS 里面改用 GCC 编，不过以前历史遗留下来给我的印象就不太好。</p>
+</li>
+<li><p>VS 的包太大，作为一个平时只是写点小程序的人来说，即使采取了最精简的安装，可能里面 90% 以上的都是我不会用到的内容，几十 M 的例如 DevC++，或者再稍大点的 Code::Blockes 足以满足我的需求。</p>
+</li>
+<li><p>运行起来不太顺畅，可能也跟以前包太大这个原因有关，要么就是心理作用了，总觉得用起来很不爽。</p>
+</li>
+</ul>
+<p>新版的 2017RC 采用了一些新的设计，例如模块化的安装器：</p>
+<img data-src=http://jcf94.com/download/2017-01-26-vs-installer.jpg class=full-image />
+
+<p>然后最重要的就是它原生支持 Linux 开发了，这也是我阔别多年重新装回 VS 的一个重要原因。</p>
+<p>VS 可以本地编辑，通过 ssh 把文件远程传输到 Linux 服务器上运行和调试，这里的由于用的是 ssh，其实本地的 WSL 子系统也是可以用的，不知道以后微软会不会加上与 WSL 交互的一些更方便的接口。</p>
+<hr>
+<h1 id="WSL-上的-ssh"><a href="#WSL-上的-ssh" class="headerlink" title="WSL 上的 ssh"></a>WSL 上的 ssh</h1><p>这其实也是个坑。</p>
+<p>没加 Insider Preview 所以不知道目前 WSL 的开发到了哪个程度了，正式版系统中的 WSL 反正是还有不少的问题需要解决。</p>
+<p>例如现在只有在管理员模式下运行 cmd 然后再开 bash 才能用 ping 等等的网络命令，然后其他还有各种奇怪的问题。</p>
+<p>默认的 WSL 下（用的 Ubuntu 14.04）需要重新设置一下 ssh 才能用。</p>
+<p>装上 openssh-server 之后，sshd_config 中有几个比较重要的需要改的有：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Port 2222</span><br><span class="line"></span><br><span class="line">ListenAddress 0.0.0.0</span><br><span class="line"></span><br><span class="line">UsePrivilegeSeparation no</span><br><span class="line"></span><br><span class="line">PasswordAuthentication yes</span><br><span class="line"></span><br><span class="line">PermitRootLogin yes</span><br></pre></td></tr></table></figure>
+
+<p>端口号是因为 Win10 系统自带一个 ssh … -_-///</p>
+<p>忘了是什么时候出现的了，某次更新之后，发现可以 ssh 自己，账号是 Win10 的本地账户，密码是微软账号的密码。</p>
+<p>ssh 进去之后是一个 cmd，当时知道的时候真是觉得我了个大去，微软偷偷摸摸就把这功能加上了。</p>
+<p>所以为了避开，就只能另外选个端口了。</p>
+<p>另外 <code>ListenAddress</code> 亲测不加不行，不知道什么原理。</p>
+<p>切到 root 下 <code>service ssh restart</code> 就好了，ssh 可以正常使用，然后过程中这个 bash 窗口不能关，关掉就切断了子系统中的所有任务。</p>
+<p>我看网上有其他教程有弄开机启动脚本的，后台一直跑着一个 sshd，有需要可以另外再找。</p>
+<hr>
+<h1 id="VS-的远程调试"><a href="#VS-的远程调试" class="headerlink" title="VS 的远程调试"></a>VS 的远程调试</h1><p>首先在设置中的 Cross Platform 里面把远程 Linux 的 ssh 加进去。</p>
+<p>在 VS 中创建一个 Linux 项目，然后正常写代码，远程 gdb 调试就 OK 啦。</p>
+<p>详细的项目配置里面有 gdb 和 gdbserver 两个选项，默认用的应该是 gdbserver，需要 Linux 服务器上也装上，如果选用 gdb 选项的话，用的是 ssh 到服务器上之后调用 <code>gdb --interpreter mi</code> 即调用 Machine Interface 接口。</p>
+<p>目前 VS 上的这部分似乎有 BUG，调试完之后 Linux 服务器上的进程不会自己结束，估计后面几个版本应该会修复。</p>
+<p>调试中可以查看内存块、调用栈等等等等等，话说 VS 的调试器确实是好用啊，各种强大，具体的以后再挖掘。</p>
+<hr>
+<h1 id="Attach-to-Process"><a href="#Attach-to-Process" class="headerlink" title="Attach to Process"></a>Attach to Process</h1><p>gdb 能调，理论上服务器上跑的任何程序都应该是能调的，对 gdb 来说只是加个 <code>-p pid</code> 选项而已。</p>
+<p>果然在调试里面找到了 <code>附加到进程</code> 这个命令，可以选择 ssh，显示出远程服务器上的进程之后再选择调试即可，不过目前的版本上也有 BUG。</p>
+<p>坐等后面的更新：</p>
+<p><a href="https://developercommunity.visualstudio.com/content/problem/11345/attach-to-process-over-ssh-fails.html" target="_blank" rel="noopener">https://developercommunity.visualstudio.com/content/problem/11345/attach-to-process-over-ssh-fails.html</a></p>
+<blockquote>
+<p>今天补充的时候，VS 的版本已经更新了，至少我在 root 下登进去已经可以用“附加到进程”进行调试了，爽！！！</p>
+</blockquote>
+<hr>
+<h1 id="目前遇到的然后解决了的-BUG"><a href="#目前遇到的然后解决了的-BUG" class="headerlink" title="目前遇到的然后解决了的 BUG"></a>目前遇到的然后解决了的 BUG</h1><ul>
+<li>添加 ssh 服务器的时候卡死</li>
+</ul>
+<p>在配两台服务器的时候遇到的这个问题，其中一台很顺利，另一台一添加 ssh 服务器就卡死了，中间反复检查过各种配置，两台服务器是一模一样的。</p>
+<p>一开始还以为是网关、路由表什么的影响，改了之后仍然未果。</p>
+<p>更坑爹的是我新建了个账户测试完全正常，只有我自己那个用户账户是不对的。</p>
+<p>最后找到的原因是：两台用的都是 zsh，但是卡住那台的默认 shell 用的是 bash，是在 <code>.bashrc</code> 最后加了个 <code>exec zsh</code> 才跳转到 zsh 的。因为当时有些环境变量的脚本跟 zsh 有冲突，所以用 bash 调完脚本加好环境之后才调 zsh。</p>
+<p>似乎 VS 的登录到了这一步就卡死了，删掉这部分之后正常。但是我在另外的地方测试了又是好的（例如我的 WSL 就是在 <code>.bashrc</code> 里面写 zsh 跳转，然而在 VS 里面可以正常用）。</p>
+<p>Anyway，玄学。</p>
+<p>反正一般情况下还是最好不要用这种方式改 shell 了。</p>
+<ul>
+<li>附加到进程失败的问题</li>
+</ul>
+<p>参见上面那个网址吧，是这个版本的一个 BUG，下个版本能修复，要么就把默认 shell 改成 bash，或者试试在 VS 里面添加 root 的账号。</p>
+<hr>
+<h1 id="用-VS-进行远程调试的例子"><a href="#用-VS-进行远程调试的例子" class="headerlink" title="用 VS 进行远程调试的例子"></a>用 VS 进行远程调试的例子</h1><p>参见 <a href="/2017/02/06/2017-02-06-swigdebug/">Python-SWIG 初探以及其 gdb 调试</a>。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/02/06/2017-02-06-swigdebug/" rel="bookmark">Python-SWIG 初探以及其 gdb 调试</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Visual-Studio/" rel="tag"># Visual-Studio</a>
+              <a href="/tags/wsl/" rel="tag"># wsl</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/01/24/2017-01-24-lost/" rel="prev" title="在冷风中凌乱着">
+      <i class="fa fa-chevron-left"></i> 在冷风中凌乱着
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/02/04/2017-02-04-tensorflow/" rel="next" title="TensorFlow">
+      TensorFlow <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#WSL-上的-ssh"><span class="nav-text">WSL 上的 ssh</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VS-的远程调试"><span class="nav-text">VS 的远程调试</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Attach-to-Process"><span class="nav-text">Attach to Process</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#目前遇到的然后解决了的-BUG"><span class="nav-text">目前遇到的然后解决了的 BUG</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#用-VS-进行远程调试的例子"><span class="nav-text">用 VS 进行远程调试的例子</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'a93d1656b52ebb014553950f2ecc0556',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

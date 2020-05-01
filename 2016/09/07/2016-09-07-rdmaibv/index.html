@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="记录一些 ibv 函数的用法 Refer to:  RDMAmojo   ibv functions">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Simple usage of RDMA ibv">
+<meta property="og:url" content="https://jcf94.com/2016/09/07/2016-09-07-rdmaibv/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="记录一些 ibv 函数的用法 Refer to:  RDMAmojo   ibv functions">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-09-07T04:16:20.000Z">
+<meta property="article:modified_time" content="2016-09-08T08:49:01.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="RDMA">
+<meta property="article:tag" content="InfiniBand">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2016/09/07/2016-09-07-rdmaibv/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Simple usage of RDMA ibv | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2016/09/07/2016-09-07-rdmaibv/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Simple usage of RDMA ibv
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-09-07 12:16:20" itemprop="dateCreated datePublished" datetime="2016-09-07T12:16:20+08:00">2016-09-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2016-09-08 16:49:01" itemprop="dateModified" datetime="2016-09-08T16:49:01+08:00">2016-09-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Architecture/" itemprop="url" rel="index"><span itemprop="name">Computer Architecture</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>记录一些 ibv 函数的用法</p>
+<p>Refer to:</p>
+<ul>
+<li><a href="http://www.rdmamojo.com/" target="_blank" rel="noopener">RDMAmojo</a></li>
+</ul>
+<hr>
+<h1 id="ibv-functions"><a href="#ibv-functions" class="headerlink" title="ibv functions"></a>ibv functions</h1><a id="more"></a>
+
+<h2 id="ibv-poll-cq"><a href="#ibv-poll-cq" class="headerlink" title="ibv_poll_cq()"></a>ibv_poll_cq()</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">ibv_poll_cq</span><span class="params">(struct ibv_cq *cq, <span class="keyword">int</span> num_entries, struct ibv_wc *wc)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>用于从 Completion Queue 中查询已完成的 Work Request。</p>
+<p>所有的 Receive Request、signaled Send Request 和出错的 Send Request 在完成之后都会产生一个 Work Completion，Work Completion 就被放入完成队列（Completion Queue）中。</p>
+<p>完成队列是 FIFO 的，ibv_poll_cq() 检查是否有 Work Completion 在完成队列中，如果是那么就将队首弹出，并返回那个 Work Completion 到 *wc 中。</p>
+<p>ibv_wc 的结构如下，描述了一个 Work Completion 的情况。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ibv_wc</span> &#123;</span></span><br><span class="line">	<span class="keyword">uint64_t</span>		wr_id;</span><br><span class="line">	<span class="keyword">enum</span> ibv_wc_status	status;</span><br><span class="line">	<span class="keyword">enum</span> ibv_wc_opcode	opcode;</span><br><span class="line">	<span class="keyword">uint32_t</span>		vendor_err;</span><br><span class="line">	<span class="keyword">uint32_t</span>		byte_len;</span><br><span class="line">	<span class="keyword">uint32_t</span>		imm_data;</span><br><span class="line">	<span class="keyword">uint32_t</span>		qp_num;</span><br><span class="line">	<span class="keyword">uint32_t</span>		src_qp;</span><br><span class="line">	<span class="keyword">int</span>			wc_flags;</span><br><span class="line">	<span class="keyword">uint16_t</span>		pkey_index;</span><br><span class="line">	<span class="keyword">uint16_t</span>		slid;</span><br><span class="line">	<span class="keyword">uint8_t</span>			sl;</span><br><span class="line">	<span class="keyword">uint8_t</span>			dlid_path_bits;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>wr_id 由产生 Work Completion 的 Request 决定</p>
+</li>
+<li><p>status 是操作的状态，通常为 IBV_WC_SUCCESS 表示 Work Completion 成功完成，其他还有一些错误信息</p>
+</li>
+<li><p>opcode 表示当前的 Work Competition 是怎么产生的</p>
+</li>
+<li><p>bute_len 表示传输的字节数</p>
+</li>
+</ul>
+<p>参数说明：</p>
+<p>|Name|Direction|Description|<br>|-|<br>|<em>cq|in|用于存放 Work Completion 的完成队列|<br>|num_entries|in|表示最大从完成队列中读取多少个 Work Completion|<br>|</em>wc|out|将读取到的 Work Completion 返回出来，如果有多个则返回的是数组|</p>
+<p>函数的返回值：成功则返回读取到的 Work Completion 数量，为 0 表示未读取到 Work Completion，可认为是完成队列为空，为负值则表示读取出错。</p>
+<h2 id="ibv-req-notify-cq"><a href="#ibv-req-notify-cq" class="headerlink" title="ibv_req_notify_cq()"></a>ibv_req_notify_cq()</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">ibv_req_notify_cq</span><span class="params">(struct ibv_cq *cq, <span class="keyword">int</span> solicited_only)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>用于在完成队列中请求一个完成通知。</p>
+<p>调用 ibv_req_notify_cq() 之后，下一个被加到 CQ 中的请求（发送请求或者接收请求）会被加上通知标记，当请求完成产生一个 Work Completion 之后就会产生通知，完成通知将被 ibv_get_cq_event() 函数读取出来。</p>
+<p>传入的参数中：</p>
+<ul>
+<li>solicited_only 为 0 时表示无论下一个加入 CQ 的请求是哪种类型的都会产生通知，否则只有 Solicited 或者出错的 Work Completion 才会产生通知</li>
+</ul>
+<h2 id="ibv-get-cq-event"><a href="#ibv-get-cq-event" class="headerlink" title="ibv_get_cq_event()"></a>ibv_get_cq_event()</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">ibv_get_cq_event</span><span class="params">(struct ibv_comp_channel *channel,</span></span></span><br><span class="line"><span class="function"><span class="params">                     struct ibv_cq **cq, <span class="keyword">void</span> **cq_context)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>用于等待某一 channel 中的下一个通知产生。</p>
+<p>ibv_get_cq_event() 默认是一个阻塞函数，调用之后会将当前程序阻塞在这里，直到下一个通知事件产生。</p>
+<p>当 ibv_get_cq_event() 收到完成事件的通知之后，需要调用 ibv_get_cq_event() 来确认事件。</p>
+<p>典型用法：</p>
+<ul>
+<li>Stage I：准备阶段</li>
+</ul>
+<p>创建一个 CQ，并且将它与一个 Completion Event Channel 相关联；</p>
+<p>用 ibv_req_notify_cq() 对一个 Completion Work 调用通知请求；</p>
+<ul>
+<li>Stage II：运行中</li>
+</ul>
+<p>等待事件产生；</p>
+<p>产生之后处理事件，并且调用 ibv_ack_cq_events() 来确认事件；</p>
+<p>对下一个 Completion Work 调用 ibv_req_notify_cq() 的通知请求；</p>
+<p>参数说明：</p>
+<p>|Name|Direction|Description|<br>|-|<br>|<em>channel|in|关联在 CQ 上的 Completion Event Channel|<br>|*</em>cq|out|从 Completion 事件中得到的一个 CQ|<br>|**cq_context|out|从 Completion 事件中得到的 CQ context|</p>
+<p>返回值：为 0 表示成功，-1 在非阻塞模式下表示当前没有事件可读，阻塞模式则表示出错。</p>
+<blockquote>
+<p>这种机制用于避免 CPU 反复读取 Work Completion ，若不采用事件的方法则只能通过不断地 ibv_poll_cq() 来轮询是否有事件完成</p>
+</blockquote>
+<h2 id="ibv-ack-cq-events"><a href="#ibv-ack-cq-events" class="headerlink" title="ibv_ack_cq_events()"></a>ibv_ack_cq_events()</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ibv_ack_cq_events</span><span class="params">(struct ibv_cq *cq, <span class="keyword">unsigned</span> <span class="keyword">int</span> nevents)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>用于确认已完成 Completion events。</p>
+<hr>
+<h1 id="Errors"><a href="#Errors" class="headerlink" title="Errors"></a>Errors</h1><h2 id="IBV-WC-WR-FLUSH-ERR-5-0x5"><a href="#IBV-WC-WR-FLUSH-ERR-5-0x5" class="headerlink" title="IBV_WC_WR_FLUSH_ERR(5/0x5)"></a>IBV_WC_WR_FLUSH_ERR(5/0x5)</h2><p>Work Request Flushed Error</p>
+<p>当 QP 的传送状态处于 Error 状态时，任何操作都会引发该错误。</p>
+<h2 id="IBV-WC-RNR-RETRY-EXC-ERR-13-0xd"><a href="#IBV-WC-RNR-RETRY-EXC-ERR-13-0xd" class="headerlink" title="IBV_WC_RNR_RETRY_EXC_ERR(13/0xd)"></a>IBV_WC_RNR_RETRY_EXC_ERR(13/0xd)</h2><p>Receiver-Not-Ready Retry Error</p>
+<p>当接收端没有准备好 Recv Request 时发送端产生了一个 Send Request 就会发生 RNR_RETRY 错误。</p>
+<p>要求 ibv_post_recv() 必须在 ibv_post_send 之前完成，所以一种基本的思路就是一开始就 Post 一堆 Recv Request 到队列中去，然后检查当队列中的 Recv Request 少于一定数量时补充，保证不管发送端什么时候 Post Send Request 时，接收端都有足够的 Recv Request 来接收。</p>
+<p>问题是如果发送端毫无顾忌地可以任意发送数据，尤其是在 RDMA_WRITE 方式，接收端这边会不会来不及取走数据，就被发送端传过来的新数据覆盖掉了？</p>
+<p>或者设置 ibv_modify_qp() 参数中的 min_rnr_timer 以及 rnr_retry，前者是重试间隔时间，后者是重试次数，当 rnr_retry 为 7 时表示重试无限次。这种方法可用于重试直到接收端确认取走数据，并且准备好下一次的 Recv Request，然后发送端再进行发送。</p>
+<p>当发送端发生 RNR_RETRY 错误时，重新调用 ibv_post_send() 是没用的，因为此时 QP 已经进入错误状态，接下来不管什么样的操作都会继续引发 IBV_WC_WR_FLUSH_ERR 错误。</p>
+<p>除非另外使用一种流控制的方式，不然上面的两种解决方案都总会存在一定的局限性。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/06/27/2016-06-27-rdma/" rel="bookmark">RDMA Warming Up</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/09/18/2017-09-18-rdmalib/" rel="bookmark">写着玩之 RDMA 轮子</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/RDMA/" rel="tag"># RDMA</a>
+              <a href="/tags/InfiniBand/" rel="tag"># InfiniBand</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/08/30/2016-08-30-iptables/" rel="prev" title="填坑系列 - Iptables">
+      <i class="fa fa-chevron-left"></i> 填坑系列 - Iptables
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/10/16/2016-10-16-october/" rel="next" title="October">
+      October <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ibv-functions"><span class="nav-text">ibv functions</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ibv-poll-cq"><span class="nav-text">ibv_poll_cq()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ibv-req-notify-cq"><span class="nav-text">ibv_req_notify_cq()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ibv-get-cq-event"><span class="nav-text">ibv_get_cq_event()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ibv-ack-cq-events"><span class="nav-text">ibv_ack_cq_events()</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Errors"><span class="nav-text">Errors</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#IBV-WC-WR-FLUSH-ERR-5-0x5"><span class="nav-text">IBV_WC_WR_FLUSH_ERR(5&#x2F;0x5)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IBV-WC-RNR-RETRY-EXC-ERR-13-0xd"><span class="nav-text">IBV_WC_RNR_RETRY_EXC_ERR(13&#x2F;0xd)</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '38beced57deed25b3c207a30c1674be3',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

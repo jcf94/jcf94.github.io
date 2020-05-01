@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="18年的第一篇，开一个估计又是会持续超长时间的坑。  要来拆包 TensorFlow 啦。   嗯，话说这件事情前年、去年就一直在做，做完 RDMA 写完论文就扔一边了，也没再整理过。没想到之后的工作还是回到了这里，所以重新过一遍，也好好整理一下。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TensorFlow 拆包（一）：Session.Run()">
+<meta property="og:url" content="https://jcf94.com/2018/01/13/2018-01-13-tfunpacking/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="18年的第一篇，开一个估计又是会持续超长时间的坑。  要来拆包 TensorFlow 啦。   嗯，话说这件事情前年、去年就一直在做，做完 RDMA 写完论文就扔一边了，也没再整理过。没想到之后的工作还是回到了这里，所以重新过一遍，也好好整理一下。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2018-01-13-tfunpacking-tf_session_run.svg">
+<meta property="article:published_time" content="2018-01-13T07:29:15.000Z">
+<meta property="article:modified_time" content="2018-10-04T02:46:34.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="TensorFlow">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2018-01-13-tfunpacking-tf_session_run.svg">
+
+<link rel="canonical" href="https://jcf94.com/2018/01/13/2018-01-13-tfunpacking/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>TensorFlow 拆包（一）：Session.Run() | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2018/01/13/2018-01-13-tfunpacking/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TensorFlow 拆包（一）：Session.Run()
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-01-13 15:29:15" itemprop="dateCreated datePublished" datetime="2018-01-13T15:29:15+08:00">2018-01-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-10-04 10:46:34" itemprop="dateModified" datetime="2018-10-04T10:46:34+08:00">2018-10-04</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Project/" itemprop="url" rel="index"><span itemprop="name">Project</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>18年的第一篇，开一个估计又是会持续超长时间的坑。</p>
+<blockquote class="blockquote-center">
+要来拆包 TensorFlow 啦。
+</blockquote>
+
+<p>嗯，话说这件事情前年、去年就一直在做，做完 RDMA 写完论文就扔一边了，也没再整理过。没想到之后的工作还是回到了这里，所以重新过一遍，也好好整理一下。</p>
+<a id="more"></a>
+
+<h1 id="GDB-调试大法"><a href="#GDB-调试大法" class="headerlink" title="GDB 调试大法"></a>GDB 调试大法</h1><p>扔一个当时写的简单指南：</p>
+<ul>
+<li><a href="http://jcf94.com/download/TensorFlow-SourceCode-Reading.pdf">TensorFlow-SourceCode-Reading.pdf</a></li>
+</ul>
+<p>最近的新版 TF 在 dbg 模式下编 GPU 版会有奇怪的 bug，Eigen 在做内存分配的时候有个地方会报错，Github 上也能找到相关的 issues，但是至少目前的 1.4、1.5 版本都还没解决。</p>
+<p>于是尝试了一下曲线救国的方案，在 opt 模式下面手动在编译选项里加上“-g”，虽然还不清楚 dbg 模式具体加了什么，但是至少后面 gdb 调试的时候 label 都是有的，还算能用，于是就这么用了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ bazel build -c opt --config=cuda --copt=<span class="string">"-g"</span> --cxxopt=<span class="string">"-g"</span> //tensorflow/tools/pip_package:build_pip_package</span><br></pre></td></tr></table></figure>
+
+<p>在要调的 python 代码前面加上这么一段：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line">PID = os.getpid()</span><br><span class="line">print(<span class="string">'Program pid:'</span>, PID)</span><br><span class="line">print(<span class="string">'Pause here to enter DBG'</span>)</span><br><span class="line">os.system(<span class="string">"read"</span>)</span><br></pre></td></tr></table></figure>
+
+<p>然后 <code>gdb -p PID</code>进去就好了。</p>
+<p>另外补充一个 python 和 gdb 的交互脚本。在 python 的源码目录下面有个 <code>Tools/gdb</code>目录，里面是一个 python 脚本 <code>libpython.py</code>。</p>
+<p>启动 gdb 之后：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(gdb) python</span><br><span class="line">&gt;import sys</span><br><span class="line">&gt;sys.path.append(<span class="string">'/path/to/libpython.py'</span>)</span><br><span class="line">&gt;import libpython</span><br><span class="line">&gt;end</span><br><span class="line">(gdb) ...</span><br></pre></td></tr></table></figure>
+
+<p>或者把<code>libpython.py</code>拷出来放到 gdb 启动的地方也行，比如为了让 gdb 能直接找到代码，通常我会在 TF 的目录下面开 gdb，那就把这个脚本放过去。导进来之后，后面 gdb 里面就会多出来一堆 <code>py-</code>开头的命令，除了 gdb 原有支持的查看 c/c++ 层面的信息以外，可以用这些新命令查看 python 层面的东西</p>
+<h1 id="TF’s-Dirs"><a href="#TF’s-Dirs" class="headerlink" title="TF’s Dirs"></a>TF’s Dirs</h1><p>源码中主要的部分在 <code>/tensorflow</code>目录下：</p>
+<table>
+<thead>
+<tr>
+<th>目录</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>/c</td>
+<td>C++ API，也是一些 Python API 与 C 层的接口部分</td>
+</tr>
+<tr>
+<td>/cc</td>
+<td></td>
+</tr>
+<tr>
+<td>/compiler</td>
+<td>即时编译的工具内容</td>
+</tr>
+<tr>
+<td>/contrib</td>
+<td>一些额外的库，大部分由第三方添加，其中一些正式确定的内容会移出去</td>
+</tr>
+<tr>
+<td>/core</td>
+<td>TensorFlow 的核心运行时代码</td>
+</tr>
+<tr>
+<td>/core/distributed_runtime</td>
+<td>分布式运行时代码</td>
+</tr>
+<tr>
+<td>/core/framework</td>
+<td>运行时中相对最底层的架构部分，涉及到很多基础结构的定义、与 Protobuf 的结合部分等等</td>
+</tr>
+<tr>
+<td>/core/graph</td>
+<td>运行时中对计算图的定义和处理</td>
+</tr>
+<tr>
+<td>/core/kernels</td>
+<td>计算图中 Op 的核心计算部分（即 Op 的 Kernel 函数）</td>
+</tr>
+<tr>
+<td>/core/lib</td>
+<td>运行时中调用的其他库的接口？</td>
+</tr>
+<tr>
+<td>/core/ops</td>
+<td>C 部分的 Op 分成两个部分，核心计算函数在前面的 /kernels 目录中，这里存的是 Op 面向上层 Python 运行时的注册部分内容。<br>详见 <a href="/2018/02/28/2018-02-28-tfunpacking3/">TensorFlow 拆包（三）：Graph 和 Node</a></td>
+</tr>
+<tr>
+<td>/core/platform</td>
+<td>针对不同平台的额外内容</td>
+</tr>
+<tr>
+<td>/core/profiler</td>
+<td>运行时的调优工具？</td>
+</tr>
+<tr>
+<td>/core/protobuf</td>
+<td>Protobuf 的定义</td>
+</tr>
+<tr>
+<td>/core/util</td>
+<td>其他的一些工具</td>
+</tr>
+<tr>
+<td>/python</td>
+<td>TensorFlow Python 部分的运行时和 API</td>
+</tr>
+</tbody></table>
+<h1 id="Session-run"><a href="#Session-run" class="headerlink" title="Session.run()"></a>Session.run()</h1><p>python 代码里面的 run 函数是<code>Session</code> 类的父类<code>BaseSession</code>里面来的。</p>
+<p><code>BaseSession</code>中对 run 这个方法有详细的说明，调用一次run是执行一遍数据流图， 在 TensorFlow 的训练代码中通常是在一个循环中多次调用<code>sess.run()</code>，一次 run 即为训练 过程中的一步。 fetches 是 run 方法的一个输入参数，这个参数可以是很多种形式的数据，run 最后的 返回值也会和 fetches 有相同的结构。 </p>
+<h2 id="TF-Run"><a href="#TF-Run" class="headerlink" title="TF_Run()"></a>TF_Run()</h2><p>中间追了一大圈，最后 c++ 的入口函数是<code>TF_Run()</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#0  tensorflow::DirectSession::Run (</span></span><br><span class="line">	this=0x7fb03026c390, run_options=..., inputs=std::vector of length 0, capacity 0,</span><br><span class="line">	output_names=std::vector of length 0, capacity 0,</span><br><span class="line">	target_nodes=std::vector of length 1, capacity 1 = &#123;...&#125;,</span><br><span class="line">	outputs=0x7fff23b07e50, run_metadata=0x7fff23b07ea0)</span><br><span class="line">	at tensorflow/core/common_runtime/direct_session.cc:437</span><br><span class="line"><span class="comment">#1  0x00007fb1130a469a in TF_Run_Helper (</span></span><br><span class="line">	session=0x7fb03026c390, handle=handle@entry=0x0, </span><br><span class="line">    run_options=run_options@entry=0x0,</span><br><span class="line">    input_pairs=std::vector of length 0, capacity 0, </span><br><span class="line">    output_tensor_names=std::vector of length 0, capacity 0,</span><br><span class="line">    c_outputs=c_outputs@entry=0x7fff23b08220,</span><br><span class="line">    target_oper_names=std::vector of length 1, capacity 1 = &#123;...&#125;, </span><br><span class="line">    run_metadata=run_metadata@entry=0x0, status=status@entry=0x7fb030307f60)</span><br><span class="line">    at tensorflow/c/c_api.cc:698</span><br><span class="line"><span class="comment">#2  0x00007fb1130a49d4 in TF_Run (</span></span><br><span class="line">	s=0x7fb03026bdd0, run_options=0x0, c_input_names=&lt;optimized out&gt;, </span><br><span class="line">    c_inputs=0x7fff23b081d0, ninputs=&lt;optimized out&gt;, c_output_names=&lt;optimized out&gt;, </span><br><span class="line">    c_outputs=0x7fff23b08220, noutputs=0, c_target_oper_names=0x7fff23b084d0, ntargets=1, </span><br><span class="line">    run_metadata=0x0, status=0x7fb030307f60)</span><br><span class="line">    at tensorflow/c/c_api.cc:753</span><br></pre></td></tr></table></figure>
+
+<p>然后再往下走到底是<code>tensorflow::DirectSession::Run()</code>，其中具体做的事情是：</p>
+<ul>
+<li>累加 Session 计数器</li>
+<li>处理输入，准备线程池，根据输入输出 tensor、目标节点，从当前 Session 中已有的 executor 中找是否存在 一个相同任务的 executor，找到则将其返回，否则创建一个新的 executor</li>
+<li>设置一个 FunctionCallFrame，似乎是用来处理 executor 输入输出的一个接口结构。从前面解析过的输入中提取出具体的 Tensor，封装到 FunctionCallFrame 里面去</li>
+<li>创建一个 RunState，用于标记运行的状态；一个 IntraProcessRendezvous 用于本地 Tensor 数据的管理；一个 CancellationManager，用于让 Session 响应 <code>Session::Close()</code></li>
+<li>中间还有用于预估网络情况相关的 cost_model、性能追踪工具等等的设置</li>
+<li>接下来的一段就是让 executor 配合线程池去执行运行了，具体的代码是<code>item.executor-&gt;RunAsync(args, barrier-&gt;Get())</code></li>
+<li>主线程这个时候会停下来等待 executor 跑完</li>
+<li>结束返回之后，检查是否有输出，然后处理输出部分，返回到上层的 python 部分</li>
+</ul>
+<h2 id="Executor"><a href="#Executor" class="headerlink" title="Executor"></a>Executor</h2><p>看一下 executor 的情况：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">PerPartitionExecutorsAndLib</span> &#123;</span></span><br><span class="line">  Graph* graph = <span class="literal">nullptr</span>;                  <span class="comment">// not owned.</span></span><br><span class="line">  Device* device = <span class="literal">nullptr</span>;                <span class="comment">// not owned.</span></span><br><span class="line">  FunctionLibraryRuntime* flib = <span class="literal">nullptr</span>;  <span class="comment">// not owned.</span></span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;Executor&gt; executor;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ExecutorsAndKeys</span> &#123;</span></span><br><span class="line">  ExecutorsAndKeys() : step_count(<span class="number">0</span>) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">std</span>::<span class="keyword">atomic_int_fast64_t</span> step_count;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;Graph&gt; graph;</span><br><span class="line">  NameNodeMap name_to_node;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;FunctionLibraryDefinition&gt; flib_def;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;ProcessFunctionLibraryRuntime&gt; proc_flr;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;PerPartitionExecutorsAndLib&gt; items;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unordered_map</span>&lt;<span class="built_in">string</span>, <span class="keyword">size_t</span>&gt; input_name_to_index;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unordered_map</span>&lt;<span class="built_in">string</span>, <span class="built_in">string</span>&gt; input_name_to_rendezvous_key;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unordered_map</span>&lt;<span class="built_in">string</span>, <span class="keyword">size_t</span>&gt; output_name_to_index;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unordered_map</span>&lt;<span class="built_in">string</span>, <span class="built_in">string</span>&gt; output_name_to_rendezvous_key;</span><br><span class="line"></span><br><span class="line">  DataTypeVector input_types;</span><br><span class="line">  DataTypeVector output_types;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><code>ExecutorsAndKeys-&gt;items</code>里面的每一个元素都是一个 Executor 的衍生类。注释里面写了 Executor 的用法：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Executor runs a graph computation.</span></span><br><span class="line"><span class="comment">// Example:</span></span><br><span class="line"><span class="comment">//   Graph* graph = ...;</span></span><br><span class="line"><span class="comment">//      ... construct graph ...</span></span><br><span class="line"><span class="comment">//   Executor* executor;</span></span><br><span class="line"><span class="comment">//   TF_CHECK_OK(NewSimpleExecutor(my_device, graph, &amp;executor));</span></span><br><span class="line"><span class="comment">//   Rendezvous* rendezvous = NewNaiveRendezvous();</span></span><br><span class="line"><span class="comment">//   TF_CHECK_OK(rendezvous-&gt;Send("input", some_input_tensor));</span></span><br><span class="line"><span class="comment">//   TF_CHECK_OK(executor-&gt;Run(&#123;ExecutorOpts, rendezvous, nullptr&#125;));</span></span><br><span class="line"><span class="comment">//   TF_CHECK_OK(rendezvous-&gt;Recv("output", &amp;output_tensor));</span></span><br><span class="line"><span class="comment">//   ... ...</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Multiple threads can call Executor::Run concurrently.</span></span><br></pre></td></tr></table></figure>
+
+<p>Executor 这个类本身只有一些基础接口，比较核心的是 RunAsync 这个虚函数接口，Run 函数是对 RunAsync 的同步封装。</p>
+<p>为了搞清楚 items 里面的 Executor 到底是什么，回到上面看一些这个东西是怎么创建的，看一下<code>DirectSession::GetOrCreateExecutors()</code>这个函数：</p>
+<ul>
+<li>首先根据输入、输出、以及参数等等情况，在 DirectSession 的记录（一个 unordered_map）里面找是不是前面有创建过一样的 Executor</li>
+<li>如果没有找到那么就准备创建一个新的。</li>
+<li>用<code>CreateGraphs()</code>创建出当前运行需要的图，这个地方产生的 graphs 具体是个什么东西先放着待研究，<code>ek-&gt;items.reserve(graphs.size())</code>这句表明等下创建的 Executor 的个数应该是跟 graphs 里面元素的个数相同的</li>
+<li>处理 GraphExecutionState、FunctionLibraryRuntime</li>
+<li>然后对 graphs 里面的每一个元素，分配运算设备、Runtime、用 GraphOptimizer 优化一遍，再用 <code>NewLocalExecutor()</code>创建对应的 Executor 放到 ExecutorsAndKeys 这个结构的 items 里面去</li>
+<li><code>NewLocalExecutor()</code>创建的是 ExecutorImpl，那问题就清楚了，<code>ExecutorsAndKeys-&gt;items</code>里面的每一个东西其实是个 ExecutorImpl</li>
+</ul>
+<p>回到上面，看一下 ExecutorImpl 的 RunAsync 函数，又引出来一个新的结构：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> ExecutorImpl::RunAsync(<span class="keyword">const</span> Args&amp; args, DoneCallback done) &#123;</span><br><span class="line">  (<span class="keyword">new</span> ExecutorState(args, <span class="keyword">this</span>))-&gt;RunAsync(<span class="built_in">std</span>::move(done));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="RunAsync-amp-ScheduleReady"><a href="#RunAsync-amp-ScheduleReady" class="headerlink" title="RunAsync() &amp; ScheduleReady()"></a>RunAsync() &amp; ScheduleReady()</h2><p>每一次的<code>ExecutorImpl::Run()</code>都会产生一个 ExecutorState 的封装结构，它负责追踪 node 的前驱节点的状态，当依赖满足、可以执行的时候把它调度到线程池里面执行。例如<code>ExecutorState::AsyncState</code>这个结构就是相当于打包了整个运行环境的上下文信息，用于多线程执行 node，把 node 当前运行需要的资源信息全部包在这里面扔进线程池，这样等新线程跑完 node 的内容还能够继续后续工作。</p>
+<p>具体对图的执行是这样的：</p>
+<ul>
+<li><p>首先展开 context map，这个地方已经是对对应的 device 进行调用了，在目标设备上准备运行时的上下文</p>
+</li>
+<li><p>初始化 ready 队列，这里面放的 TaggedNode 就是图里面入度为 0 的 note，也就是 root_node</p>
+</li>
+<li><p>接下来调用<code>ScheduleReady()</code>，交给线程池开始跑。这个函数本身的描述是：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Schedule all the expensive nodes in 'ready', and put all the inexpensive</span></span><br><span class="line"><span class="comment">// nodes in 'ready' into 'inline_ready'.</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ScheduleReady</span><span class="params">(<span class="keyword">const</span> TaggedNodeSeq&amp; ready,</span></span></span><br><span class="line"><span class="function"><span class="params">                   TaggedNodeReadyQueue* inline_ready)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>关键是这个 expensive node 到底是怎么定义的呢？在代码里面看的不是很清楚。<code>ExecutorImpl::RunAsync()</code>调用的时候是把 root_node 放在 ready 队列里面传进来，inline_ready 给的是空指针，那么看 <code>ScheduleReady()</code>的实现，这部分在这里执行之后就返回了：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># executor.cc:2085</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (inline_ready == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">  <span class="comment">// Schedule to run all the ready ops in thread pool.</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">auto</span>&amp; tagged_node : ready) &#123;</span><br><span class="line">    runner_([=]() &#123; Process(tagged_node, scheduled_usec); &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>后面的部分先跳过，回头再看。</p>
+</li>
+</ul>
+<h2 id="runner"><a href="#runner" class="headerlink" title="runner_()"></a>runner_()</h2><p>接下来考虑一下这个<code>runner_()</code>是什么东西：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Executor</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">Args</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">typedef</span> <span class="built_in">std</span>::function&lt;<span class="keyword">void</span>()&gt; Closure;</span><br><span class="line">    <span class="keyword">typedef</span> <span class="built_in">std</span>::function&lt;<span class="keyword">void</span>(Closure)&gt; Runner;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExecutorState</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  Executor::Args::Runner runner_;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这玩意就是个套了很多层的<code>std::function&lt;void()&gt;</code>！！！在 gdb 里面追踪起来像函数指针一样难受，只能继续翻源码看它是从哪来的。它的初始化在 ExecutorState 的构造函数里面直接完成，赋值的是上面传进来的 <code>args.runner</code>，向上需要追溯到<code>tensorflow::DirectSession::Run()</code>里面。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"># direct_session.cc:<span class="number">585</span></span><br><span class="line"></span><br><span class="line">Executor::Args::Runner default_runner = [<span class="keyword">this</span>,</span><br><span class="line">                                         pool](Executor::Args::Closure c) &#123;</span><br><span class="line">  SchedClosure(pool, <span class="built_in">std</span>::move(c));</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; item : executors_and_keys-&gt;items) &#123;</span><br><span class="line">  <span class="comment">// TODO(zhengxq): support partial run.</span></span><br><span class="line">  <span class="comment">// TODO(zhengxq): if the device picks its own threadpool, we need to assign</span></span><br><span class="line">  <span class="comment">//     less threads to the main compute pool by default.</span></span><br><span class="line">  thread::ThreadPool* device_thread_pool =</span><br><span class="line">      item.device-&gt;tensorflow_device_thread_pool();</span><br><span class="line">  <span class="keyword">if</span> (!device_thread_pool) &#123;</span><br><span class="line">    args.runner = default_runner;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    args.runner = [<span class="keyword">this</span>, device_thread_pool](Executor::Args::Closure c) &#123;</span><br><span class="line">      SchedClosure(device_thread_pool, <span class="built_in">std</span>::move(c));</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">  item.executor-&gt;RunAsync(args, barrier-&gt;Get());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>好了，所以是<code>runner_()</code>就是 <code>SchedClosure()</code>，删掉这部分代码里面跟安卓有关的部分是这样的：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> DirectSession::SchedClosure(thread::ThreadPool* pool,</span><br><span class="line">                                 <span class="built_in">std</span>::function&lt;<span class="keyword">void</span>()&gt; c) &#123;</span><br><span class="line">  pool-&gt;Schedule(<span class="built_in">std</span>::move(c));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>runner_([=]() { Process(tagged_node, scheduled_usec); })</code>即把 Lambda 里面的 <code>Process()</code> 传给对应线程池的<code>Schedule()</code> 函数。这个函数然后又套了一层：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> ThreadPool::Schedule(<span class="built_in">std</span>::function&lt;<span class="keyword">void</span>()&gt; fn) &#123;</span><br><span class="line">  CHECK(fn != <span class="literal">nullptr</span>);</span><br><span class="line">  impl_-&gt;Schedule(<span class="built_in">std</span>::move(fn));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>impl_ 是 ThreadPool 这个类的实际对象，继承于 <code>Eigen::ThreadPoolTempl&lt;EigenEnvironment&gt;</code>这个模版，继承的目标这部分已经不在 TensorFlow 的源码包里面了，而是来源于 Eigen 的源码，在<code>workspace.bzl</code>里面可以找到 ：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">tf_http_archive(</span><br><span class="line">    name = <span class="string">"eigen_archive"</span>,</span><br><span class="line">    urls = [</span><br><span class="line">        <span class="string">"https://mirror.bazel.build/bitbucket.org/eigen/eigen/get/c2947c341c68.tar.gz"</span>,</span><br><span class="line">        <span class="string">"https://bitbucket.org/eigen/eigen/get/c2947c341c68.tar.gz"</span>,</span><br><span class="line">    ],</span><br><span class="line">    sha256 = <span class="string">"f21f8ab8a8dbcb91cd0deeade19a043f47708d0da7a4000164cdf203b4a71e34"</span>,</span><br><span class="line">    strip_prefix = <span class="string">"eigen-eigen-c2947c341c68"</span>,</span><br><span class="line">    build_file = str(Label(<span class="string">"//third_party:eigen.BUILD"</span>)),</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>这条线就先不展开了，总之是扔进线程池里面跑就是了。</p>
+<h2 id="Process"><a href="#Process" class="headerlink" title="Process()"></a>Process()</h2><p>接下来来看<code>tensorflow::(anonymous namespace)::ExecutorState::Process()</code>，也就是线程池里面实际跑的东西的内容：</p>
+<ul>
+<li>处理好上下文以及一些运行中需要用到的参数</li>
+<li>inline_ready 是需要运行的 node 队列，这里的核心过程就是一个 while 循环，不断从队列里面把 node 给 pop 出来跑</li>
+<li>准备当前 node 的输入等等一系列东西</li>
+<li>如果 kernel 是异步的，那么调用 <code>device-&gt;ComputeAsync()</code>，否则调用<code>device-&gt;Compute()</code></li>
+<li>处理输出结果<code>ProcessOutputs()</code>，然后<code>PropagateOutputs()</code>，这个函数<strong>很重要</strong>，除了把算完的结果沿着当前 node 的出边传给下一个 node 以外，还把接下来满足依赖关系的 node 放到 ready 队列里面</li>
+<li>最后调用<code>tensorflow::(anonymous namespace)::ExecutorState::NodeDone()</code>表明当前 node 的计算完成了</li>
+</ul>
+<h2 id="NodeDone-amp-ScheduleReady"><a href="#NodeDone-amp-ScheduleReady" class="headerlink" title="NodeDone() &amp; ScheduleReady()"></a>NodeDone() &amp; ScheduleReady()</h2><p><code>NodeDone()</code> 的最后一步执行的也是<code>ScheduleReady()</code>。有意思的是，异步 kernel 跑完之后，往<code>NodeDone()</code>里面传进去的 inline_ready 还是空指针，那<code>ScheduleReady()</code>的执行方式就跟前面一样，往线程池里面扔进去新的<code>Process()</code>任务；同步的 kernel 往<code>NodeDone()</code>里面传进去的就是当前线程的 inline_ready，那么回到上面继续看这个函数的后半部分：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># executor.cc:2092</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> GraphView&amp; gview = impl_-&gt;gview_;</span><br><span class="line"><span class="keyword">const</span> TaggedNode* curr_expensive_node = <span class="literal">nullptr</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">auto</span>&amp; tagged_node : ready) &#123;</span><br><span class="line">  <span class="keyword">const</span> NodeItem&amp; item = *gview.node(tagged_node.node-&gt;id());</span><br><span class="line">  <span class="keyword">if</span> (tagged_node.is_dead || !item.kernel_is_expensive) &#123;</span><br><span class="line">    <span class="comment">// Inline this inexpensive node.</span></span><br><span class="line">    inline_ready-&gt;push_back(tagged_node);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (curr_expensive_node) &#123;</span><br><span class="line">      <span class="comment">// Dispatch to another thread since there is plenty of work to</span></span><br><span class="line">      <span class="comment">// do for this thread.</span></span><br><span class="line">      runner_(<span class="built_in">std</span>::bind(&amp;ExecutorState::Process, <span class="keyword">this</span>, *curr_expensive_node,</span><br><span class="line">                        scheduled_usec));</span><br><span class="line">    &#125;</span><br><span class="line">    curr_expensive_node = &amp;tagged_node;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (curr_expensive_node) &#123;</span><br><span class="line">  <span class="keyword">if</span> (inline_ready-&gt;empty()) &#123;</span><br><span class="line">    <span class="comment">// Tail recursion optimization</span></span><br><span class="line">    inline_ready-&gt;push_back(*curr_expensive_node);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// There are inline nodes to run already. We dispatch this expensive</span></span><br><span class="line">    <span class="comment">// node to other thread.</span></span><br><span class="line">    runner_(<span class="built_in">std</span>::bind(&amp;ExecutorState::Process, <span class="keyword">this</span>, *curr_expensive_node,</span><br><span class="line">                      scheduled_usec));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面这个循环一开始我是没看懂的，看明白了发现这里的逻辑还是挺有意思的。检查 ready 队列中的每一个元素，如果下一个 node 不是耗时的计算任务（<strong>expensive node</strong>），那就直接加到 inline_ready 队列里面去，否则当前线程<strong>至多只做一个</strong>耗时任务，其他的任务都扔到线程池里面去交给别的线程做。</p>
+<p>也就是说，当前线程要么把全部的不耗时任务做了，要么只做一个耗时任务。</p>
+<hr>
+<p>到这里为止，运行部分的逻辑闭环就结束了。这部分的整个流程图大概是这个样子：</p>
+<p><img data-src="http://jcf94.com/download/2018-01-13-tfunpacking-tf_session_run.svg" alt="Session.Run()"></p>
+<hr>
+<p>后面继续深入 Executor 的运行时实现往下看看：</p>
+<ul>
+<li><a href="/2018/01/23/2018-01-23-tfunpacking2/">TensorFlow 拆包（二）：TF 的数据流模型实现</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/02/04/2017-02-04-tensorflow/" rel="bookmark">TensorFlow</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/04/04/2017-04-04-alexnet/" rel="bookmark">AlexNet</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/23/2018-01-23-tfunpacking2/" rel="bookmark">TensorFlow 拆包（二）：TF 的数据流模型实现以及自动求导</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/03/07/2018-03-07-tfunpacking4/" rel="bookmark">TensorFlow 拆包（四）：Device</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/03/12/2018-03-12-tfunpacking6/" rel="bookmark">TensorFlow 拆包（六）：RDMA</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/TensorFlow/" rel="tag"># TensorFlow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/12/20/2017-12-20-distributeddl/" rel="prev" title="分布式机器学习 / 深度学习论文整理">
+      <i class="fa fa-chevron-left"></i> 分布式机器学习 / 深度学习论文整理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/01/18/2018-01-18-vizgraph/" rel="next" title="写了一个画框图的轮子">
+      写了一个画框图的轮子 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#GDB-调试大法"><span class="nav-text">GDB 调试大法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TF’s-Dirs"><span class="nav-text">TF’s Dirs</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Session-run"><span class="nav-text">Session.run()</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#TF-Run"><span class="nav-text">TF_Run()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Executor"><span class="nav-text">Executor</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunAsync-amp-ScheduleReady"><span class="nav-text">RunAsync() &amp; ScheduleReady()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#runner"><span class="nav-text">runner_()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Process"><span class="nav-text">Process()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NodeDone-amp-ScheduleReady"><span class="nav-text">NodeDone() &amp; ScheduleReady()</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '3bb018d5b0362261c20d2333186d3707',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

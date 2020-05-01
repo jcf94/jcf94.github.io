@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="绪论  微波是电磁波谱中介于超短波与红外线之间的波段，频率范围从300MHz（波长1m）至3000GHz（波长0.1mm）  微波、天线与电波：三者的共同基础都是电磁场理论，是电磁场在不同边界值条件下的应用   微波：研究如何导引电磁波在微波传输系统中的有效传输 天线：1.有效地辐射或者接受电磁波；2.把无线电波能量转换为导行波能量 电波：分析和研究电波在空间的传播方式和特点">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微波技术与天线 复习笔记">
+<meta property="og:url" content="https://jcf94.com/2015/06/27/2015-06-27-weibojishuyutianxian/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="绪论  微波是电磁波谱中介于超短波与红外线之间的波段，频率范围从300MHz（波长1m）至3000GHz（波长0.1mm）  微波、天线与电波：三者的共同基础都是电磁场理论，是电磁场在不同边界值条件下的应用   微波：研究如何导引电磁波在微波传输系统中的有效传输 天线：1.有效地辐射或者接受电磁波；2.把无线电波能量转换为导行波能量 电波：分析和研究电波在空间的传播方式和特点">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-06-27T04:25:35.000Z">
+<meta property="article:modified_time" content="2018-03-07T06:55:48.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="复习笔记">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2015/06/27/2015-06-27-weibojishuyutianxian/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>微波技术与天线 复习笔记 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2015/06/27/2015-06-27-weibojishuyutianxian/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          微波技术与天线 复习笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-06-27 12:25:35" itemprop="dateCreated datePublished" datetime="2015-06-27T12:25:35+08:00">2015-06-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-03-07 14:55:48" itemprop="dateModified" datetime="2018-03-07T14:55:48+08:00">2018-03-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Bachelor-of-Engineering/" itemprop="url" rel="index"><span itemprop="name">Bachelor-of-Engineering</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="绪论"><a href="#绪论" class="headerlink" title="绪论"></a>绪论</h1><hr>
+<ul>
+<li><p><u><strong>微波</strong>是电磁波谱中介于超短波与红外线之间的波段，频率范围从<strong>300MHz（波长1m）</strong>至<strong>3000GHz（波长0.1mm）</strong></u></p>
+</li>
+<li><p>微波、天线与电波：三者的共同基础都是<strong>电磁场理论</strong>，是电磁场在<strong>不同边界值条件下</strong>的应用</p>
+</li>
+</ul>
+<p>微波：研究如何<strong>导引</strong>电磁波在微波传输系统中的有效传输</p>
+<p>天线：1.有效地辐射或者接受电磁波；2.把无线电波能量转换为导行波能量</p>
+<p>电波：分析和研究电波在空间的传播方式和特点</p>
+<a id="more"></a>
+
+<h1 id="第一章-均匀传输线理论"><a href="#第一章-均匀传输线理论" class="headerlink" title="第一章 均匀传输线理论"></a>第一章 均匀传输线理论</h1><hr>
+<ul>
+<li><p><u>微波传输线是用传输<strong>微波信息和能量</strong>的各种形式传输系统的总称，它的作用是<strong>引导</strong>电磁波沿一定方向传输，因此又称为<strong>导波系统</strong>，其所引导的电磁波被称为<strong>导行波</strong></u></p>
+</li>
+<li><p>一般将截面尺寸、形状、媒质分布、材料及边界条件均不变的导波系统称为<strong>规则导波系统</strong></p>
+</li>
+<li><p>微波无源器件、均匀传输线、有源元器件以及天线一起构成微波系统</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li><p><u>将传输线上导行波的<strong>电压与电流之比</strong>定义为传输线的<strong>特性阻抗</strong>，用 $Z_0$ 来表示，其倒数称为特性导纳，用$Y_0$来表示</u></p>
+</li>
+<li><p>常用平行双导线传输线的特性阻抗有<strong>250$\Omega$、400$\Omega$和600$\Omega$</strong>三种</p>
+</li>
+<li><p>传输线上<strong>任意一点的电压与电流之比</strong>称为传输线在该点的<strong>阻抗</strong></p>
+</li>
+<li><p>均匀无耗传输线上任意一点的<strong>输入阻抗</strong>与<strong>观察点的位置</strong>、传输线的<strong>特性阻抗</strong>、<strong>终端负载阻抗</strong>及<strong>工作频率</strong>有关</p>
+</li>
+<li><p>无耗传输线上任意相距<strong>${1 \over 2}$波长阻抗相同，${1 \over 4}$波长阻抗变换</strong></p>
+</li>
+<li><p><u>定义传输线上任意一点的<strong>反射波电压（或电流）与入射波电压（或电流）</strong>之比为<strong>电压（或电流）的反射系数$\Gamma$</strong></u></p>
+</li>
+<li><p>终端反射系数：</p>
+</li>
+</ul>
+<p>$$\Gamma_1=\frac {Z_1-Z_0}{Z_1+Z_0}=|\Gamma_1|e^{j\phi_1}$$</p>
+<ul>
+<li>反射系数：</li>
+</ul>
+<p>$$\Gamma(z)=|\Gamma_1|e^{-j2\beta z}=|\Gamma_1|e^{j(\phi_1-2\beta z)}$$</p>
+<p>$$\Gamma(0)=\Gamma_1$$</p>
+<ul>
+<li>输入阻抗与反射系数的关系：</li>
+</ul>
+<p>$$Z_{in}(z)=Z_0\frac{1+\Gamma(z)}{1-\Gamma(z)}$$</p>
+<p>$$\Gamma(z)=\frac{Z_{in}(z)-Z_0}{Z_{in}(z)+Z_0}$$</p>
+<ul>
+<li>相移常数</li>
+</ul>
+<p>$$\beta=\frac{2\pi f}{c}=\frac{2\pi}{\lambda}$$</p>
+<ul>
+<li><p>反射系数也具有<strong>${1 \over 2}$波长重复性</strong></p>
+</li>
+<li><p>当传输线<strong>特性阻抗一定</strong>时，输入阻抗与反射系数有<strong>一一对应</strong>的关系</p>
+</li>
+<li><p>当$Z_1=Z_0$时，反射系数为0，即终端无反射，称为<strong>负载匹配</strong></p>
+</li>
+<li><p>定义传输线上<strong>波腹点电压振幅与波节点电压振幅之比</strong>为<strong>电压驻波比</strong></p>
+</li>
+</ul>
+<p>$$\rho=\frac{|U|_{max}}{|U|_{min}}=\frac{1+|\Gamma_1|}{1-|\Gamma_1|}$$</p>
+<p>$$\Gamma_1=\frac{\rho-1}{\rho+1}$$</p>
+<p>|无耗传输线的状态|负载阻抗|任意一点的输入阻抗|反射系数|说明|<br>|-|<br>|行波状态|$Z_1=Z_0$|$Z_{in}(z)=Z_0$|$\Gamma_1=0$，终端无反射|负载匹配|<br>|纯驻波状态|短路、开路或纯电抗||$\Gamma_1=1$，终端全反射||<br>|行驻波状态|终端接任意负数阻抗负载|||既有行波又有纯驻波|</p>
+<ul>
+<li>行驻波状态时的波腹点和波节点</li>
+</ul>
+<p>||电压幅度|电流幅度|位置|阻抗|<br>|-|<br>|波腹点|最大|最小|$z_{max}=\frac{\lambda}{4\pi}\phi_1+n\frac{\lambda}{2}(n=0,1,2,…)$|$R_{max}=Z_0\rho$|<br>|波节点|最小|最大|$z_{min}=\frac{\lambda}{4\pi}\phi_1+(2n\pm 1)\frac{\lambda}{4}(n=0,1,2,…)$|$R_{min}=\frac{Z_0}{\rho}$|</p>
+<p>可见：</p>
+<p>$$R_{max}R_{min}=Z_0^2$$</p>
+<p>匹配传输线的特性阻抗：</p>
+<p>$$Z_{01}=\sqrt{Z_0R}$$</p>
+<hr>
+<ul>
+<li><p><strong>负载阻抗匹配</strong>：<strong>负载阻抗</strong>等于传输线的特性阻抗，传输线上只有从信源到负载的入射波，而无反射波。<strong>匹配负载完全吸收了由信源入射来的微波功率。</strong></p>
+</li>
+<li><p><strong>源阻抗匹配</strong>：<strong>电源内阻</strong>等于传输线的特性阻抗。<strong>入射功率不随负载变化。</strong></p>
+</li>
+<li><p><strong>共轭阻抗匹配</strong>：不匹配电源，当<strong>负载阻抗折合到电源参考面上的输入阻抗</strong>为电源内阻的共轭值时，<strong>负载能得到最大的功率值</strong></p>
+</li>
+</ul>
+<h1 id="第二章-规则金属波导"><a href="#第二章-规则金属波导" class="headerlink" title="第二章 规则金属波导"></a>第二章 规则金属波导</h1><hr>
+<ul>
+<li><p>当工作波长<strong>小于</strong>截止波长时，此模可以在波导中传输，称为传导模</p>
+</li>
+<li><p>当工作波长<strong>大于</strong>截止波长时，此模不能在波导中传输，称为截止模</p>
+</li>
+<li><p>激励波导的三种方法：<strong>电激励、磁激励和电流激励</strong></p>
+</li>
+</ul>
+<h2 id="矩形波导"><a href="#矩形波导" class="headerlink" title="矩形波导"></a>矩形波导</h2><ul>
+<li><p>宽边尺寸a，窄边尺寸b</p>
+</li>
+<li><p>截止波数：</p>
+</li>
+</ul>
+<p>$$k_{cmn}=\sqrt{(\frac{m\pi}{a})^2+(\frac{n\pi}{b})^2}$$</p>
+<ul>
+<li>截止波长：</li>
+</ul>
+<p>$$\lambda_{cTE_{mn}}=\lambda_{cTM_{mn}}=\frac{2\pi}{k_{cmn}}=\frac{2}{\sqrt{(\frac{m}{a})^2+(\frac{n}{b})^2}}$$</p>
+<ul>
+<li>相移常数</li>
+</ul>
+<p>$$\beta=\frac{2\pi}{\lambda}\sqrt{1-(\frac{\lambda}{\lambda_c})^2}=\sqrt{k^2-k_c^2}$$</p>
+<ul>
+<li>相速与波导波长</li>
+</ul>
+<p>$$\nu_p=\frac{\omega}{\beta}$$<br>$$\lambda_g=\frac{2\pi}{\beta}$$</p>
+<ul>
+<li>例如：</li>
+</ul>
+<p>$$\lambda_{cTE_{10}}=2a$$<br>$$\lambda_{cTE_{01}}=2b$$<br>$$\lambda_{cTM_{11}}=\frac{2ab}{\sqrt{a^2+b^2}}$$</p>
+<h3 id="TE波"><a href="#TE波" class="headerlink" title="TE波"></a>TE波</h3><ul>
+<li>$TE_{01}$为<strong>最低次模（主模）</strong>，其余称为高次模</li>
+</ul>
+<h3 id="TM波"><a href="#TM波" class="headerlink" title="TM波"></a>TM波</h3><ul>
+<li>$TM_{11}$为<strong>最低次模</strong>，其余均为高次模</li>
+</ul>
+<h2 id="圆形波导"><a href="#圆形波导" class="headerlink" title="圆形波导"></a>圆形波导</h2><ul>
+<li><p>外导体内径a</p>
+</li>
+<li><p>截止波数：</p>
+</li>
+</ul>
+<p>$$k_{cTE_{mn}}=\frac{\mu_{mn}}{a}$$<br>$$k_{cTM_{mn}}=\frac{\nu_{mn}}{a}$$</p>
+<ul>
+<li>截止波长：</li>
+</ul>
+<p>$$\lambda_{cTE_{mn}}=\frac{2\pi}{k_{cTE_{mn}}}=\frac{2\pi a}{\mu_{mn}}$$<br>$$\lambda_{cTM_{mn}}=\frac{2\pi}{k_{cTM_{mn}}}=\frac{2\pi a}{\nu_{mn}}$$</p>
+<ul>
+<li>在所有的模式中，$TE_{11}$模截止波最长，其次为$TM_{01}$模，三种典型模式的截止波长为：</li>
+</ul>
+<p>$$\lambda_{cTE_{11}}=3.4126a$$<br>$$\lambda_{cTM_{01}}=2.6127a$$<br>$$\lambda_{cTE_{01}}=1.6398a$$</p>
+<h1 id="第三章-微波集成传输线"><a href="#第三章-微波集成传输线" class="headerlink" title="第三章 微波集成传输线"></a>第三章 微波集成传输线</h1><hr>
+<ul>
+<li>各种集成微波传输系统：</li>
+</ul>
+<ol>
+<li><strong>准TEM波传输线</strong>，主要包括微带传输线和共面波导等</li>
+<li><strong>非TEM波传输线</strong>，主要包括槽线、鳍线等</li>
+<li><strong>开放式介质波导传输线</strong>，主要包括介质波导、镜像波导等</li>
+<li><strong>半开放式介质波导</strong>，主要包括H形波导、G形波导等</li>
+</ol>
+<ul>
+<li>对于耦合微带线，可以将激励分为<strong>奇模激励和偶模激励</strong></li>
+</ul>
+<p>设两线的激励电压分别为$U_1、U_2$，则可表示为两个<strong>等幅同相</strong>电压激励$U_e（奇模激励）$和两个<strong>等幅反相</strong>电压激励$U_o$</p>
+<h1 id="第四章-微波网络基础"><a href="#第四章-微波网络基础" class="headerlink" title="第四章 微波网络基础"></a>第四章 微波网络基础</h1><hr>
+<ul>
+<li>阻抗矩阵：</li>
+</ul>
+<p>$$U_1=Z_{11}I_1+Z_{12}I_2$$</p>
+<p>$$U_2=Z_{21}I_1+Z_{22}I_2$$</p>
+<p>$$\begin{bmatrix}U_1\\U_2\end{bmatrix}=\begin{bmatrix}Z_{11}&amp;Z_{12}\\Z_{21}&amp;Z_{22}\end{bmatrix}\begin{bmatrix}I_1\\I_2\end{bmatrix}$$</p>
+<p>$$[U]=[Z][I]$$</p>
+<p>其中$[U]$为电压矩阵，$[I]$为电流矩阵，$[Z]$为阻抗矩阵，其中$Z_{11}$、$Z_{22}$分别是端口1和端口2的自阻抗，$Z_{12}$、$Z_{21}$分别是端口1和端口2的互阻抗。</p>
+<p>$\left.Z_{11}=\frac{U_1}{I_1}\right|_{I_2=0}$为$T_2$面开路时，端口1的输入阻抗</p>
+<p>$\left.Z_{12}=\frac{U_1}{I_2}\right|_{I_1=0}$为$T_1$面开路时，端口2至端口1的转移阻抗</p>
+<p>$\left.Z_{21}=\frac{U_2}{I_1}\right|_{I_2=0}$为$T_2$面开路时，端口1至端口2的转移阻抗</p>
+<p>$\left.Z_{22}=\frac{U_2}{I_2}\right|_{I_1=0}$为$T_1$面开路时，端口2的输入阻抗</p>
+<ul>
+<li>导纳矩阵</li>
+</ul>
+<p>$$I_1=Y_{11}U_1+Y_{12}U_2$$</p>
+<p>$$I_2=Y_{21}U_1+Y_{22}U_2$$</p>
+<p>$$\begin{bmatrix}I_1\\I_2\end{bmatrix}=\begin{bmatrix}Y_{11}&amp;Y_{12}\\Y_{21}&amp;Y_{22}\end{bmatrix}\begin{bmatrix}U_1\\U_2\end{bmatrix}$$</p>
+<p>$$[I]=[Y][U]$$</p>
+<p>$\left.Y_{11}=\frac{I_1}{U_1}\right|_{U_2=0}$为$T_2$面短路时，端口1的输入导纳</p>
+<p>$\left.Y_{12}=\frac{I_1}{U_2}\right|_{U_1=0}$为$T_1$面短路时，端口2至端口1的转移导纳</p>
+<p>$\left.Y_{21}=\frac{I_2}{U_1}\right|_{U_2=0}$为$T_2$面短路时，端口1至端口2的转移导纳</p>
+<p>$\left.Y_{22}=\frac{I_2}{U_2}\right|_{U_1=0}$为$T_1$面短路时，端口2的输入导纳</p>
+<p>$$[Z][Y]=[E]$$</p>
+<p>$$[Y]=[Z]^{-1}$$</p>
+<ul>
+<li>转移矩阵</li>
+</ul>
+<p>转移矩阵也称为A矩阵</p>
+<p>$$U_1=AU_2+B(-I_2)$$</p>
+<p>$$I_1=CU_2+D(-I_2)$$</p>
+<p>$$\begin{bmatrix}U_1\\I_1\end{bmatrix}=\begin{bmatrix}A&amp;B\\C&amp;D\end{bmatrix}\begin{bmatrix}U_2\\ -I_2\end{bmatrix}$$</p>
+<p>$\left.A=\frac{U_1}{U_2}\right|_{I_2=0}$为$T_2$开路时电压的转移参数</p>
+<p>$\left.B=\frac{U_1}{-I_2}\right|_{U_2=0}$为$T_2$短路时转移阻抗</p>
+<p>$\left.C=\frac{I_1}{U_2}\right|_{I_2=0}$为$T_2$开路时转移导纳</p>
+<p>$\left.D=\frac{I_1}{-I_2}\right|_{U_2=0}$为$T_2$短路时电流的转移参数</p>
+<p>n个双端口网络级联，则有：</p>
+<p>$$[A]=[A_1][A_2]…[A_n]$$</p>
+<ul>
+<li>散射矩阵</li>
+</ul>
+<p>对于线性网络，归一化入射波和归一化反射射波之间是线性关系，故有线性方程：</p>
+<p>$$b_1=S_{11}a_1+S_{12}a_2$$</p>
+<p>$$b_2=S_{21}a_1+S_{22}a_2$$</p>
+<p>$$\begin{bmatrix}b_1\\b_2\end{bmatrix}=\begin{bmatrix}S_{11}&amp;S_{12}\\S_{21}&amp;S_{22}\end{bmatrix}\begin{bmatrix}a_1\\a_2\end{bmatrix}$$</p>
+<p>$$[b]=[S][a]$$</p>
+<p>$\left.S_{11}=\frac{b_1}{a_1}\right|_{a_2=0}$表示端口2匹配时，端口1的反射系数</p>
+<p>$\left.S_{12}=\frac{b_1}{a_2}\right|_{a_1=0}$表示端口1匹配时，端口2到端口1的反向传输系数</p>
+<p>$\left.S_{21}=\frac{b_2}{a_1}\right|_{a_2=0}$表示端口2匹配时，端口1到端口2的正向传输系数</p>
+<p>$\left.S_{22}=\frac{b_2}{a_2}\right|_{a_1=0}$表示端口1匹配时，端口2的反射系数</p>
+<p>对于互易网络：$S_{12}=S_{21}$</p>
+<p>对于对称网络：$S_{11}=S_{22}$</p>
+<p>对于无耗网络：$[S]^+[S]=[E]$<br>其中$[S]^+$是$[S]$的转置共轭矩阵，$[E]$为单位矩阵</p>
+<h1 id="第五章-微波元器件"><a href="#第五章-微波元器件" class="headerlink" title="第五章 微波元器件"></a>第五章 微波元器件</h1><hr>
+<ul>
+<li>理想衰减器</li>
+</ul>
+<p>$$\begin{bmatrix}S_\alpha\end{bmatrix}=\begin{bmatrix}0&amp;e^{-\alpha l}\\e^{-\alpha l}&amp;0\end{bmatrix}$$</p>
+<ul>
+<li>理想相移器</li>
+</ul>
+<p>$$\begin{bmatrix}S_\theta\end{bmatrix}=\begin{bmatrix}0&amp;e^{-j\theta}\\e^{-j\theta}&amp;0\end{bmatrix}$$</p>
+<ul>
+<li>理想隔离器</li>
+</ul>
+<p>$$\begin{bmatrix}S\end{bmatrix}=\begin{bmatrix}0&amp;0\\1&amp;0\end{bmatrix}$$</p>
+<ul>
+<li>Y形结环形器</li>
+</ul>
+<p>$$\begin{bmatrix}S\end{bmatrix}=\begin{bmatrix}S_{11}&amp;S_{12}&amp;S_{13}\\S_{21}&amp;S_{22}&amp;S_{23}\\S_{31}&amp;S_{32}&amp;S_{33}\end{bmatrix}$$</p>
+<ul>
+<li><strong>定向耦合器</strong>，是一种具有<strong>定向传输特性</strong>的四端口元件。</li>
+</ul>
+<p>端口1：输入端</p>
+<p>端口2：直通输出端</p>
+<p>端口3：耦合输出端</p>
+<p>端口4：隔离端</p>
+<p>性能指标：耦合度、隔离度、定向度、输入驻波比和工作带宽</p>
+<h1 id="第六章-天线辐射与接收的基本理论"><a href="#第六章-天线辐射与接收的基本理论" class="headerlink" title="第六章 天线辐射与接收的基本理论"></a>第六章 天线辐射与接收的基本理论</h1><hr>
+<p>*　天线应具有以下功能：</p>
+<ol>
+<li>天线应能将导波能量尽可能多转变为<strong>电磁波能量</strong></li>
+<li>天线应使电磁波尽可能集中于确定的方向上，即<strong>天线具有方向性</strong></li>
+<li>天线应能发射或接收规定极化的电磁波，即<strong>天线有适当的极化</strong></li>
+<li>天线应有足够的<strong>工作频带</strong></li>
+</ol>
+<ul>
+<li><p><u>电基本振子是一段长度$l$<strong>远小于波长</strong>、电流$I$<strong>振幅均匀分布、相位相同</strong>的直线电流元。它是线天线的基本组成部分，任意线天线均可看成是由一系列电基本振子组成的。</u></p>
+</li>
+<li><p>天线的电参数：</p>
+</li>
+</ul>
+<ol>
+<li><u><strong>天线方向图</strong>：指在<strong>离天线一定距离处</strong>，辐射场的<strong>相对场强（归一化模值）</strong>随方向变化的曲线图，通常采用通过天线最大辐射方向上的<strong>两个相互垂直的</strong>平面方向图来表示</u></li>
+<li><u><strong>天线效率</strong>：定义为天线<strong>辐射功率与输入功率</strong>之比</u></li>
+<li><u><strong>增益系数</strong>：是综合衡量天线<strong>能量转换和方向特性</strong>的参数，它是<strong>方向系数与天线效率的乘积</strong>，记为G</u></li>
+<li><u><strong>极化和交叉极化电平</strong>：极化特性是指天线在<strong>最大辐射方向</strong>上电场矢量的方向<strong>随时间变化</strong>的规律。有线极化、圆极化、椭圆极化等。引入交叉极化电平来表征<strong>线极化的纯度</strong>。</u></li>
+<li><u><strong>频带宽度</strong>：当工作频率变化时，天线的<strong>有关电参数不超出规定范围的频率范围</strong>称为天线的频带宽度，简称天线的带宽</u></li>
+<li><u><strong>输入阻抗与驻波比</strong></u></li>
+<li><u><strong>有效长度</strong>：在保持实际天线最大辐射方向上的<strong>场强值不变</strong>的条件下，假设天线上<strong>电流分布为均匀分布</strong>时天线的<strong>等效长度</strong>。有效长度越长，表明天线的辐射能力越强。</u></li>
+</ol>
+<h1 id="第七章-电波传播概论"><a href="#第七章-电波传播概论" class="headerlink" title="第七章 电波传播概论"></a><del>第七章 电波传播概论</del></h1><h1 id="第八章-线天线"><a href="#第八章-线天线" class="headerlink" title="第八章 线天线"></a>第八章 线天线</h1><hr>
+<ul>
+<li><p>横向尺寸<strong>远小于</strong>纵向尺寸并<strong>小于波长</strong>的细长结构的天线称为线天线</p>
+</li>
+<li><p><u>为了加强天线的<strong>方向性</strong>，将若干<strong>辐射单元</strong>按某种方式排列所构成的系统称为<strong>天线阵列</strong></u></p>
+</li>
+<li><p>相似元：各阵元的形状与尺寸相同，且以相同的姿态排列</p>
+</li>
+<li><p><strong>元因子</strong>$|F(\theta,\varphi)|$表示组成天线阵的<strong>单个辐射元</strong>的方向图函数，其值<strong>仅取决于天线元本身的类型和尺寸</strong>，体现了天线元的方向性对天线阵方向性的影响</p>
+</li>
+<li><p><strong>阵因子</strong>表示<strong>各向同性元</strong>所组成的天线阵的方向性，其值取决于天线阵的排列方式及其天线元上激励电流的相对振幅和相位</p>
+</li>
+<li><p>在各天线元为相似元的条件下，天线阵的方向图函数是<strong>单元因子与阵因子之积</strong>，这个特性称为<strong>方向图乘积定理</strong></p>
+</li>
+<li><p>最大辐射方向在<strong>垂直于阵轴方向</strong>的天线阵称为<strong>边射式直线阵</strong></p>
+</li>
+<li><p>最大辐射方向在<strong>阵轴方向</strong>的天线阵称为<strong>端射式直线阵</strong></p>
+</li>
+<li><p><strong>均匀直线阵</strong>是等间距、各阵元电流的幅度<strong>相等（等幅分布）</strong>而相位依次灯亮递增或递减的直线阵</p>
+</li>
+</ul>
+<h1 id="第九章-面天线"><a href="#第九章-面天线" class="headerlink" title="第九章 面天线"></a>第九章 面天线</h1><hr>
+<ul>
+<li><p>面天线又称口径天线，它所载的电流<strong>沿天线体的金属表面</strong>分布，且面天线的口径尺寸<strong>远大于</strong>工作波长</p>
+</li>
+<li><p><u><strong>惠更斯-菲涅尔原理</strong>：在空间任意一点的场，是包围天线的<strong>封闭曲面</strong>上各点的<strong>电磁扰动产生的次级辐射</strong>在该点<strong>叠加</strong>的结果</u></p>
+</li>
+<li><p><strong>旋转抛物面天线</strong>由两部分组成：1.抛物线绕其焦轴旋转而成的抛物反射面；2.置于抛物面焦点处的馈源（照射器）</p>
+</li>
+</ul>
+<h1 id="第十章-微波应用系统"><a href="#第十章-微波应用系统" class="headerlink" title="第十章 微波应用系统"></a><del>第十章 微波应用系统</del></h1><hr>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/05/28/2015-05-28-xiandaijiaohuan/" rel="bookmark">现代交换原理 复习笔记 部分</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/05/30/2015-05-30-shuzishipin/" rel="bookmark">数字视频 复习笔记</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/06/19/2015-06-19-zhuanye/" rel="bookmark">专业知识整理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/07/01/2015-07-01-xinhaoxiangguan/" rel="bookmark">信号相关专业复习</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/07/05/2015-07-05-fft/" rel="bookmark">快速傅里叶变换FFT算法的用途</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%A4%8D%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 复习笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/06/25/2015-06-25-baoyan/" rel="prev" title="小记">
+      <i class="fa fa-chevron-left"></i> 小记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/07/01/2015-07-01-oj-hexo/" rel="next" title="长大OJ诞生记（三）用HEXO作为主页">
+      长大OJ诞生记（三）用HEXO作为主页 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#绪论"><span class="nav-text">绪论</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第一章-均匀传输线理论"><span class="nav-text">第一章 均匀传输线理论</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第二章-规则金属波导"><span class="nav-text">第二章 规则金属波导</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#矩形波导"><span class="nav-text">矩形波导</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TE波"><span class="nav-text">TE波</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TM波"><span class="nav-text">TM波</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#圆形波导"><span class="nav-text">圆形波导</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第三章-微波集成传输线"><span class="nav-text">第三章 微波集成传输线</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第四章-微波网络基础"><span class="nav-text">第四章 微波网络基础</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第五章-微波元器件"><span class="nav-text">第五章 微波元器件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第六章-天线辐射与接收的基本理论"><span class="nav-text">第六章 天线辐射与接收的基本理论</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第七章-电波传播概论"><span class="nav-text">第七章 电波传播概论</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第八章-线天线"><span class="nav-text">第八章 线天线</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第九章-面天线"><span class="nav-text">第九章 面天线</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第十章-微波应用系统"><span class="nav-text">第十章 微波应用系统</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '0c014ba0b1a2aa4c891b6c13e150c0bb',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

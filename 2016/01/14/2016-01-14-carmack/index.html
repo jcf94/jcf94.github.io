@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="逛知乎的时候看到这么个问题：  游戏设计中有哪些经典的计算公式？  其中有个答案提到了一种计算浮点数的平方根倒数的快速算法，其实我以前就曾经思考过大数平方根的计算方法，然后…就没有然后了。 神奇的地方在于这个快速算法中有个诡异的常数，据说至今没有人知道它最早是怎么来的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="卡马克快速平方根倒数算法">
+<meta property="og:url" content="https://jcf94.com/2016/01/14/2016-01-14-carmack/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="逛知乎的时候看到这么个问题：  游戏设计中有哪些经典的计算公式？  其中有个答案提到了一种计算浮点数的平方根倒数的快速算法，其实我以前就曾经思考过大数平方根的计算方法，然后…就没有然后了。 神奇的地方在于这个快速算法中有个诡异的常数，据说至今没有人知道它最早是怎么来的。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-01-14T09:50:40.000Z">
+<meta property="article:modified_time" content="2018-10-04T02:46:34.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="平方根">
+<meta property="article:tag" content="泰勒级数">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2016/01/14/2016-01-14-carmack/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>卡马克快速平方根倒数算法 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2016/01/14/2016-01-14-carmack/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          卡马克快速平方根倒数算法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-01-14 17:50:40" itemprop="dateCreated datePublished" datetime="2016-01-14T17:50:40+08:00">2016-01-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-10-04 10:46:34" itemprop="dateModified" datetime="2018-10-04T10:46:34+08:00">2018-10-04</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">算法学习</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>逛知乎的时候看到这么个问题：</p>
+<ul>
+<li><a href="https://www.zhihu.com/question/20396457/answer/23573801" target="_blank" rel="noopener">游戏设计中有哪些经典的计算公式？</a></li>
+</ul>
+<p>其中有个答案提到了一种计算浮点数的平方根倒数的快速算法，其实我以前就曾经思考过大数平方根的计算方法，然后…就没有然后了。</p>
+<p>神奇的地方在于这个快速算法中有个<strong>诡异</strong>的常数，据说至今没有人知道它最早是怎么来的。</p>
+<a id="more"></a>
+
+<h1 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h1><p>下面这段代码来源于上面那个答案。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">float</span> <span class="title">InvSqrt</span><span class="params">(<span class="keyword">float</span> x)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">float</span> xhalf = <span class="number">0.5f</span>*x;</span><br><span class="line">	<span class="keyword">int</span> i = *(<span class="keyword">int</span>*)&amp;x;</span><br><span class="line">	i = <span class="number">0x5f3759df</span> - (i &gt;&gt; <span class="number">1</span>);</span><br><span class="line">	x = *(<span class="keyword">float</span>*)&amp;i;</span><br><span class="line">	x = x*(<span class="number">1.5f</span> - xhalf*x*x);</span><br><span class="line">	<span class="keyword">return</span> x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个算法说到头只有这么几行而已，而恰恰神奇的就是这么几行代码可以非常快速地实现平方根倒数。</p>
+<p>整个算法的关键就是第5行的那个<strong>诡异常数</strong>以及第7行的<strong><a href="http://baike.baidu.com/link?url=-5j2wmWhMIvi3nIWBhd0sGWpq_a0zY7P_NQQ6nQ1caMULrTG31_Ktezf6_tVW-s1WgW7UvseSShGWge5QUtKyK" target="_blank" rel="noopener">牛顿迭代</a></strong>了。</p>
+<h1 id="算法原理"><a href="#算法原理" class="headerlink" title="算法原理"></a>算法原理</h1><p>要理解这个算法，首先要明白<strong>牛顿迭代</strong>，而牛顿迭代法的基础是<strong>泰勒级数</strong>。</p>
+<h2 id="泰勒级数"><a href="#泰勒级数" class="headerlink" title="泰勒级数"></a>泰勒级数</h2><p>定义：如果$f(x)$在点$x=x_0$处具有任意阶导数，则幂级数：</p>
+<p>$$<br>\begin{align}<br>f(x)&amp;=\sum^{\infty}_{n=0}\frac{f^{(n)}(x_0)}{n!}(x-x_0)^n\<br>&amp;=f(x_0)+f’(x_0)(x-x_0)+\frac{f’’(x_0)}{2!}(x-x_0)^2+…+\frac{f^{(n)}(x_0)}{n!}(x-x_0)^n+…<br>\end{align}$$</p>
+<p>称为$f(x)$在$x=x_0$处的泰勒级数。</p>
+<p>泰勒展开在数学上还有很多的应用…然而，高数学过去那么多年了，有啥用我早忘了…0.0</p>
+<p>这里只要知道泰勒级数可以用来近似计算函数值就行了。</p>
+<p>后面部分明显是越往后越小的，收敛性应该是要有条件来严格证明的…这个我也忘了。</p>
+<h2 id="牛顿迭代"><a href="#牛顿迭代" class="headerlink" title="牛顿迭代"></a>牛顿迭代</h2><p>牛顿迭代解线性方程，就是把线性方程$f(x)=0$线性化的一种近似方法。把$f(x)$在$x_0$的某个邻域内展开成泰勒级数，取其线性部分（前两项）：</p>
+<p>$$<br>f(x)=f(x_0)+f’(x_0)(x-x_0)<br>$$</p>
+<p>令其为零，就可以作为原本$f(x)=0$方程的近似方程了。只要$f’(x_0)\neq0$，方程的解就可以写成：</p>
+<p>$$<br>x_1=x_0-\frac{f(x_0)}{f’(x_0)}<br>$$</p>
+<p>这样，就得到牛顿迭代法的迭代关系式了：</p>
+<p>$$<br>x_{n+1}=x_n-\frac{f(x_n)}{f’(x_n)}<br>$$</p>
+<blockquote>
+<p>理论上来说，是不是我任意取一个满足$f’(x_0)\neq0$的数，都可以把它作为第1个近似解，然后通过不断地进行牛顿迭代，直到精度达到要求即解出了比较靠谱的方程解？</p>
+</blockquote>
+<hr>
+<p>回到目标算法上面来，假设已知的数是$a$，要求它的平方根的倒数，就是解方程：</p>
+<p>$$<br>(\frac{1}{x})^2=a<br>$$</p>
+<p>即解方程：</p>
+<p>$$<br>f(x)=\frac{1}{x^2}-a=0<br>$$</p>
+<p>那么：</p>
+<p>$$<br>f’(x)=-\frac{2}{x^3}<br>$$</p>
+<p>代回到牛顿迭代式中去：</p>
+<p>$$<br>\begin{align}<br>x_{n+1}&amp;=x_n-\frac{f(x_n)}{f’(x_n)}\<br>&amp;=x_n-\frac{\frac{1}{x^2_n}-a}{-\frac{2}{x^3_n}}\<br>&amp;=x_n+\frac{x_n-ax^3_n}{2}\<br>&amp;=\frac{3}{2}x_n-\frac{a}{2}x^3_n<br>\end{align}<br>$$</p>
+<p>这个就是上面程序第7行的那个牛顿迭代式了。上面那个程序段只迭代了一次，其实精度是不够的，一般迭代2次，跟标准值的误差就不大了。</p>
+<p>当然，迭代次数越多，精度越高，相应地耗时也是越长。</p>
+<h2 id="诡异的常数"><a href="#诡异的常数" class="headerlink" title="诡异的常数"></a>诡异的常数</h2><p>最后，还有个问题没解决……<code>0x5f3759df</code>这个常数是什么鬼啊？</p>
+<p>上面已经讨论过了，通过牛顿迭代法，我们可以在第n个近似解的基础上推出第n+1个精度更高的近似解。这里唯一的漏洞就是：<strong>我们必须得到第1个近似解！这样才能够往下递推！</strong></p>
+<p>而上面第5行的这段代码：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">i = <span class="number">0x5f3759df</span> - (i &gt;&gt; <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<p>就是用来计算第1个近似解的。</p>
+<hr>
+<p>好吧，还是不明白这个数是怎么来的…</p>
+<p>据史料记载：</p>
+<blockquote>
+<p>浮点数的平方根倒数常用于计算正规化矢量。3D图形程序需要使用正规化矢量来实现光照和投影效果，因此每秒都需做上百万次平方根倒数运算，而在处理坐标转换与光源的专用硬件设备出现前，这些计算都由软件完成，计算速度亦相当之慢；在1990年代这段代码开发出来之时，多数浮点数操作的速度更是远远滞后于整数操作，因而针对正规化矢量算法的优化就显得尤为重要。</p>
+<p>1999年的《雷神之锤III竞技场》就借助了这个神奇的算法。</p>
+<p>《雷神之锤III》的代码直到QuakeCon 2005才正式放出，但早在2002年（或2003年）时平方根倒数速算法的代码就已经出现在Usenet与其他论坛上了。最初人们猜测是卡马克写下了这段代码，但他在询问邮件的回复中否定了这个观点，并猜测可能是先前曾帮id Software优化雷神之锤的资深汇编程序员Terje Mathisen写下了这段代码；而在Mathisen的邮件里他表示在1990年代初他只曾作过类似的实现，确切来说这段代码亦非他所作。现在所知的最早实现是由Gary Tarilli在SGI Indigo中实现的，但他亦坦承他仅对常数R的取值做了一定的改进，实际上他也不是作者。Rys Sommefeldt则在向以发明MATLAB而闻名的Cleve Moler查证后认为原始的算法是Ardent Computer公司的Greg Walsh所发明，但他也没有任何决定性的证据能证明这一点。</p>
+<p>目前不仅该算法的原作者不明，人们也仍无法明确当初选择这个“魔术数字”的方法。Chris Lomont在研究中曾做了个试验：他编写了一个函数，以在一个范围内遍历选取R值的方式将逼近误差降到最小，以此方法他计算出了线性近似的最优R值0x5f37642f（与代码中使用的0x5f3759df相当接近），但以之代入算法计算并进行一次牛顿迭代后，所得近似值与代入0x5f3759df的结果相比精度却仍略微更低；而后Lomont将目标改为遍历选取在进行1－2次牛顿迭代后能得到最大精度的R值，并由此算出最优R值为0x5f375a86，以此值代入算法并进行牛顿迭代后所得的结果都比代入原始值（0x5f3759df）更精确，于是他的论文最后以“原始常数是以数学推导还是以反复试错的方式求得”的问题作结。在论文中Lomont亦指出64位的IEEE754浮点数（即双精度类型）所对应的魔术数字是0x5fe6ec85e7de30da，但后来的研究表明代入0x5fe6eb50c7aa19f9的结果精确度更高（McEniry得出的结果则是0x5FE6EB50C7B537AA，精度介于两者之间）。在Charles McEniry的论文中，他使用了一种类似Lomont但更复杂的方法来优化R值：他最开始使用穷举搜索法，所得结果与Lomont相同；而后他尝试用带权二分法寻找最优值，所得结果恰是代码中所使用的魔术数字0x5f3759df，因此McEniry确信这一常数或许最初便是以“在可容忍误差范围内使用二分法”的方式求得。</p>
+</blockquote>
+<hr>
+<p>先复习一下计算机中<strong><a href="/2015/09/09/2015-09-09-cod/#3-5-_Floating_Point">浮点数的表示法</a></strong></p>
+<p>然后回到上面讨论过的第1个近似解，第1个近似解越接近正确答案，则显然牛顿迭代法的效果会越好。</p>
+<p>考虑已知的浮点数$a$在计算机中的实际表示为：</p>
+<p>$$(1+F)*2^E$$</p>
+<p>那么它的平方根倒数为：</p>
+<p>$$(1+F)^{-\frac{1}{2}}*2^{-\frac{E}{2}}$$</p>
+<p>猜测一下：第5行代码中，将i右移1位，再用常数减掉，可以看成是将指数除2之后再取反。至于尾数…早都变得不知道哪去了。</p>
+<hr>
+<p>所以，还是没明白这个常数是怎么来的，我只能猜测到这里了。</p>
+<p>这里把Chris Lomont写的那篇论文也一并贴出来：<a href="http://jcf94.com/download/2016-01-14-carmack-InvSqrt.pdf">FAST INVERSE SQUARE ROOT
+</a></p>
+
+    </div>
+
+    
+    
+    
+      
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%B9%B3%E6%96%B9%E6%A0%B9/" rel="tag"># 平方根</a>
+              <a href="/tags/%E6%B3%B0%E5%8B%92%E7%BA%A7%E6%95%B0/" rel="tag"># 泰勒级数</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/01/11/2016-01-11-tools/" rel="prev" title="工具软件整理">
+      <i class="fa fa-chevron-left"></i> 工具软件整理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/01/22/2016-01-22-dragonbook/" rel="next" title="编译原理 龙书">
+      编译原理 龙书 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#代码示例"><span class="nav-text">代码示例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#算法原理"><span class="nav-text">算法原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#泰勒级数"><span class="nav-text">泰勒级数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#牛顿迭代"><span class="nav-text">牛顿迭代</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#诡异的常数"><span class="nav-text">诡异的常数</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '85e33d45cd8aed24be00da94e8551763',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

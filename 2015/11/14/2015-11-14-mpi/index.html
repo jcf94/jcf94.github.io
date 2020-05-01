@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="这段时间刚好赶上这学期的考试期，之前MPI只是稍微看了一点，在这里：并行编程 MPI初探 考完一个阶段稍微轻松些了，回来把总结补上。 Message Passing Interface并行编程的结构大致有两种：  共享内存式系统：运算核心有多个，但是多核心通过访问一个公共的内存区域来进行协作； 分布式内存系统：运算核心有多个，每个核心有它自己的内存，多个核心之间通过通信来协作，通信可以是通过网络实">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MPI小结">
+<meta property="og:url" content="https://jcf94.com/2015/11/14/2015-11-14-mpi/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="这段时间刚好赶上这学期的考试期，之前MPI只是稍微看了一点，在这里：并行编程 MPI初探 考完一个阶段稍微轻松些了，回来把总结补上。 Message Passing Interface并行编程的结构大致有两种：  共享内存式系统：运算核心有多个，但是多核心通过访问一个公共的内存区域来进行协作； 分布式内存系统：运算核心有多个，每个核心有它自己的内存，多个核心之间通过通信来协作，通信可以是通过网络实">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-11-14T06:08:08.000Z">
+<meta property="article:modified_time" content="2016-07-07T02:53:17.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="并行编程">
+<meta property="article:tag" content="MPI">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2015/11/14/2015-11-14-mpi/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>MPI小结 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2015/11/14/2015-11-14-mpi/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MPI小结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-11-14 14:08:08" itemprop="dateCreated datePublished" datetime="2015-11-14T14:08:08+08:00">2015-11-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2016-07-07 10:53:17" itemprop="dateModified" datetime="2016-07-07T10:53:17+08:00">2016-07-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Parallel/" itemprop="url" rel="index"><span itemprop="name">Parallel</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>这段时间刚好赶上这学期的考试期，之前MPI只是稍微看了一点，在这里：<a href="/2015/11/03/2015-11-03-mpi/">并行编程 MPI初探</a></p>
+<p>考完一个阶段稍微轻松些了，回来把总结补上。</p>
+<h1 id="Message-Passing-Interface"><a href="#Message-Passing-Interface" class="headerlink" title="Message Passing Interface"></a>Message Passing Interface</h1><p>并行编程的结构大致有两种：</p>
+<ol>
+<li>共享内存式系统：运算核心有多个，但是多核心通过访问一个公共的内存区域来进行协作；</li>
+<li>分布式内存系统：运算核心有多个，每个核心有它自己的内存，多个核心之间通过<strong>通信</strong>来协作，通信可以是通过网络实现的，因此分布式系统可以做到<strong>多机并行</strong>。</li>
+</ol>
+<p>MPI就是一种<strong>分布式内存系统</strong>。</p>
+<a id="more"></a>
+
+<p>它的全称叫做<strong>消息传递接口</strong>，就是在C、C++、Fortran的基础上又做了一套并行的函数库接口，然后运行时通过多进程之间的消息传递机制来协作完成并行任务。</p>
+<h1 id="MPI程序框架"><a href="#MPI程序框架" class="headerlink" title="MPI程序框架"></a>MPI程序框架</h1><p>首先在主函数开始时调用<code>MPI_Init()</code>来建立MPI进程，如果程序不需要额外的输入，则直接传入<code>MPI_Init(NULL, NULL)</code>。</p>
+<p>中间的代码段则是各个进程同时都会运行的部分，所以需要注意的是，MPI程序与一般的串行程序应该是<strong>完全不一样的</strong>，因为相同的代码段会被<strong>不同的进程同时运行</strong>，而需要程序员在写代码的时候就考虑到不同进程的运行情况，写出特殊的代码，进程与进程之间通过通信子来进行相互通信交换数据。</p>
+<p>如果只是简单地将原本的串行程序放上去，那只不过是同时在多个核上跑了很多遍一模一样的代码而已，完全达不到加速的效果。</p>
+<p>关键的MPI语句运行完毕之后，如果中间有创建过另外的通信子或者组的话，还需要单独将它们释放掉。</p>
+<p>最后，调用<code>MPI_Finalize()</code>来结束MPI程序。</p>
+<h1 id="基本函数"><a href="#基本函数" class="headerlink" title="基本函数"></a>基本函数</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MPI_Comm_size(</span><br><span class="line">	MPI_Comm	comm,</span><br><span class="line">    <span class="keyword">int</span>*		comm_size)</span><br></pre></td></tr></table></figure>
+
+<p>返回<code>comm</code>通信子中的进程总数。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MPI_Comm_rank(</span><br><span class="line">	MPI_Comm	comm,</span><br><span class="line">    <span class="keyword">int</span>*		comm_rank)</span><br></pre></td></tr></table></figure>
+
+<p>返回当前进程在<code>comm</code>通信子中的序号。</p>
+<ul>
+<li>点对点通信</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MPI_Send(</span><br><span class="line">	<span class="keyword">void</span>*		msg_buf,</span><br><span class="line">    <span class="keyword">int</span>			msg_size,</span><br><span class="line">    MPI_Datatype	msg_type,</span><br><span class="line">    <span class="keyword">int</span>			dest,</span><br><span class="line">    <span class="keyword">int</span>			tag,</span><br><span class="line">    MPI_Comm		comm)</span><br></pre></td></tr></table></figure>
+
+<p>向<code>dest</code>进程发送信息。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MPI_Recv(</span><br><span class="line">	<span class="keyword">void</span>*		msg_buf,</span><br><span class="line">    <span class="keyword">int</span>			buf_size,</span><br><span class="line">    MPI_Datatype	buf_type,</span><br><span class="line">    <span class="keyword">int</span>			source,</span><br><span class="line">    <span class="keyword">int</span>			tag,</span><br><span class="line">    MPI_Comm		comm,</span><br><span class="line">    MPI_Status*		status)</span><br></pre></td></tr></table></figure>
+
+<p>从<code>source</code>进程接收信息。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">MPI_Probe(</span><br><span class="line">	<span class="keyword">int</span>		source,</span><br><span class="line">    <span class="keyword">int</span>			tag,</span><br><span class="line">    MPI_Comm		comm,</span><br><span class="line">    MPI_Status*		status)</span><br></pre></td></tr></table></figure>
+
+<p>与<code>MPI_Recv()</code>很像，除了不能接收消息，其他都一样，主要是为了将下一条消息的各项属性保存到<code>status</code>里面来。</p>
+<ul>
+<li>集合通信</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MPI_Barrier(</span><br><span class="line">	MPI_Comm	comm)</span><br></pre></td></tr></table></figure>
+
+<p>将<code>comm</code>通信子中的所有进程都同步到当前位置。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MPI_Bcast(</span><br><span class="line">	<span class="keyword">void</span>*		data_buf,</span><br><span class="line">    <span class="keyword">int</span>			count,</span><br><span class="line">    MPI_Datatype	datatype,</span><br><span class="line">    <span class="keyword">int</span>			source,</span><br><span class="line">    MPI_Comm		comm)</span><br></pre></td></tr></table></figure>
+
+<p>从<code>source</code>进程向通信子中的所有其他进程发送消息。</p>
+<p><code>MPI_Bcast()</code>用的是树形结构的广播，会比单纯的从<code>source</code>进程开个for循环要高效的多。</p>
+<blockquote>
+<p>然而我在单台电脑上实测的时候貌似没发现<code>MPI_Bcast()</code>能快多少…反而有时候还慢很多，不知道是不是我发送的东西太少了，还是电脑本身的处理速度太快了。</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MPI_Scatter(</span><br><span class="line">	<span class="keyword">void</span>*		send_buf,</span><br><span class="line">    <span class="keyword">int</span>			send_count,</span><br><span class="line">    MPI_Datatype	send_type,</span><br><span class="line">    <span class="keyword">void</span>*		recv_buf,</span><br><span class="line">    <span class="keyword">int</span>			recv_count,</span><br><span class="line">    MPI_Datatype	recv_type,</span><br><span class="line">    <span class="keyword">int</span>			source,</span><br><span class="line">    MPI_Comm		comm)</span><br></pre></td></tr></table></figure>
+
+<p>将<code>source</code>进程中的<code>send_buf</code>均分成多份，分发给通信子中的所有进程。<br>需要注意的是<code>send_count</code>和<code>recv_count</code>的值是一样的，都等于每个通信子将收到的数据数量。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MPI_Gather(</span><br><span class="line">	<span class="keyword">void</span>*		send_buf,</span><br><span class="line">    <span class="keyword">int</span>			send_count,</span><br><span class="line">    MPI_Datatype	send_type,</span><br><span class="line">    <span class="keyword">void</span>*		recv_buf,</span><br><span class="line">    <span class="keyword">int</span>			recv_count,</span><br><span class="line">    MPI_Datatype	recv_type,</span><br><span class="line">    <span class="keyword">int</span>			dest,</span><br><span class="line">    MPI_Comm		comm)</span><br></pre></td></tr></table></figure>
+
+<p>与上面的<code>MPI_Scatter()</code>非常相似，这个的作用是从多个进程中接收一定数量的数据到<code>dest</code>的<code>recv_buf</code>中。<br>同样<code>send_count</code>和<code>recv_count</code>的值是一样的，都等于每个通信子需要发送的数据量。</p>
+<hr>
+<p><a href="https://computing.llnl.gov/tutorials/mpi/" target="_blank" rel="noopener">这里</a>有完整的MPI函数说明。</p>
+<h1 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h1><p>前段时间忙着准备期末考试，原本准备好的好多个文档都没看，然后之前买的书也都没怎么看。我发现我就是擅长挖坑，然后挖了坑又填不上 o(￣▽￣)d。</p>
+<p>虽然看到现在，基本的MPI操作已经明白了，但是还是比较缺少实践。</p>
+<p>接下来准备再看下OpenMP和CUDA，然后找点小项目来练练手吧。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/11/03/2015-11-03-mpi/" rel="bookmark">并行编程 MPI初探</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/11/20/2015-11-20-openmp/" rel="bookmark">共享内存系统并行 OpenMP</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/08/16/2015-08-16-compilers/" rel="bookmark">编译原理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/09/09/2015-09-09-cod/" rel="bookmark">计算机组成与设计.硬件/软件接口 学习笔记（一）</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/10/23/2015-10-23-virtualmemory/" rel="bookmark">硬件/软件接口 Virtual Memory</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 学习笔记</a>
+              <a href="/tags/%E5%B9%B6%E8%A1%8C%E7%BC%96%E7%A8%8B/" rel="tag"># 并行编程</a>
+              <a href="/tags/MPI/" rel="tag"># MPI</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/11/08/2015-11-08-run/" rel="prev" title="跑跑跑">
+      <i class="fa fa-chevron-left"></i> 跑跑跑
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/11/15/2015-11-15-lightbot/" rel="next" title="Lightbot 一个有意思的编程解谜游戏">
+      Lightbot 一个有意思的编程解谜游戏 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Message-Passing-Interface"><span class="nav-text">Message Passing Interface</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MPI程序框架"><span class="nav-text">MPI程序框架</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基本函数"><span class="nav-text">基本函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#后话"><span class="nav-text">后话</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '997165ec5397e906a609cbe7a729d40b',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="第一章 绪论视频图像处理的概念视频是一组图像在时间轴上的有序排列，是二维图像在一维时间轴上构成的图像序列，又称动态图像、活动图像、运动图像。不止包含了静止图像的内容，还包含了目标的运动信息和客观世界随时间变化的信息。 序列&gt;帧&gt;像素 视频图像处理系统的组成 图像采集 图像显示 图像存储 图像通信 图像处理和分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数字视频 复习笔记">
+<meta property="og:url" content="https://jcf94.com/2015/05/30/2015-05-30-shuzishipin/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="第一章 绪论视频图像处理的概念视频是一组图像在时间轴上的有序排列，是二维图像在一维时间轴上构成的图像序列，又称动态图像、活动图像、运动图像。不止包含了静止图像的内容，还包含了目标的运动信息和客观世界随时间变化的信息。 序列&gt;帧&gt;像素 视频图像处理系统的组成 图像采集 图像显示 图像存储 图像通信 图像处理和分析">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-05-30T13:42:29.000Z">
+<meta property="article:modified_time" content="2018-03-07T06:58:04.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="复习笔记">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2015/05/30/2015-05-30-shuzishipin/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>数字视频 复习笔记 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2015/05/30/2015-05-30-shuzishipin/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          数字视频 复习笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-05-30 21:42:29" itemprop="dateCreated datePublished" datetime="2015-05-30T21:42:29+08:00">2015-05-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-03-07 14:58:04" itemprop="dateModified" datetime="2018-03-07T14:58:04+08:00">2018-03-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Bachelor-of-Engineering/" itemprop="url" rel="index"><span itemprop="name">Bachelor-of-Engineering</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="第一章-绪论"><a href="#第一章-绪论" class="headerlink" title="第一章 绪论"></a>第一章 绪论</h2><h3 id="视频图像处理的概念"><a href="#视频图像处理的概念" class="headerlink" title="视频图像处理的概念"></a>视频图像处理的概念</h3><p>视频是一组图像在<strong>时间轴</strong>上的<strong>有序排列</strong>，是二维图像在一维时间轴上构成的<strong>图像序列</strong>，又称<strong>动态图像、活动图像、运动图像</strong>。不止包含了静止图像的内容，还包含了目标的<strong>运动信息</strong>和<strong>客观世界随时间变化的信息</strong>。</p>
+<p>序列&gt;帧&gt;像素</p>
+<h3 id="视频图像处理系统的组成"><a href="#视频图像处理系统的组成" class="headerlink" title="视频图像处理系统的组成"></a>视频图像处理系统的组成</h3><ol>
+<li>图像<strong>采集</strong></li>
+<li>图像<strong>显示</strong></li>
+<li>图像<strong>存储</strong></li>
+<li>图像<strong>通信</strong></li>
+<li>图像<strong>处理和分析</strong></li>
+</ol>
+<a id="more"></a>
+
+<p>图像处理和分析：</p>
+<ol>
+<li>图像变换</li>
+<li>图像编码压缩</li>
+<li>图像增强复原</li>
+<li>图像分割</li>
+<li>图像理解和识别</li>
+</ol>
+<hr>
+<h2 id="第二章-视频图象的表示"><a href="#第二章-视频图象的表示" class="headerlink" title="第二章 视频图象的表示"></a>第二章 视频图象的表示</h2><h3 id="图像的基本概念"><a href="#图像的基本概念" class="headerlink" title="图像的基本概念"></a>图像的基本概念</h3><ol>
+<li>光通量：光源辐射出来的光功率，单位流明（lm）</li>
+<li>照度：单位面积上的光通量，单位勒克斯（lx，$1ls=1lm/m^2$）</li>
+<li>亮度：观察者感觉光的量度，有主观性，又称辉度</li>
+<li>视敏度：人眼对不同波长可见光的敏感程度</li>
+<li>亮度适应级：一定条件下，人眼的亮度适应区间</li>
+</ol>
+<h3 id="分辨率"><a href="#分辨率" class="headerlink" title="分辨率"></a>分辨率</h3><ol>
+<li>图像分辨率<br>图像中存储的信息，单位像素/英寸（pixel per inch, ppi）</li>
+<li>显示分辨率<br>构成画面像素点的多少，用宽高像素*像素表示</li>
+<li>打印分辨率<br>又叫输出分辨率，决定打印机打印的惊喜程度，单位点/英寸（dot per inch, dpi）</li>
+</ol>
+<h3 id="人眼的视觉特性"><a href="#人眼的视觉特性" class="headerlink" title="人眼的视觉特性"></a>人眼的视觉特性</h3><p>||锥状细胞|柱状细胞|<br>|-<br>|结构|一个细胞连一个神经末梢|几个细胞连一个神经末梢<br>|功能|感光/感色，区分细节|感光，提供整体形象|<br>|作用时间|强光下、白天|弱光下、黑夜|<br>|视觉|亮视觉|暗视觉|</p>
+<p>锥状细胞分为<strong>红敏、绿敏、蓝敏</strong>。</p>
+<p>三基色原理。</p>
+<p>影响人眼分辨力的因素：<strong>环境照度、景物相对对比度、被观察物体的距离和运动状态</strong></p>
+<ol>
+<li>人眼对亮度响应有<strong>非线性特性，对灰度误差不敏感</strong></li>
+<li>人眼对<strong>亮度</strong>信号的空间分辨率大于对色度信号的空间分辨率</li>
+<li>人眼容易感觉到<strong>边缘位置</strong>的变化，而对于边缘部分的灰度误差不敏感</li>
+<li>时间域的<strong>掩蔽效应</strong>，当视频图像序列中相邻画面的变化剧烈（如场景切换）时，人眼的分辨率会突然剧烈的下降</li>
+<li><strong>视觉惰性</strong>，人眼的亮度感觉总是滞后于实际亮度，<strong>视觉暂留</strong></li>
+<li><strong>闪烁感觉</strong>，周期性光脉冲频率高到一定程度后人眼无法区分</li>
+</ol>
+<h3 id="颜色模型"><a href="#颜色模型" class="headerlink" title="颜色模型"></a>颜色模型</h3><p>||RGB|HSI|YUV|<br>|-<br>|主要用于|计算机显示器|描述人眼的视觉特性|电视信号，彩色兼容黑白|<br>|说明|分别表示红绿蓝三色的分解采样量|色调H，饱和度S，密度I（对应亮度和灰度）|亮度Y，色度U、V</p>
+<p><strong>真彩色</strong>：每个像素值都用三基色分量描述</p>
+<p><strong>伪彩色</strong>：每个像素颜色采用颜色查找表表现</p>
+<p><strong>直接色</strong>：每个像素点的RGB值分别用查找表表现</p>
+<h3 id="图像的数字化"><a href="#图像的数字化" class="headerlink" title="图像的数字化"></a>图像的数字化</h3><p>视频图象数字化两种方法：</p>
+<ol>
+<li>复合编码：先数字化再分离<br>先用高速模/数转换器对模拟视频（彩色全电视信号）进行数字化，再在数字域中分离</li>
+<li>分量编码：先分离再数字化<br>从模拟视频（彩色电视信号）中分离出彩色分量的亮度和色度，得到YUV或YIQ分量，再用3个模/数转换器对3个分量分别数字化</li>
+</ol>
+<p>采样方式：隔行采样</p>
+<h3 id="图像量化"><a href="#图像量化" class="headerlink" title="图像量化"></a>图像量化</h3><ol>
+<li>有记忆量化和无记忆量化：取样点是否独立</li>
+<li>均匀量化和非均匀量化：量化步长是否一致</li>
+<li>标量量化和矢量量化：<br>标量量化：一维量化，所有取样使用同一个量化器进行量化，每个取样的量化都和其他所有取样无关(无记忆量化)，常用均方误差量化器<br>矢量量化：多维量化，先将K个取样值序列形成K维空间中的一个矢量,然后将此矢量进行量化</li>
+</ol>
+<p>非均匀量化：</p>
+<ol>
+<li>基于人的视觉特性特点，对于亮度值急剧变化的部分，粗量化；对亮度值变化比较平缓的部分，细量化。</li>
+<li>计算所有可能的亮度值出现的概率分布，对于出现概率大的那些亮度值，细量化；对于出现概率小的那些亮度值，粗量化</li>
+</ol>
+<p>非均匀采样：在细节多区域采样密，在平滑区域采样少</p>
+<p>空间分辨率：图像的大小，空间分辨率=最大行数*每行的最大像素数。</p>
+<p>灰度分辨率：一个像素值单位幅度上包含的灰度级，用一个字节存储一个像素值，则灰度级数为256</p>
+<h3 id="图像格式"><a href="#图像格式" class="headerlink" title="图像格式"></a>图像格式</h3><p>||矢量图形|位图图像|<br>|-<br>|定义|图形，指用一组绘图指令描述和记录的各种图形，包括直线、弧线、圆、矩形的大小形状等|图像，由一组计算机内存位组成，这些位定义了图像中每个像素点的亮度和颜色|<br>|文件内容|图形指令|图像点阵数据|<br>|生成|相应软件生成|用绘图软件生成；用彩色扫描仪扫描二维图片；用摄像机以及帧捕获设备获得数字化画面|<br>|所需磁盘空间|小|大|<br>|常用格式|WHF、DRW、CDR、DXF、EPS、FLI、FLC、CGM等|BMP、PCX、GIF、TIFF|</p>
+<h2 id="第三章-图像变换"><a href="#第三章-图像变换" class="headerlink" title="第三章 图像变换"></a>第三章 图像变换</h2><h3 id="傅里叶变换-FT"><a href="#傅里叶变换-FT" class="headerlink" title="傅里叶变换 FT"></a>傅里叶变换 FT</h3><h3 id="离散傅里叶变换-DFT"><a href="#离散傅里叶变换-DFT" class="headerlink" title="离散傅里叶变换 DFT"></a>离散傅里叶变换 DFT</h3><h3 id="快速傅里叶变换-FFT-掌握"><a href="#快速傅里叶变换-FFT-掌握" class="headerlink" title="快速傅里叶变换 FFT (掌握)"></a>快速傅里叶变换 FFT (<strong>掌握</strong>)</h3><h3 id="离散余弦变换-DCT"><a href="#离散余弦变换-DCT" class="headerlink" title="离散余弦变换 DCT"></a>离散余弦变换 DCT</h3><h3 id="K-L变换"><a href="#K-L变换" class="headerlink" title="K-L变换"></a>K-L变换</h3><p>均方误差（MSE）意义下的最佳变换。</p>
+<h3 id="连续小波变换-CWT"><a href="#连续小波变换-CWT" class="headerlink" title="连续小波变换 CWT"></a>连续小波变换 CWT</h3><p>小波变换：把一个信号分解为将基本小波经过缩放和平移之后的一系列小波</p>
+<h3 id="小波变换"><a href="#小波变换" class="headerlink" title="小波变换"></a>小波变换</h3><h2 id="第六章-视频图像分割"><a href="#第六章-视频图像分割" class="headerlink" title="第六章 视频图像分割"></a>第六章 视频图像分割</h2><h3 id="视频图像分割的相关概念"><a href="#视频图像分割的相关概念" class="headerlink" title="视频图像分割的相关概念"></a>视频图像分割的相关概念</h3><p>从语义信息分析，视频由大量<strong>场景</strong>组成的，每个场景由一个或多个<strong>镜头</strong>组成，镜头由一系列的<strong>帧</strong>组成的。</p>
+<p>视频对象分割：把视频序列中（一个镜头）人们感兴趣的或具有某种重要特性的一个或多个<strong>视频对象</strong>从视频场景中提取出来。</p>
+<p>同一视频对象具有<strong>相似</strong>的属性，如<strong>亮度、色彩、纹理及运动特征等</strong>。</p>
+<p>一个<strong>视频对象</strong>是指视频图像序列中的同一个物理对象。位于一个图像中的视频对象称为一个<strong>视频对象区</strong>。</p>
+<p>为了表示用户感兴趣的区域 ，MPEG-4标准提出了视频对象的概念，其<strong>编码是基于对象</strong>的，由此，对比特率控制可以基于对象。为了实现高效压缩，每个视频对象用三类信息来描述：<strong>运动信息、形状信息、纹理信息</strong>，再根据这些信息完成视频的编码和解码。</p>
+<h3 id="视频分割基本理论"><a href="#视频分割基本理论" class="headerlink" title="视频分割基本理论"></a>视频分割基本理论</h3><p>按照是否需要人工参与分：自动方式、半自动方式</p>
+<p>按照视频分割过程中利用的信息分：</p>
+<ol>
+<li><strong>时域分割</strong>算法用来检测和分割物体的<strong>运动边缘</strong>；</li>
+<li><strong>空间域分割</strong>算法利用特定的判决原则将图像<strong>分割成区域集合</strong>；</li>
+<li><strong>时空联合分割</strong>算法结合了时域分割和空间域分割的优点。</li>
+</ol>
+<p>按照是否提供压缩形式分：压缩域分割、非压缩域分割</p>
+<p>按照用途分：用于视频压缩编码、用于内容交互多媒体应用</p>
+<h3 id="视频分割技术"><a href="#视频分割技术" class="headerlink" title="视频分割技术"></a>视频分割技术</h3><h4 id="空间域分割"><a href="#空间域分割" class="headerlink" title="空间域分割"></a>空间域分割</h4><blockquote>
+<p>视频帧内的分割，即图像分割，将图像分割为有意义的区域集合，这些区域之间通常具有明显的边界。</p>
+</blockquote>
+<p>基于空间域的分割技术主要有：</p>
+<ul>
+<li>基于灰度的空域分割；</li>
+<li>基于区域的空域分割；</li>
+<li>基于边缘的空域分割；</li>
+<li>基于纹理的空域分割等</li>
+<li>分水岭算法：基于数学形态学的图像分割算法</li>
+</ul>
+<h5 id="区域生长（Region-Growing）（掌握）"><a href="#区域生长（Region-Growing）（掌握）" class="headerlink" title="区域生长（Region Growing）（掌握）"></a>区域生长（Region Growing）（掌握）</h5><blockquote>
+<p>将具有相似性质的像素集合起来构成区域</p>
+</blockquote>
+<p>区域生长法的关键：</p>
+<ol>
+<li>选择或确定一组能正确代表所需区域的<strong>种子像素</strong>；</li>
+<li>确定在<strong>生长</strong>过程中能将<strong>相邻像素</strong>包括进来的准则；</li>
+<li>制定让生长过程停止的<strong>条件或规则</strong></li>
+</ol>
+<p>常见区域生长算法种类：</p>
+<ol>
+<li>以单像素为单位的区域生长法</li>
+<li>以区域为单位的区域生长法（子图合并）</li>
+</ol>
+<h4 id="时间域分割技术"><a href="#时间域分割技术" class="headerlink" title="时间域分割技术"></a>时间域分割技术</h4><h5 id="帧间差分的变化检测"><a href="#帧间差分的变化检测" class="headerlink" title="帧间差分的变化检测"></a>帧间差分的变化检测</h5><blockquote>
+<p>时域中检测运动对象的基本方法，采用帧间差分法可消除视频数据的帧间冗余信息，提取变化检测掩模（Change Detection Mask）。</p>
+</blockquote>
+<p>基本原理：通过检测前、后帧之间的帧差，从而把当前视频分割成相对于参考帧“变化的”和“未变化的”区域。</p>
+<p>前后帧的偏移帧差：<br>$$d_{k,k+1}(x,y)=|f_{k+1}(x,y)-f_k(x,y)|$$</p>
+<p>局限性：</p>
+<ol>
+<li>阈值选取至关重要的，无通用阈值设定方法；</li>
+<li>对某些视频序列无能为力的，如纹理不够充分、某些帧对象存在运动而另外一些帧没有运动；</li>
+<li>对于对象间的相互遮挡区、显露区的判断是直接用亮度信号估算参数；</li>
+<li>差分检测受噪声影响不敏感，还受运动估算精度的影响</li>
+</ol>
+<h4 id="块匹配的运动估计"><a href="#块匹配的运动估计" class="headerlink" title="块匹配的运动估计"></a>块匹配的运动估计</h4><blockquote>
+<p>基于对时间图像序列变化的检测。</p>
+</blockquote>
+<p>运动物体特征：检测图像变化，可以在不同的层次上进行，如像素、边缘或区域</p>
+<p>二维运动估计：估计运动前后相邻时刻两幅图像上对应点的坐标,以获取二维运动矢量。假设物体点的亮度在此运动和时间间隔保持不变。</p>
+<p>几种匹配准则：</p>
+<ol>
+<li>最大互相关函数</li>
+<li>最小均方误差函数（MSE）</li>
+<li>最小平均绝对差值函数（MAD）</li>
+<li>最大匹配像素统计（MPC）</li>
+</ol>
+<h4 id="光流法"><a href="#光流法" class="headerlink" title="光流法"></a>光流法</h4><p>运动场：给图像中<strong>每一像素点赋予一个速度向量</strong>，就形成了<strong>图像运动场</strong>(motion field)，对应于物体的三维运动</p>
+<p>光流定义：视频序列<strong>空间坐标关于时间的变化率</strong>，对应于像素的<strong>瞬时速度矢量</strong>，也是运动物体在一帧图像到下一帧图像相对应像素点间的位移量</p>
+<p>光流：图像亮度模式的<strong>表观(视在)运动</strong>，“可察觉”的二维运动，依赖于<strong>光照条件</strong>和<strong>物体表面的纹理</strong>。假设光流就是真实的二维运动，估算二维运动矢量。</p>
+<h2 id="第九章-视频跟踪"><a href="#第九章-视频跟踪" class="headerlink" title="第九章 视频跟踪"></a>第九章 视频跟踪</h2><h2 id="第十章-视频压缩编码"><a href="#第十章-视频压缩编码" class="headerlink" title="第十章 视频压缩编码"></a>第十章 视频压缩编码</h2>
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/05/28/2015-05-28-xiandaijiaohuan/" rel="bookmark">现代交换原理 复习笔记 部分</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/06/19/2015-06-19-zhuanye/" rel="bookmark">专业知识整理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/06/27/2015-06-27-weibojishuyutianxian/" rel="bookmark">微波技术与天线 复习笔记</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/07/01/2015-07-01-xinhaoxiangguan/" rel="bookmark">信号相关专业复习</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/07/05/2015-07-05-fft/" rel="bookmark">快速傅里叶变换FFT算法的用途</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%A4%8D%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 复习笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/05/28/2015-05-28-xiandaijiaohuan/" rel="prev" title="现代交换原理 复习笔记 部分">
+      <i class="fa fa-chevron-left"></i> 现代交换原理 复习笔记 部分
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/06/02/2015-06-02-birthday/" rel="next" title="生日 记">
+      生日 记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#第一章-绪论"><span class="nav-text">第一章 绪论</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#视频图像处理的概念"><span class="nav-text">视频图像处理的概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#视频图像处理系统的组成"><span class="nav-text">视频图像处理系统的组成</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第二章-视频图象的表示"><span class="nav-text">第二章 视频图象的表示</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#图像的基本概念"><span class="nav-text">图像的基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分辨率"><span class="nav-text">分辨率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#人眼的视觉特性"><span class="nav-text">人眼的视觉特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#颜色模型"><span class="nav-text">颜色模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#图像的数字化"><span class="nav-text">图像的数字化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#图像量化"><span class="nav-text">图像量化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#图像格式"><span class="nav-text">图像格式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第三章-图像变换"><span class="nav-text">第三章 图像变换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#傅里叶变换-FT"><span class="nav-text">傅里叶变换 FT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#离散傅里叶变换-DFT"><span class="nav-text">离散傅里叶变换 DFT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#快速傅里叶变换-FFT-掌握"><span class="nav-text">快速傅里叶变换 FFT (掌握)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#离散余弦变换-DCT"><span class="nav-text">离散余弦变换 DCT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#K-L变换"><span class="nav-text">K-L变换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#连续小波变换-CWT"><span class="nav-text">连续小波变换 CWT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小波变换"><span class="nav-text">小波变换</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第六章-视频图像分割"><span class="nav-text">第六章 视频图像分割</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#视频图像分割的相关概念"><span class="nav-text">视频图像分割的相关概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#视频分割基本理论"><span class="nav-text">视频分割基本理论</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#视频分割技术"><span class="nav-text">视频分割技术</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#空间域分割"><span class="nav-text">空间域分割</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#区域生长（Region-Growing）（掌握）"><span class="nav-text">区域生长（Region Growing）（掌握）</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#时间域分割技术"><span class="nav-text">时间域分割技术</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#帧间差分的变化检测"><span class="nav-text">帧间差分的变化检测</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#块匹配的运动估计"><span class="nav-text">块匹配的运动估计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#光流法"><span class="nav-text">光流法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第九章-视频跟踪"><span class="nav-text">第九章 视频跟踪</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第十章-视频压缩编码"><span class="nav-text">第十章 视频压缩编码</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'ba07e29e68994471660e2295b328b200',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

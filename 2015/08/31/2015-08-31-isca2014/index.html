@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="即将踏入 Computer Architecture 领域，准备从今年下半年开始把这个方向相关的国际顶级会议论文都下过来看看。 从 ISCA 2014 开始： ISCA 是由 ACM 与 IEEE 共同主办的体系结构领域顶级会议，全名是 International Symposium on Computer Architecture。 然后搜到了这个..ISCA2000-2011所有论文的摘要">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ISCA 2014 会议论文整理">
+<meta property="og:url" content="https://jcf94.com/2015/08/31/2015-08-31-isca2014/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="即将踏入 Computer Architecture 领域，准备从今年下半年开始把这个方向相关的国际顶级会议论文都下过来看看。 从 ISCA 2014 开始： ISCA 是由 ACM 与 IEEE 共同主办的体系结构领域顶级会议，全名是 International Symposium on Computer Architecture。 然后搜到了这个..ISCA2000-2011所有论文的摘要">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-08-31T14:34:15.000Z">
+<meta property="article:modified_time" content="2017-09-27T01:21:01.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="ISCA">
+<meta property="article:tag" content="IEEE">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2015/08/31/2015-08-31-isca2014/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>ISCA 2014 会议论文整理 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2015/08/31/2015-08-31-isca2014/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ISCA 2014 会议论文整理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-08-31 22:34:15" itemprop="dateCreated datePublished" datetime="2015-08-31T22:34:15+08:00">2015-08-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2017-09-27 09:21:01" itemprop="dateModified" datetime="2017-09-27T09:21:01+08:00">2017-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Paper/" itemprop="url" rel="index"><span itemprop="name">Paper</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>即将踏入 Computer Architecture 领域，准备从今年下半年开始把这个方向相关的国际顶级会议论文都下过来看看。</p>
+<p>从 ISCA 2014 开始：</p>
+<p>ISCA 是由 ACM 与 IEEE 共同主办的体系结构领域顶级会议，全名是 International Symposium on Computer Architecture。</p>
+<p>然后搜到了这个..<a href="http://www.sigma.me/isca/" target="_blank" rel="noopener">ISCA2000-2011所有论文的摘要</a></p>
+<blockquote>
+<p>话说，学校买了 IEEE 的刊文版权就是好哇<del>~</del>数字图书馆登上去直接就能下了，怀抱这么一个大金库，真是爽啊！！</p>
+</blockquote>
+<a id="more"></a>
+
+<h1 id="Session-1-Machines-and-Prototypes"><a href="#Session-1-Machines-and-Prototypes" class="headerlink" title="Session 1: Machines and Prototypes"></a>Session 1: Machines and Prototypes</h1><ul>
+<li><p>[238] Unifying on-chip and inter-node switching within the Anton 2 network<br>使用Anton 2网络来统一片上和节点间切换</p>
+</li>
+<li><p>[195] A Reconfigurable Fabric for Accelerating Large-Scale Datacenter Services<br>一种用于加速大型数据中心服务的可重构组织结构</p>
+</li>
+<li><p>[232] SCORPIO: A 36-Core Research Chip Demonstrating Snoopy Coherence</p>
+</li>
+</ul>
+<h1 id="Session-2A-Resilience"><a href="#Session-2A-Resilience" class="headerlink" title="Session 2A: Resilience"></a>Session 2A: Resilience</h1><ul>
+<li><p>[200] Avoiding Core’s DUE &amp; SDC via Acoustic Wave Detectors and Tailored Error Containment and Recovery</p>
+</li>
+<li><p>[221] MemGuard: A Low Cost and Energy Efficient Design to Support and Enhance Memory System Reliability</p>
+</li>
+<li><p>[212] GangES: Gang Error Simulation for Hardware Resiliency Evaluation</p>
+</li>
+<li><p>[227] Real-World Design and Evaluation of Compiler-Managed GPU Redundant Multithreading</p>
+</li>
+</ul>
+<h1 id="Session-2B-Design-Space-Exploration"><a href="#Session-2B-Design-Space-Exploration" class="headerlink" title="Session 2B: Design Space Exploration"></a>Session 2B: Design Space Exploration</h1><ul>
+<li><p>[198] ArchRanker: A Ranking Approach to Design Space Exploration</p>
+</li>
+<li><p>[196] Aladdin: A Pre-RTL, Power-Performance Accelerator Simulator Enabling Large Design Space Exploration of Customized Architectures</p>
+</li>
+<li><p>[236] SynFull: Synthetic Traffic Models Capturing Cache Coherent Behaviour</p>
+</li>
+<li><p>[218] Harnessing ISA Diversity: Design of a Heterogeneous-ISA Chip Multiprocessor</p>
+</li>
+</ul>
+<h1 id="Session-3A-Caches"><a href="#Session-3A-Caches" class="headerlink" title="Session 3A: Caches"></a>Session 3A: Caches</h1><ul>
+<li><p>[203] The Direct-to-Data (D2D) Cache: Navigating the Cache Hierarchy with a Single Lookup</p>
+</li>
+<li><p>[231] SC^2: A Statistical Compression Cache Scheme</p>
+</li>
+<li><p>[204] The Dirty-Block Index</p>
+</li>
+<li><p>[214] Going Vertical in Memory Management: Handling Multiplicity by Multi-policy</p>
+</li>
+</ul>
+<h1 id="Session-3B-GPUs-and-Parallelism"><a href="#Session-3B-GPUs-and-Parallelism" class="headerlink" title="Session 3B: GPUs and Parallelism"></a>Session 3B: GPUs and Parallelism</h1><ul>
+<li><p>[209] Fine-grain Task Aggregation and Coordination on GPUs</p>
+</li>
+<li><p>[208] Enabling Preemptive Multiprogramming on GPUs</p>
+</li>
+<li><p>[234] Single-Graph Multiple Flows: Energy Efficient Design Alternative for GPGPUs</p>
+</li>
+<li><p>[215] HELIX-RC: An Architecture-Compiler Co-Design for Automatic Parallelization of Irregular Programs</p>
+</li>
+</ul>
+<h1 id="Session-4-Emerging-Technologies"><a href="#Session-4-Emerging-Technologies" class="headerlink" title="Session 4: Emerging Technologies"></a>Session 4: Emerging Technologies</h1><ul>
+<li><p>[206] Efficient Digital Neurons for Large Scale Cortical Architectures</p>
+</li>
+<li><p>[197] An Examination of the Architecture and System-level Tradeoffs of Employing Steep Slope Devices in 3D CMPs</p>
+</li>
+<li><p>[233] STAG: Spintronic-Tape Architecture for GPGPU Cache Hierarchies</p>
+</li>
+</ul>
+<h1 id="Session-5A-NVRAM"><a href="#Session-5A-NVRAM" class="headerlink" title="Session 5A: NVRAM"></a>Session 5A: NVRAM</h1><ul>
+<li><p>[222] Memory Persistency</p>
+</li>
+<li><p>[228] Reducing Access Latency of MLC PCMs through Line Striping</p>
+</li>
+<li><p>[216] HIOS: A Host Interface 110 Scheduler for Solid State Disks</p>
+</li>
+</ul>
+<h1 id="Session-5B-Datacenters-and-Cloud"><a href="#Session-5B-Datacenters-and-Cloud" class="headerlink" title="Session 5B: Datacenters and Cloud"></a>Session 5B: Datacenters and Cloud</h1><ul>
+<li><p>[237] Towards Energy Proportionality for Large-Scale Latency-Critical Workloads</p>
+</li>
+<li><p>[235] SleepScale: Runtime Joint Speed Scaling and Sleep States Management for Power Efficient Data Centers</p>
+</li>
+<li><p>[224] Optimizing Virtual Machine Consolidation Performance on NUMA Server Architecture for Cloud Workloads</p>
+</li>
+</ul>
+<h1 id="Session-6A-DRAM"><a href="#Session-6A-DRAM" class="headerlink" title="Session 6A: DRAM"></a>Session 6A: DRAM</h1><ul>
+<li><p>[230] Row-Buffer Decoupling: A Case for Low-Latency DRAM Microarchitecture</p>
+</li>
+<li><p>[217] Half-DRAM: a High-bandwidth and Low-power DRAM Architecture from the Rethinking of Fine-grained Activation</p>
+</li>
+<li><p>[210] Flipping Bits in Memory Without Accessing Them: An Experimental Study of DRAM Disturbance Errors</p>
+</li>
+</ul>
+<h1 id="Session-6B-Circuits-and-Architecture"><a href="#Session-6B-Circuits-and-Architecture" class="headerlink" title="Session 6B: Circuits and Architecture"></a>Session 6B: Circuits and Architecture</h1><ul>
+<li><p>[199] Architecture Implications of Pads as a Scarce Resource</p>
+</li>
+<li><p>[220] Increasing Off-Chip Bandwidth in Multi-Core Processors with Switchable Pins</p>
+</li>
+<li><p>[194] A Low Power and Reliable Charge Pump Design for Phase Change Memories</p>
+</li>
+</ul>
+<h1 id="Session-7A-Coherence-and-Replay"><a href="#Session-7A-Coherence-and-Replay" class="headerlink" title="Session 7A: Coherence and Replay"></a>Session 7A: Coherence and Replay</h1><ul>
+<li><p>[211] Fractal++: Closing the Performance Gap between Fractal and Conventional Coherence</p>
+</li>
+<li><p>[223] OmniOrder: Directory-Based Conflict Serialization of Transactions</p>
+</li>
+<li><p>[225] Pacifier: Record and Replay for Relaxed-Consistency Multiprocessors with Distributed Directory ProtocoL</p>
+</li>
+<li><p>[229] Replay Debugging: Leveraging Record and Replay for Program Debugging</p>
+</li>
+</ul>
+<h1 id="Session-7B-Security-OOO-Processors"><a href="#Session-7B-Security-OOO-Processors" class="headerlink" title="Session 7B: Security/OOO Processors"></a>Session 7B: Security/OOO Processors</h1><ul>
+<li><p>[201] The CHERI capability model: Revisiting RISC in an age of risk</p>
+</li>
+<li><p>[202] CODOMs: Protecting Software with Code-centric Memory Domains</p>
+</li>
+<li><p>[205] EOLE: Paving the Way for an Effective Implementation of Value Prediction</p>
+</li>
+<li><p>[219] Improving the Energy Efficiency of Big Cores</p>
+</li>
+</ul>
+<h1 id="Session-8-Accelerators"><a href="#Session-8-Accelerators" class="headerlink" title="Session 8: Accelerators"></a>Session 8: Accelerators</h1><ul>
+<li><p>[213] General-Purpose Code Acceleration with Limited-Precision Analog Computation</p>
+</li>
+<li><p>[226] Race Logic: A Hardware Acceleration for Dynamic Programming Algorithms</p>
+</li>
+<li><p>[207] Eliminating Redundant Fragment Shader Executions on a Mobile GPU via Hardware Memoization</p>
+</li>
+<li><p>[239] WebCore: Architectural Support for Mobile Web Browsing</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+      
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ISCA/" rel="tag"># ISCA</a>
+              <a href="/tags/IEEE/" rel="tag"># IEEE</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/08/28/2015-08-28-manufactoria/" rel="prev" title="Manufactoria 一个好玩的自动机编程游戏">
+      <i class="fa fa-chevron-left"></i> Manufactoria 一个好玩的自动机编程游戏
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/09/07/2015-09-07-nothing/" rel="next" title="杂记">
+      杂记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Session-1-Machines-and-Prototypes"><span class="nav-text">Session 1: Machines and Prototypes</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Session-2A-Resilience"><span class="nav-text">Session 2A: Resilience</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Session-2B-Design-Space-Exploration"><span class="nav-text">Session 2B: Design Space Exploration</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Session-3A-Caches"><span class="nav-text">Session 3A: Caches</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Session-3B-GPUs-and-Parallelism"><span class="nav-text">Session 3B: GPUs and Parallelism</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Session-4-Emerging-Technologies"><span class="nav-text">Session 4: Emerging Technologies</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Session-5A-NVRAM"><span class="nav-text">Session 5A: NVRAM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Session-5B-Datacenters-and-Cloud"><span class="nav-text">Session 5B: Datacenters and Cloud</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Session-6A-DRAM"><span class="nav-text">Session 6A: DRAM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Session-6B-Circuits-and-Architecture"><span class="nav-text">Session 6B: Circuits and Architecture</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Session-7A-Coherence-and-Replay"><span class="nav-text">Session 7A: Coherence and Replay</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Session-7B-Security-OOO-Processors"><span class="nav-text">Session 7B: Security&#x2F;OOO Processors</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Session-8-Accelerators"><span class="nav-text">Session 8: Accelerators</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'bbbf99aeb5cf6e6f710e8e4438f27ee7',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

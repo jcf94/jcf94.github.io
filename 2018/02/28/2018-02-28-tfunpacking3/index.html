@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="接上篇：  TensorFlow 拆包（一）：Session.Run() TensorFlow 拆包（二）：TF 的数据流模型实现  先来拆一下第一篇里面 DirectSession::Run 里面跑的那个 graph 里面到底都是些什么内容。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TensorFlow 拆包（三）：Graph 和 Node">
+<meta property="og:url" content="https://jcf94.com/2018/02/28/2018-02-28-tfunpacking3/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="接上篇：  TensorFlow 拆包（一）：Session.Run() TensorFlow 拆包（二）：TF 的数据流模型实现  先来拆一下第一篇里面 DirectSession::Run 里面跑的那个 graph 里面到底都是些什么内容。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-28-tfunpacking3-graph_meta.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-28-tfunpacking3-dot_graph1.svg">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-28-tfunpacking3-mnist_dnn.svg">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-28-tfunpacking3-mnist_dnn_distributed.svg">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-28-tfunpacking3-cnn_distributed.svg">
+<meta property="article:published_time" content="2018-02-28T12:50:26.000Z">
+<meta property="article:modified_time" content="2020-04-25T07:12:38.048Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="TensorFlow">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2018-02-28-tfunpacking3-graph_meta.jpg">
+
+<link rel="canonical" href="https://jcf94.com/2018/02/28/2018-02-28-tfunpacking3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>TensorFlow 拆包（三）：Graph 和 Node | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2018/02/28/2018-02-28-tfunpacking3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TensorFlow 拆包（三）：Graph 和 Node
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-02-28 20:50:26" itemprop="dateCreated datePublished" datetime="2018-02-28T20:50:26+08:00">2018-02-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-25 15:12:38" itemprop="dateModified" datetime="2020-04-25T15:12:38+08:00">2020-04-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Project/" itemprop="url" rel="index"><span itemprop="name">Project</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>接上篇：</p>
+<ul>
+<li><a href="http://jcf94.com/2018/01/13/2018-01-13-tfunpacking/">TensorFlow 拆包（一）：Session.Run()</a></li>
+<li><a href="/2018/01/23/2018-01-23-tfunpacking2/">TensorFlow 拆包（二）：TF 的数据流模型实现</a></li>
+</ul>
+<p>先来拆一下第一篇里面 <code>DirectSession::Run</code> 里面跑的那个 graph 里面到底都是些什么内容。</p>
+<a id="more"></a>
+
+<hr>
+<h1 id="DirectSession-GetOrCreateExecutors"><a href="#DirectSession-GetOrCreateExecutors" class="headerlink" title="DirectSession::GetOrCreateExecutors"></a>DirectSession::GetOrCreateExecutors</h1><p>前面分析到 <a href="/2018/01/13/2018-01-13-tfunpacking/#Executor">Executor</a> 的时候，中间看到 <code>DirectSession::GetOrCreateExecutors</code> 这个函数生成了一堆 Executor，其中 <code>CreateGraphs()</code> 做的就是根据输入的 op 名建图的过程。</p>
+<p>函数调用在：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">direct_session.cc: <span class="number">1131</span></span><br><span class="line">  <span class="comment">// Nothing found, so create the executors and store in the cache.</span></span><br><span class="line">  BuildGraphOptions options;</span><br><span class="line">  options.feed_endpoints = inputs_sorted;</span><br><span class="line">  options.fetch_endpoints = outputs_sorted;</span><br><span class="line">  options.target_nodes = tn_sorted;</span><br><span class="line">  options.use_function_convention = !run_state_args-&gt;is_partial_run;</span><br><span class="line">  <span class="keyword">if</span> (!run_state_args-&gt;debug_options.debug_tensor_watch_opts().empty()) &#123;</span><br><span class="line">    options.debug_options = run_state_args-&gt;debug_options;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;ExecutorsAndKeys&gt; ek(<span class="keyword">new</span> ExecutorsAndKeys);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// The executor_lock_ is intentionally released while executor is</span></span><br><span class="line">  <span class="comment">// being created.</span></span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unordered_map</span>&lt;<span class="built_in">string</span>, <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;Graph&gt;&gt; graphs;</span><br><span class="line">  TF_RETURN_IF_ERROR(CreateGraphs(options, &amp;graphs, &amp;ek-&gt;flib_def,</span><br><span class="line">                                  run_state_args, &amp;ek-&gt;input_types,</span><br><span class="line">                                  &amp;ek-&gt;output_types));</span><br></pre></td></tr></table></figure>
+
+<p>这个调用很有意思，ek 和 graphs 这两个东西都是现场创建的，传地址进去其实用来作为函数的输出结果，所以实际的输入只有 options 和 run_state_args。</p>
+<p>run_state_args 里面保存的是一些额外的运行信息，用于调试等等。options 的 feed_endpoints 和 fetch_endpoint 分别表示的就是当前运行中的输入点和输出点。</p>
+<p>然后看一下 <code>CreateGraphs()</code> 的具体实现：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Status DirectSession::CreateGraphs(</span><br><span class="line">    <span class="keyword">const</span> BuildGraphOptions&amp; subgraph_options,</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">unordered_map</span>&lt;<span class="built_in">string</span>, <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;Graph&gt;&gt;* outputs,</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;FunctionLibraryDefinition&gt;* flib_def,</span><br><span class="line">    RunStateArgs* run_state_args, DataTypeVector* input_types,</span><br><span class="line">    DataTypeVector* output_types)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>创建一个 <code>GraphExecutionState* execution_state</code> 用于保存当前次运行真正要用到的运行图。</p>
+<p>DirectSession 对象中的 execution_state_ 成员保存的是环境中的完整的图信息。若当前次运行需要用精简的图，则从 execution_state_ 中提取出需要用到的一部分内容放进前面创建的 execution_state 中，如果不需要精简，则直接复制 executor_state_ 到 execution_state 中。</p>
+<p>完成的图会输出到 client_graph 这个结构中。</p>
+</li>
+<li><p>检查输入输出的数量跟准备好的 client_graph 的输入输出是否对应</p>
+</li>
+<li><p>保存 Stateful placements（？？不知道是干嘛用的）</p>
+</li>
+<li><p>用<code>tensorflow::Partition()</code>把运行的图切分到当前可用的 device 上，返回的是一个 <code>std::unordered_map&lt;string, GraphDef&gt;</code>的结构，放在 partitions 这个变量中</p>
+</li>
+<li><p>对 partitions 中的每一组 GraphDef，用 <code>ConvertGraphDefToGraph()</code> 转化成 Graph，存入前面的 <code>std::unordered_map&lt;string, std::unique_ptr&lt;Graph&gt;&gt;</code> 结构，也就是 outputs 这个指针中</p>
+</li>
+<li><p>对图进行一定的优化，然后通过 outputs 指针返回到上一层去</p>
+</li>
+</ul>
+<h2 id="Graph-amp-GraphDef"><a href="#Graph-amp-GraphDef" class="headerlink" title="Graph &amp; GraphDef"></a>Graph &amp; GraphDef</h2><blockquote>
+<p>其实 Graph 本身实现的思路还是很容易接受的，但是加上 Protobuf 定义之后就变得…</p>
+<p>贼复杂！！！</p>
+<p>有的地方用 Graph，有的地方又是转成 GraphDef 然后重新提取信息用。</p>
+</blockquote>
+<p>GraphDef 是 TensorFlow 中对图的 Protobuf 定义结构，主要方便保存啊、传输啊等等，真正运行的时候要转成 Graph 这个结构用。</p>
+<blockquote>
+<p>我原本还奇怪为什么 TF 里面的很多东西都要用字符串来唯一标识，本来我觉得对象解析这种事情应该在比较高的层次上比如 Python 那层就做完，结果这里是到底层还要用字符串。</p>
+<p>大概很大的原因就是为了方便 Protobuf 的序列化？</p>
+</blockquote>
+<p>下面这个链接中给出了 GraphDef 和 Graph 这两个结构的简单关系：</p>
+<ul>
+<li><a href="http://www.cnblogs.com/yao62995/p/5773070.html" target="_blank" rel="noopener">图解tensorflow源码] Graph 图模块 （UML视图）</a></li>
+</ul>
+<p>引用一下：</p>
+<p><img data-src="http://jcf94.com/download/2018-02-28-tfunpacking3-graph_meta.jpg" alt=""></p>
+<h2 id="Graph-in-C"><a href="#Graph-in-C" class="headerlink" title="Graph in C"></a>Graph in C</h2><p>有关 Graph 的定义，基本上都在 <code>tensorflow/core/graph/graph.h</code>这个头文件里面，几个类都分的比较清晰：</p>
+<ul>
+<li><p>Graph：表示计算图的一个大类，里面有整个图的完整结构，这里的图的定义是唯一起点和唯一终点，以及可用的计算设备表</p>
+</li>
+<li><p>Node：计算图中的节点，定义里面包含了当前节点的详细信息，以及输入输出的信息（输入节点、输出节点、输入边、输出边）</p>
+<p>节点类型里面，switch、merge、enter、exit、next_iteration 这五个在上一篇里面讲了是 TF 的控制流部分，其他的也基本上是 TF 中的一些特殊用途的类型。</p>
+<p>有关计算内容的定义似乎是要配合 Graph 中注册好的 Ops 表来完成的，这里还不是很明白这个过程具体是什么样的，猜测计算用的节点应该是属于 NC_OTHER 这种类型，具体的计算内容的定义写在 props_ 这个 NodeProperties 结构中。</p>
+</li>
+<li><p>Edge：计算图中的边</p>
+</li>
+<li><p>其他还有几个 iter，重载了运算符用来方便对 Graph 中的 Edge 和 Node 进行标识、对比什么的</p>
+</li>
+</ul>
+<p>用 Graph 中定义的一些函数例如 AddNode、RemoveNode、AddEdge 等等就可以轻松地把整个表示出来了。</p>
+<blockquote>
+<p>这里的实现上很多地方是 Protobuf 的 Def 结构和非 Def 结构混用的，比如 AddNode 这个函数的输入参数是个 NodeDef，感觉很难受啊。</p>
+</blockquote>
+<p>剩下的实现倒是没什么特别的。</p>
+<h2 id="Graph-amp-Op-in-Python"><a href="#Graph-amp-Op-in-Python" class="headerlink" title="Graph &amp; Op in Python"></a>Graph &amp; Op in Python</h2><p>Python 层的 Graph 定义在 <code>/tensorflow/python/framework/ops.py</code> 中，这个类的结构本身算是比较简单，主要就是一堆 Op 和 Tensor 的集合（<code>_nodes_by_id</code>和<code>_nodes_by_name</code> 两个<code>dict()</code> ， <code>_unfeedable_tensors</code>和<code>_unfetchable_ops</code>两个<code>set()</code>，还有几个关系标识）。往 Graph 中添加 Op 的函数<code>_add_op</code>即把 Op 或者 Tensor 加到<code>dict()</code>中。</p>
+<p>TF 中的 Python Op 有两种定义方式，在 Python 层中直接定义的 Op 函数的核心部分是：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> ops.name_scope(name, default_name, value) <span class="keyword">as</span> name:</span><br></pre></td></tr></table></figure>
+
+<p>这个类封装。由它来找到 Op 的输入所在的 Graph，处理依赖关系以及把当前 Op 加入到 Graph 相应的列表中去。</p>
+<p>……在代码里面搜<code>with ops.name_scope</code>这组关键词可以找到很多的 Op 定义。</p>
+<p>另外一种 Op 建立方式是通过<code>load_library.load_op_library()</code>来载入编译好的 C 层的 Op 函数，然后包装成 Python 层的 Op。</p>
+<h1 id="How-to-organize-the-Op-to-Graph"><a href="#How-to-organize-the-Op-to-Graph" class="headerlink" title="How to organize the Op to Graph"></a>How to organize the Op to Graph</h1><p>TF 官方有个创建自定义 Op 的教程：</p>
+<ul>
+<li><a href="https://www.tensorflow.org/extend/adding_an_op" target="_blank" rel="noopener">Adding a New Op</a></li>
+</ul>
+<p>先通过这个来了解一下 Op 的完整运行过程。</p>
+<h2 id="Adding-a-New-Op"><a href="#Adding-a-New-Op" class="headerlink" title="Adding a New Op"></a>Adding a New Op</h2><p>教程中的示例是要创建一个输入一串 int32 的数组，把除了第一个数字以外的其他数字变成 0 后输出的 op。这里的创建从 C 层面开始，创建一个 zero_out.cc 文件：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"tensorflow/core/framework/op.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"tensorflow/core/framework/shape_inference.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> tensorflow;</span><br><span class="line"></span><br><span class="line">REGISTER_OP(<span class="string">"ZeroOut"</span>)</span><br><span class="line">    .Input(<span class="string">"to_zero: int32"</span>)</span><br><span class="line">    .Output(<span class="string">"zeroed: int32"</span>)</span><br><span class="line">    .SetShapeFn([](::tensorflow::shape_inference::InferenceContext* c) &#123;</span><br><span class="line">      c-&gt;set_output(<span class="number">0</span>, c-&gt;input(<span class="number">0</span>));</span><br><span class="line">      <span class="keyword">return</span> Status::OK();</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+
+<p><code>REGISTER_OP</code> 是一个宏，这套注册的过程是所有 op 首先要做的，打开 <code>tensorflow/core/ops/</code>目录下的每一个自带的 op 文件中也都是这些内容。</p>
+<blockquote>
+<p>这个宏注册的内容是给上层的 Python 层构建 Op 封装的时候用的。</p>
+</blockquote>
+<p><code>.SetShapeFn()</code>定义了输出的形状。</p>
+<p>然后要写的是上面这个 Op 的 OpKernel，即 C 层实际运算的部分，从 OpKernel 继承出一个新的类，重写它的 Compute 函数，Compute 就是到时候扔到 TF 运行时里面跑的内容。从 OpKernelContext 里面可以获取到这个 OpKernel 在执行时的上下文信息：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"tensorflow/core/framework/op_kernel.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> tensorflow;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ZeroOutOp</span> :</span> <span class="keyword">public</span> OpKernel &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  explicit ZeroOutOp(OpKernelConstruction* context) : OpKernel(context) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">Compute</span><span class="params">(OpKernelContext* context)</span> override </span>&#123;</span><br><span class="line">    <span class="comment">// Grab the input tensor</span></span><br><span class="line">    <span class="keyword">const</span> Tensor&amp; input_tensor = context-&gt;input(<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">auto</span> input = input_tensor.flat&lt;int32&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Create an output tensor</span></span><br><span class="line">    Tensor* output_tensor = <span class="literal">NULL</span>;</span><br><span class="line">    OP_REQUIRES_OK(context, context-&gt;allocate_output(<span class="number">0</span>, input_tensor.shape(),</span><br><span class="line">                                                     &amp;output_tensor));</span><br><span class="line">    <span class="keyword">auto</span> output_flat = output_tensor-&gt;flat&lt;int32&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Set all but the first element of the output tensor to 0.</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">int</span> N = input.size();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; N; i++) &#123;</span><br><span class="line">      output_flat(i) = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Preserve the first input value if possible.</span></span><br><span class="line">    <span class="keyword">if</span> (N &gt; <span class="number">0</span>) output_flat(<span class="number">0</span>) = input(<span class="number">0</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>之后再用一个宏，把这个注册好的 Op 和 OpKernel 关联在一起，C 部分的实现就完成了：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">REGISTER_KERNEL_BUILDER(Name(<span class="string">"ZeroOut"</span>).Device(DEVICE_CPU), ZeroOutOp);</span><br></pre></td></tr></table></figure>
+
+<p>这个宏中 <code>Name()</code>里面是前面注册的 Op 名，<code>Device()</code>定义了当前这个 Kernel 函数的运算设备，最后是需要注册的 Kernel 函数名。</p>
+<p><code>tensorflow/core/user_ops/fact.cc</code>中也是一个自定义 op 的示例。</p>
+<p>把 C 实现编译成动态链接库之后，在 Python 中调用<code>tf.load_op_library()</code>方法，把前面注册好的 C 层面的 Op 以及它的 OpKernel 封装成一个 Python 层的 Op 对象。</p>
+<p>之后这个 Op 就可以像 TensorFlow 中其他自带的 Op 一样使用了。</p>
+<p>如果需要让这个 Op 支持自动求导，只需要在 Python 中注册好它的梯度函数即可：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ops.RegisterGradient("ZeroOut")</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_zero_out_grad</span><span class="params">(op, grad)</span>:</span></span><br><span class="line">    xxxxxxxxx</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>C 层还有另外两个名字很像的注册梯度函数的宏（……谁起的这名字！！！）：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">REGISTER_OP_GRADIENT(<span class="string">"OpName"</span>, OpGradientDef);</span><br><span class="line">REGISTER_GRADIENT_OP(<span class="string">"OpName"</span>, OpGradientKernel);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>到这里为止，我们对 TensorFlow 中 Python 层与 C 层的 Op 结合过程有了一个大体的印象。</p>
+<p><img data-src="http://jcf94.com/download/2018-02-28-tfunpacking3-dot_graph1.svg" alt=""></p>
+<p>那么 C 层的 Graph 构建是什么时候发生的呢？回到前面创建 Executor 时的<code>CreateGraphs()</code>函数，可以看到此时DirectSession 对象中的 execution_state_ 成员已经保存了当前 Session 环境中的完整的图信息了，那么 execution_state_ 中的图是哪里来的？</p>
+<h2 id="Back-to-TF-Run"><a href="#Back-to-TF-Run" class="headerlink" title="Back to TF_Run()"></a>Back to TF_Run()</h2><p>之前在<a href="/2018/01/13/2018-01-13-tfunpacking/">TensorFlow 拆包（一）：Session.Run()</a>篇中已经对 TF_Run() 关于执行图的计算的部分进行了分析，现在需要把关注点放回到这里，看一下 Python 层中的 Graph 与 C 层中的 Graph 是如何联系在一起的。</p>
+<p>以下是 Python 层的调用栈：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#8 File "dbg_mnist.py", line 62, in simple_dnn</span></span><br><span class="line">            train_step.run(feed_dict=&#123;x: batch[0], y_: batch[1]&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">#7 File "/home/jcf/tf-run-1.5.0-rc0-cuda-dbg/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 2213, in run</span></span><br><span class="line">    _run_using_default_session(self, feed_dict, self.graph, session)</span><br><span class="line"></span><br><span class="line"><span class="comment">#6 File "/home/jcf/tf-run-1.5.0-rc0-cuda-dbg/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 4790, in _run_using_default_session</span></span><br><span class="line">  session.run(operation, feed_dict)</span><br><span class="line"></span><br><span class="line"><span class="comment">#5 File "/home/jcf/tf-run-1.5.0-rc0-cuda-dbg/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 895, in run</span></span><br><span class="line">      result = self._run(None, fetches, feed_dict, options_ptr,</span><br><span class="line">                         run_metadata_ptr)</span><br><span class="line"></span><br><span class="line"><span class="comment">#4 File "/home/jcf/tf-run-1.5.0-rc0-cuda-dbg/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1128, in _run</span></span><br><span class="line">      results = self._do_run(handle, final_targets, final_fetches,</span><br><span class="line">                             feed_dict_tensor, options, run_metadata)</span><br><span class="line"></span><br><span class="line"><span class="comment">#3 File "/home/jcf/tf-run-1.5.0-rc0-cuda-dbg/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1344, in _do_run</span></span><br><span class="line">      <span class="built_in">return</span> self._do_call(_run_fn, self._session, feeds, fetches, targets,</span><br><span class="line">                           options, run_metadata)</span><br><span class="line"></span><br><span class="line"><span class="comment">#2 File "/home/jcf/tf-run-1.5.0-rc0-cuda-dbg/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1350, in _do_call</span></span><br><span class="line">      <span class="built_in">return</span> fn(*args)</span><br><span class="line"></span><br><span class="line"><span class="comment">#1 File "/home/jcf/tf-run-1.5.0-rc0-cuda-dbg/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1329, in _run_fn</span></span><br><span class="line">          <span class="built_in">return</span> tf_session.TF_Run(session, options,</span><br><span class="line">                                   feed_dict, fetch_list, target_list,</span><br><span class="line">                                   status, run_metadata)</span><br><span class="line"></span><br><span class="line"><span class="comment">#0 &lt;built-in method TF_Run of module object at remote 0x7f7e938c6bd8&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>从栈底开始逐步往内部看：</p>
+<ul>
+<li><p>#8、#7、#6 <code>Operation.run()</code>：通常我们的用法可能都是 <code>sess.run(Operation)</code> ，在设置好默认的 Session 之后，Operation 类中的 <code>run()</code> 方法就是调用默认 Session 的 <code>run()</code> 方法</p>
+</li>
+<li><p>#5 <code>BaseSession.run()</code>：fetches 是需要得到的输出目标，feed_dict 是喂进去的输入数据</p>
+</li>
+<li><p>#4 <code>BaseSession._run()</code>：检查 session，设置 feed_dict，创建一个 _FetchHandler，这个结构会根据 fetches 和 feed_dict 生成一个需要得到的 Tensor 列表和需要运行的 Op 列表（大概是遍历图？），final_fetches 中存放为了运行当前 Op 所需要得到的 Tensor，final_targets 中存放为了运行当前 Op 所需要运行的前置 Op</p>
+</li>
+<li><p>#3 <code>BaseSession._do_run()</code>：……贼多层 API 封装，<code>_run_fn()</code> 和<code>_prun_fn()</code> 是两种运行方式，跟参数一起传入下一层的函数</p>
+</li>
+<li><p>#2 <code>BaseSession._do_call()</code>：这层封装是用来处理异常的，其实要执行的是前面传进来的两个运行函数之一</p>
+</li>
+<li><p>#1 <code>BaseSession._run_fn()</code>： 准备进入 C 层的运行库，Python 层到这里结束。</p>
+<p>在执行 <code>TF_Run()</code> 之前，这里还有一个<code>_extend_graph()</code> 的过程，初次执行时，C 部分的运行时会为 DirectSession 初始化一个 GraphExecutionState 结构，即前面所提的保存了环境中初始的图信息的 executor_state_ 。<strong>！！关键在这里！！</strong></p>
+</li>
+<li><p>#0 <code>tf_session.TF_Run()</code>：这就是<code>tensorflow/c/c_api.cc</code> 中 C 层运行时的入口函数了。</p>
+</li>
+</ul>
+<p>整理一下上面的部分，Python 层的 API 要做的只是根据输入数据和输出目标找到整个图中的所有依赖项（包括 Tensor 和 Op），然后把这些内容传入 C 层。</p>
+<p>那么最后再把前面的整个运行过程整理一遍：</p>
+<ul>
+<li>用 Python 层的接口构建出计算图</li>
+<li>如果不定义新的 Graph 结构，则所有的 Op 都会放在默认图中</li>
+<li>调用 <code>Session.run(...)</code> ，Python 层遍历计算图，整理出为了执行目标所需要提供的前置数据（Tensor）以及得到这些数据所需要执行的所有 Op 列表</li>
+<li>首次运行 <code>_extend_graph()</code> 时，为 C 层的 DirectSession 对象初始化 GraphExecutionState 结构，这里面保存了 C 层的完整计算图定义</li>
+<li>Python 层整理完的 feed_dice、fetch_list、target_list 通过 <code>TF_Run()</code> 接口传入 C 层</li>
+<li>接下里是 <code>DirectSession::Run()</code> 中的内容，详细可见<a href="/2018/01/13/2018-01-13-tfunpacking/">TensorFlow 拆包（一）：Session.Run()</a>篇，为当前需要执行的部分创建 Executor、线程池等等，完成整个计算图的执行</li>
+</ul>
+<h1 id="Output-the-C-level-Graph"><a href="#Output-the-C-level-Graph" class="headerlink" title="Output the C level Graph!!!"></a>Output the C level Graph!!!</h1><p>在环境变量中加上<code>TF_CPP_MIN_VLOG_LEVEL</code>等于 2 以上的级别时，TensorFlow 运行时会输出比较详细的运行 log 来。其中就包含了 C 层面的建图相关的信息，于是用了几个 awk 脚本把这部分内容抓出来了：</p>
+<blockquote>
+<p>get_graph.sh</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"></span><br><span class="line">LOGFILE=<span class="variable">$1</span>.<span class="built_in">log</span></span><br><span class="line">ROUGH_LOGFILE=<span class="variable">$1_rough</span>.<span class="built_in">log</span></span><br><span class="line">FILTERED_LOGFILE=<span class="variable">$1_filterd</span>.<span class="built_in">log</span></span><br><span class="line">ROUGH_DOTFILE=<span class="variable">$1_rough</span>.dot</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [ -f <span class="variable">$LOGFILE</span> ]; <span class="keyword">then</span></span><br><span class="line">    awk <span class="string">'match($0, /.*\|\|\s+(.*)/, out) &#123;print out[1]&#125;'</span> <span class="variable">$LOGFILE</span> &gt; <span class="variable">$ROUGH_LOGFILE</span></span><br><span class="line">    awk -f get_graph_filter.awk <span class="variable">$ROUGH_LOGFILE</span> &gt; <span class="variable">$FILTERED_LOGFILE</span></span><br><span class="line">    awk -f get_graph.awk <span class="variable">$FILTERED_LOGFILE</span> &gt; <span class="variable">$ROUGH_DOTFILE</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>get_graph_filter.awk</p>
+<p>第一步从 log 中抓出图部分的信息之后，用这个删掉其中的重复信息。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/bin/awk</span></span><br><span class="line"></span><br><span class="line">BEGIN &#123;</span><br><span class="line">    RS = <span class="string">""</span>;</span><br><span class="line">    FS = <span class="string">"\n"</span>;</span><br><span class="line">    count = 0;</span><br><span class="line">    list[0] = <span class="string">""</span>;</span><br><span class="line">&#125;</span><br><span class="line">&#123;</span><br><span class="line">    list[count] = <span class="variable">$0</span>;</span><br><span class="line">    count ++;</span><br><span class="line">&#125;</span><br><span class="line">END &#123;</span><br><span class="line">    asort(list)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span> list[0];</span><br><span class="line">    <span class="keyword">for</span> (i=1;i&lt;count;i++)</span><br><span class="line">    <span class="keyword">if</span> (list[i] != list[i-1])</span><br><span class="line">        <span class="built_in">print</span> list[i];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>get_graph.awk</p>
+<p>最后用这个脚本生成 GraphViz 的图。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/bin/awk</span></span><br><span class="line"></span><br><span class="line">BEGIN &#123;</span><br><span class="line">    count = 0;</span><br><span class="line">    <span class="built_in">print</span> <span class="string">"digraph newgraph &#123;\n"</span>;</span><br><span class="line">&#125;</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (match(<span class="variable">$0</span>, /(\w+)\s=\s(\w+)\[(.*)\]\((.*)\)/, out))</span><br><span class="line">    &#123;</span><br><span class="line">        name = out[1];</span><br><span class="line">        newname = sprintf(<span class="string">"c%dn"</span>, count);</span><br><span class="line">        gsub(<span class="string">"n"</span>, newname, name);</span><br><span class="line">        content = out[3];</span><br><span class="line">        gsub(<span class="string">"\""</span>, <span class="string">"\\\""</span>, content)</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"        %s[label=\"%s\", tooltip=\"%s\"];\n"</span>, name, out[2], content);</span><br><span class="line">        <span class="keyword">if</span> (out[4])</span><br><span class="line">        &#123;</span><br><span class="line">            inpt = out[4];</span><br><span class="line">            gsub(<span class="string">"n"</span>, newname, inpt);</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"        %s -&gt; %s;\n"</span>, inpt, name);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">print</span> <span class="string">"#"</span>, <span class="variable">$0</span>;</span><br><span class="line">        <span class="keyword">if</span> (match(<span class="variable">$0</span>, /\(.*\&#123;/))</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"    subgraph cluster_%d &#123;\n        label=\"c%d\";\n"</span>, count, count);</span><br><span class="line">            count ++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (match(<span class="variable">$0</span>, /\&#125;/))</span><br><span class="line">            <span class="built_in">print</span> <span class="string">"    &#125;"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">END &#123;</span><br><span class="line">    <span class="built_in">print</span> <span class="string">"&#125;"</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>稍微修正一下最终的输出图，我们就可以得到：</p>
+<h2 id="Simple-DNN"><a href="#Simple-DNN" class="headerlink" title="Simple DNN"></a>Simple DNN</h2><p><img data-src="http://jcf94.com/download/2018-02-28-tfunpacking3-mnist_dnn.svg" alt=""></p>
+<h2 id="Simple-DNN-Distributed"><a href="#Simple-DNN-Distributed" class="headerlink" title="Simple DNN Distributed"></a>Simple DNN Distributed</h2><p><img data-src="http://jcf94.com/download/2018-02-28-tfunpacking3-mnist_dnn_distributed.svg" alt=""></p>
+<h2 id="Simple-CNN-Distributed"><a href="#Simple-CNN-Distributed" class="headerlink" title="Simple CNN Distributed"></a>Simple CNN Distributed</h2><p><img data-src="http://jcf94.com/download/2018-02-28-tfunpacking3-cnn_distributed.svg" alt=""></p>
+<p>为了比较好的视觉效果，上面输出来的图中或多或少被我删掉一点不重要的内容，有的在相同变量上也还没做整合。<code>ApplyGradientDescent</code>、<code>ApplyAdam</code>、<code>Assign</code> 这些有多出来的虚线我加的也不一定对，<strong>暂时先批判地看待上面这几张图吧</strong>。</p>
+<p>C 层面的图结构比 Tensorboard 里面的 Python 层要稍微多点东西（比如跨设备的 send/recv 等），然后有的地方信息又不太全（比如上图中最右侧的部分，对照 Tensorboard 才知道是 adam 中两个值的平方，从 C 层面这些 node 本身的信息上体现不出来），不过大致上还是一致的。</p>
+<h2 id="Assign、Identity"><a href="#Assign、Identity" class="headerlink" title="Assign、Identity"></a>Assign、Identity</h2><p>关于图中的 Assign 和 Identity 这两个 op，可以见<a href="https://www.jianshu.com/p/bebcdfb74fb1" target="_blank" rel="noopener">这里的一些介绍</a>。</p>
+<p>简单来说，Variable 持有一个内存中的 Tensor 实例，Assign 是对这块内存中的数据进行修改的操作。</p>
+<p><a href="https://stackoverflow.com/questions/34877523/in-tensorflow-what-is-tf-identity-used-for" target="_blank" rel="noopener">Stack Overflow 上对 Identity 有个讨论</a>，然而我感觉高票答案的 <code>tf.control_dependencies()</code> 的例子其实引的不好，根本说明不清楚问题。</p>
+<p>从官方文档里面只能看出来是做了一个别名引用，下面做一个简单的测试：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"></span><br><span class="line">a = tf.Variable(<span class="number">0</span>)</span><br><span class="line">a_i = tf.identity(a)</span><br><span class="line"></span><br><span class="line">b = tf.assign_add(a, <span class="number">1</span>)</span><br><span class="line">b_i = tf.identity(b)</span><br><span class="line"></span><br><span class="line">sess = tf.Session()</span><br><span class="line"></span><br><span class="line">sess.run(tf.global_variables_initializer())</span><br><span class="line"></span><br><span class="line">print(<span class="string">'a:'</span>, sess.run(a))</span><br><span class="line">print(<span class="string">'a_i:'</span>, sess.run(a_i))</span><br><span class="line"></span><br><span class="line">print(<span class="string">'b:'</span>, sess.run(b))</span><br><span class="line">print(<span class="string">'a:'</span>, sess.run(a))</span><br><span class="line">print(<span class="string">'a_i:'</span>, sess.run(a_i))</span><br><span class="line"></span><br><span class="line">print(<span class="string">'b_i:'</span>, sess.run(b_i))</span><br><span class="line">print(<span class="string">'a:'</span>, sess.run(a))</span><br><span class="line">print(<span class="string">'a_i:'</span>, sess.run(a_i))</span><br><span class="line"></span><br><span class="line">print(<span class="string">'b:'</span>, sess.run(tf.assign_add(b, <span class="number">1</span>)))</span><br><span class="line"></span><br><span class="line">print(<span class="string">'a:'</span>, sess.run(a))</span><br><span class="line">print(<span class="string">'a_i:'</span>, sess.run(a_i))</span><br></pre></td></tr></table></figure>
+
+<p>得到的输出结果是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">a: 0</span><br><span class="line">a_i: 0</span><br><span class="line">b: 1</span><br><span class="line">a: 1</span><br><span class="line">a_i: 1</span><br><span class="line">b_i: 2</span><br><span class="line">a: 2</span><br><span class="line">a_i: 2</span><br><span class="line">b: 4</span><br><span class="line">a: 4</span><br><span class="line">a_i: 4</span><br></pre></td></tr></table></figure>
+
+<p>这里 a_i 和 b_i 分别是对 a 和 b 的 <code>tf.identity()</code> 操作。</p>
+<p>首次输出的 a 和 a_i 都是 a 的初始值 0，a_i 在这里就是对 a 的直接引用。</p>
+<p>接下来，输出 b 之后，再次输出 a 和 a_i，得到的结果与前面相同，都是 a 执行加一之后的 1，可见<code>tf.assign_add()</code> 是直接对 a 所代表的 Tensor 数据本身进行的操作。</p>
+<p>然后再测试 b_i，结果与前面运行 b 一致。</p>
+<hr>
+<p>后续：</p>
+<ul>
+<li><a href="/2018/03/07/2018-03-07-tfunpacking4/">TensorFlow 拆包（四）：Device</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/02/04/2017-02-04-tensorflow/" rel="bookmark">TensorFlow</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/04/04/2017-04-04-alexnet/" rel="bookmark">AlexNet</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/13/2018-01-13-tfunpacking/" rel="bookmark">TensorFlow 拆包（一）：Session.Run()</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/23/2018-01-23-tfunpacking2/" rel="bookmark">TensorFlow 拆包（二）：TF 的数据流模型实现以及自动求导</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/03/07/2018-03-07-tfunpacking4/" rel="bookmark">TensorFlow 拆包（四）：Device</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/TensorFlow/" rel="tag"># TensorFlow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/02/13/2018-02-13-intel/" rel="prev" title="Intel 处理器架构演进">
+      <i class="fa fa-chevron-left"></i> Intel 处理器架构演进
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/03/07/2018-03-07-tfunpacking4/" rel="next" title="TensorFlow 拆包（四）：Device">
+      TensorFlow 拆包（四）：Device <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#DirectSession-GetOrCreateExecutors"><span class="nav-text">DirectSession::GetOrCreateExecutors</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Graph-amp-GraphDef"><span class="nav-text">Graph &amp; GraphDef</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Graph-in-C"><span class="nav-text">Graph in C</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Graph-amp-Op-in-Python"><span class="nav-text">Graph &amp; Op in Python</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#How-to-organize-the-Op-to-Graph"><span class="nav-text">How to organize the Op to Graph</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Adding-a-New-Op"><span class="nav-text">Adding a New Op</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Back-to-TF-Run"><span class="nav-text">Back to TF_Run()</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Output-the-C-level-Graph"><span class="nav-text">Output the C level Graph!!!</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Simple-DNN"><span class="nav-text">Simple DNN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Simple-DNN-Distributed"><span class="nav-text">Simple DNN Distributed</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Simple-CNN-Distributed"><span class="nav-text">Simple CNN Distributed</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Assign、Identity"><span class="nav-text">Assign、Identity</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'b9338c46a3a79ab1bfc00abebe53a7d2',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

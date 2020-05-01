@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="花了点时间，终于把PL&#x2F;0整个编译器的源码分析了一遍，接下来就是上手对这个编译器进行改造的过程了。 我决定首先尝试将PL&#x2F;0编译器的源码从C转到C++上，然后划分成多文件，再准备开始改。先从课设作业要求开始，最终的目标是完成PL&#x2F;0的完整文法支持。 已经完成的部分我用删除线在下面标出来。 在github上开了个仓库，准备存放改写后的代码，以及用于记录整个过程：https:&#x2F;&#x2F;github.com&#x2F;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="编译原理课设尝试（二）——PL&#x2F;0编译器改写">
+<meta property="og:url" content="https://jcf94.com/2016/02/22/2016-02-22-pl0change/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="花了点时间，终于把PL&#x2F;0整个编译器的源码分析了一遍，接下来就是上手对这个编译器进行改造的过程了。 我决定首先尝试将PL&#x2F;0编译器的源码从C转到C++上，然后划分成多文件，再准备开始改。先从课设作业要求开始，最终的目标是完成PL&#x2F;0的完整文法支持。 已经完成的部分我用删除线在下面标出来。 在github上开了个仓库，准备存放改写后的代码，以及用于记录整个过程：https:&#x2F;&#x2F;github.com&#x2F;">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-02-22T08:53:08.000Z">
+<meta property="article:modified_time" content="2016-07-07T02:49:53.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="编译原理">
+<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="PL&#x2F;0">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2016/02/22/2016-02-22-pl0change/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>编译原理课设尝试（二）——PL/0编译器改写 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2016/02/22/2016-02-22-pl0change/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          编译原理课设尝试（二）——PL/0编译器改写
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-02-22 16:53:08" itemprop="dateCreated datePublished" datetime="2016-02-22T16:53:08+08:00">2016-02-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2016-07-07 10:49:53" itemprop="dateModified" datetime="2016-07-07T10:49:53+08:00">2016-07-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Architecture/" itemprop="url" rel="index"><span itemprop="name">Computer Architecture</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>花了点时间，终于把<a href="/2016/02/21/2016-02-21-pl0/">PL/0整个编译器的源码</a>分析了一遍，接下来就是上手对这个编译器进行改造的过程了。</p>
+<p>我决定首先尝试将PL/0编译器的源码从C转到C++上，然后划分成多文件，再准备开始改。先从课设作业要求开始，最终的目标是完成PL/0的完整文法支持。</p>
+<p>已经完成的部分我用删除线在下面标出来。</p>
+<p>在github上开了个仓库，准备存放改写后的代码，以及用于记录整个过程：<br><a href="https://github.com/jcf94/pl0_compiler" target="_blank" rel="noopener">https://github.com/jcf94/pl0_compiler</a></p>
+<p>下面先看一下拓展后的PL/0文法。</p>
+<a id="more"></a>
+
+<h1 id="PL-0可拓展的完整文法"><a href="#PL-0可拓展的完整文法" class="headerlink" title="PL/0可拓展的完整文法"></a>PL/0可拓展的完整文法</h1><ul>
+<li><p><del>Program → Block .</del></p>
+</li>
+<li><p>Block → [ConstDecl][TypeDecl][VarDecl][FuncDecl] begin Stmt {; Stmt } end</p>
+</li>
+<li><p><del>ConstDecl → const ConstDef {, ConstDef} ;</del></p>
+</li>
+<li><p><del>ConstDef → ident = number</del></p>
+</li>
+<li><p>TypeDecl → type TypeDef {TypeDef }</p>
+</li>
+<li><p>TypeDef → ident = TypeExp ;</p>
+</li>
+<li><p>TypeExp → integer | real | Boolean | array ‘[’number .. number‘]’ of TypeExp</p>
+</li>
+<li><p><del>VarDecl → var VarDec {VarDec }</del></p>
+</li>
+<li><p><del>VarDec → ident {, ident} : Type ;</del></p>
+</li>
+<li><p>Type → integer | real | boolean | ident</p>
+</li>
+<li><p>FuncDecl → FuncDec { FuncDec }</p>
+</li>
+<li><p>FuncDec → procedure ident [ ( ForParal ) ]; Block ; | function ident [ ( ForParal ) ] : Type ; Block ;</p>
+</li>
+<li><p>ForParal → ident : Type {; ident : Type }</p>
+</li>
+<li><p>Stmt → IdentRef := Exp | if Exp then Stmt | if Exp then Stmt else Stmt | begin Stmt {; Stmt } end | while Exp do Stmt | exit | ε | call ident [ ( ActParal ) ] | write ( Exp {, Exp } ) | read (IdentRef {, IdentRef } )</p>
+</li>
+<li><p>IdentRef → ident [ ‘[’Exp‘]’ { ‘[’Exp‘]’ } ]</p>
+</li>
+<li><p>ActParal → Exp {, Exp }</p>
+</li>
+<li><p><del>Exp → SimpExp RelOp SimpExp | SimpExp</del></p>
+</li>
+<li><p><del>RelOp →  = | &lt;&gt; | &lt; | &gt; | &lt;= | &gt;=</del></p>
+</li>
+<li><p><del>SimpExp → [+ | - ] Term {+ Term | - Term | or Term}</del></p>
+</li>
+<li><p><del>Term → Factor {* Factor | / Factor | div Factor | mod Factor | and Factor}</del></p>
+</li>
+<li><p>Factor →  IdentRef | number | ( Exp ) | not Factor | ident [ ( ActParal ) ] | odd (SimpExp) | true | false</p>
+</li>
+</ul>
+<h1 id="课设要求"><a href="#课设要求" class="headerlink" title="课设要求"></a>课设要求</h1><p>课设要求上给出了8个题目：</p>
+<ul>
+<li><p><del>给PL/0语言增加C语言形式的/∗ …… ∗/的注释。</del></p>
+</li>
+<li><p><del>给PL/0语言增加带else子句的条件语句和exit语句。exit语句作为while语句的非正常出口语句。若处于多层while语句中，则它只作为最内层while语句的非正常出口。若它没有处于任何while语句中，则是一个错误。</del></p>
+</li>
+<li><p><del>给PL/0语言增加输入输出语句。</del></p>
+</li>
+<li><p>给PL/0语言增加带参数的过程，参数传递按值调用方式。</p>
+</li>
+<li><p><del>给PL/0语言增加布尔类型，并且布尔类型的表达式按短路方式计算。</del></p>
+</li>
+<li><p>给PL/0语言增加数组类型。</p>
+</li>
+<li><p>给PL/0语言增加函数类型。</p>
+</li>
+<li><p>给PL/0语言增加实数类型。</p>
+</li>
+</ul>
+<h1 id="改写过程记录"><a href="#改写过程记录" class="headerlink" title="改写过程记录"></a>改写过程记录</h1><ul>
+<li><p>多文件改写</p>
+</li>
+<li><p>添加C语言形式的注释功能，支持<code>//</code>注释一行和<code>/* */</code>的段注释</p>
+</li>
+</ul>
+<p>修改词法分析器的<code>getsym()</code>部分即可，要注意的是除法也是<code>/</code>符号</p>
+<ul>
+<li>添加else子句</li>
+</ul>
+<p>这里有个比较容易出错的问题，即PL/0中对分号的处理与C中稍微有些区别，<strong>并不是所有的语句后面都会有分号</strong>。查看文法可知，block后跟点或分号，常量、变量定义的最后要有分号，出现多条并列的stmt时需要<strong>用分号来分隔</strong>（而最后一条stmt可能是不需要带分号的）。</p>
+<p>这一点从文法分析中对分号<code>semicolon</code>的处理上也可以看出来。</p>
+<p>因此else子句只要继续按照文法进行扩展即可：</p>
+<p>if Exp then Stmt | if Exp then Stmt else Stmt</p>
+<p>else前面应该是没有分号的。</p>
+<p>首先将else加入保留字，<code>norw</code>、<code>word</code>、<code>wsym</code>都要作相应修改，注意原代码中用了二分查找，所以保留字的顺序也要作相应调整。</p>
+<p>在文法分析中if语句部分的后面加上对else的判定即可。</p>
+<p>最后还要处理一下若遇到一个语句开头部分直接是else的错误反馈。</p>
+<ul>
+<li>添加exit语句</li>
+</ul>
+<p>同样先将exit加入保留字，然后在stmt中增加对exit的支持。</p>
+<p>一个exit语句其实就是<code>jmp</code>跳转到while的末尾即可，一个while中可能出现多个exit，而且while本身也是可以嵌套多层的，因此这里可以采用栈的结构exitlist保存下每个exit产生的<code>jmp</code>语句的位置。</p>
+<p>等到一个while块结束时，再根据exitlist把所有<code>jmp</code>语句缺少的地址给补上。</p>
+<ul>
+<li>添加输入输出语句</li>
+</ul>
+<p>首先看一下输入输出部分的文法：</p>
+<p>write ( Exp {, Exp } ) | read (IdentRef {, IdentRef } )</p>
+<p>write是括号中跟一个或多个exp，read是括号中跟一个或多个IdentRef。</p>
+<p>由于还没有作其他的拓展，这里的IdentRef只是变量名，后面拓展成数组等等之后就有更多的东西了，比较麻烦…我在想是不是要先把IdentRef单独先分出来，以便于以后的工作。</p>
+<p>首先继续添加关键字，原本的<code>sym</code>用的是unsigned long类型，大小有点不够，所以把所有的<code>sym</code>都改成unsigned long long类型。</p>
+<p>在<code>statbegsys</code>中把read和write都加上。</p>
+<p>然后在stmt中完成对read和write的处理即可。</p>
+<p>有了read和write之后，接下来对PL/0编译器的各种测试和调试都可以先通过这两个来完成啦，简直是赞。</p>
+<ul>
+<li>添加true和false支持</li>
+</ul>
+<p>为后面添加boolean类型作准备</p>
+<ul>
+<li>添加not/and/or/div/mod支持</li>
+</ul>
+<p>事实上由于类型还没改，到这里为止编译器还只能支持整数，这里的div和原本的除法是一样的。</p>
+<ul>
+<li>添加integer/boolean类型定义</li>
+</ul>
+<p>在<code>enum object</code>这个枚举类型中把integer和boolean都加上。</p>
+<p>添加类型定义需要涉及到的修改的地方比较多，比如VarDec的定义：</p>
+<p>VarDec → ident {, ident} : Type ;</p>
+<p>PL/0不像C语言那样先写下类型，后面再跟变量名，而是刚好反过来，因此这里新加一个enterlist的结构，识别出ident之后先把对应的符号表位置存入enterlist，然后等类型识别完毕后再改上去。</p>
+<p><strong>各个位置</strong>涉及到变量值的都需要修改，另外在变量的使用过程中还需要增加运算类型是否匹配的检查。我增加了一个运算操作用来整理boolean型变量的数据，即非零的全变成1。</p>
+<blockquote>
+<p>这个编译器中运行时直接用的是C的数组作为数据栈，所以对于不同类型变量的存储其实是大大简化了的，因为随便怎么写都能存下来，大不了最后我把运行栈整个改成double数组就能同时支持整数和浮点数了，而实际要生成真正的汇编语言的话，需要考虑到的东西很多，还要看是不是跟机器也相关等等。</p>
+<p>这里还是仅作实验学习吧…</p>
+</blockquote>
+<p>额，各种问题都是相当麻烦，详细的就不记录了，改着改着都改忘了。</p>
+<ul>
+<li>boolean运算的短路方式</li>
+</ul>
+<p>or前面是1，则后面部分不再计算；and前面是0，则后面部分不再计算。</p>
+<p>本来想是不是生成中间代码时就直接跳了，但是值的计算是到运行时才完成的，编译阶段根本不知道结果，所以要修改的部分应该是在中间代码生成时加上判断跳转的指令。</p>
+<blockquote>
+<p>这里遇到点小麻烦，本来以为已经完成了这部分，结果调试时不对。</p>
+<p>翻解释器的代码出来看之后惊奇地发现jpc结束后居然是要栈顶减1的…这样我原来想的就有问题了。<br>明天再想想怎么解决吧。</p>
+</blockquote>
+<hr>
+<p>待续…</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/02/21/2016-02-21-pl0/" rel="bookmark">编译原理课设尝试（一）——PL/0编译器分析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/08/16/2015-08-16-compilers/" rel="bookmark">编译原理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/01/22/2016-01-22-dragonbook/" rel="bookmark">编译原理 龙书</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/09/09/2015-09-09-cod/" rel="bookmark">计算机组成与设计.硬件/软件接口 学习笔记（一）</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/10/23/2015-10-23-virtualmemory/" rel="bookmark">硬件/软件接口 Virtual Memory</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86/" rel="tag"># 编译原理</a>
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 学习笔记</a>
+              <a href="/tags/PL-0/" rel="tag"># PL/0</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/02/21/2016-02-21-pl0/" rel="prev" title="编译原理课设尝试（一）——PL/0编译器分析">
+      <i class="fa fa-chevron-left"></i> 编译原理课设尝试（一）——PL/0编译器分析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/03/06/2016-03-06-ustc/" rel="next" title="USTC">
+      USTC <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PL-0可拓展的完整文法"><span class="nav-text">PL&#x2F;0可拓展的完整文法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#课设要求"><span class="nav-text">课设要求</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#改写过程记录"><span class="nav-text">改写过程记录</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '03dd651105339ea11aaca12adac1ba37',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

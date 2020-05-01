@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="【A】无向图的双联通子图计数、DP+状态压缩 【B】计算几何（点的旋转） 【C】DP+状态压缩 【D】离散数学+DP （感觉可出） 【E】概率DP 【F】LCT模板题（-_-&#x2F;&#x2F;&#x2F;LCT是啥！！！！） 【G】签到题 【H】染色+搜索 【I】阅读理解+记忆化搜索 【J】物理题，数论，高斯消元法（感觉可出）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The 2014 ACM-ICPC Asia Regional Anshan Online">
+<meta property="og:url" content="https://jcf94.com/2014/09/13/2014-09-13-The-2014-ACM-ICPC-Asia-Regional-Anshan-Online/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="【A】无向图的双联通子图计数、DP+状态压缩 【B】计算几何（点的旋转） 【C】DP+状态压缩 【D】离散数学+DP （感觉可出） 【E】概率DP 【F】LCT模板题（-_-&#x2F;&#x2F;&#x2F;LCT是啥！！！！） 【G】签到题 【H】染色+搜索 【I】阅读理解+记忆化搜索 【J】物理题，数论，高斯消元法（感觉可出）">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2014-09-13T06:47:12.000Z">
+<meta property="article:modified_time" content="2018-03-07T06:58:42.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="ACM-ICPC">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2014/09/13/2014-09-13-The-2014-ACM-ICPC-Asia-Regional-Anshan-Online/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>The 2014 ACM-ICPC Asia Regional Anshan Online | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2014/09/13/2014-09-13-The-2014-ACM-ICPC-Asia-Regional-Anshan-Online/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          The 2014 ACM-ICPC Asia Regional Anshan Online
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2014-09-13 14:47:12" itemprop="dateCreated datePublished" datetime="2014-09-13T14:47:12+08:00">2014-09-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-03-07 14:58:42" itemprop="dateModified" datetime="2018-03-07T14:58:42+08:00">2018-03-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ACM-%E6%AF%94%E8%B5%9B/" itemprop="url" rel="index"><span itemprop="name">ACM-比赛</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>【A】无向图的双联通子图计数、DP+状态压缩</p>
+<p><del>【B】计算几何（点的旋转）</del></p>
+<p>【C】DP+状态压缩</p>
+<p>【D】离散数学+DP （感觉可出）</p>
+<p><del>【E】概率DP</del></p>
+<p>【F】LCT模板题（-_-///LCT是啥！！！！）</p>
+<p><del>【G】签到题</del></p>
+<p>【H】染色+搜索</p>
+<p>【I】阅读理解+记忆化搜索</p>
+<p>【J】物理题，数论，高斯消元法（感觉可出）</p>
+<a id="more"></a>
+
+<hr>
+<h1 id="B、Rotate"><a href="#B、Rotate" class="headerlink" title="B、Rotate"></a>B、Rotate</h1><p>Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/65536 K (Java/Others)</p>
+<p>Special Judge</p>
+<h2 id="Problem-Description"><a href="#Problem-Description" class="headerlink" title="Problem Description"></a>Problem Description</h2><p>Noting is more interesting than rotation!</p>
+<p>Your little sister likes to rotate things. To put it easier to analyze, your sister makes n rotations. In the i-th time, she makes everything in the plane rotate counter-clockwisely around a point ai by a radian of pi.</p>
+<p>Now she promises that the total effect of her rotations is a single rotation around a point A by radian P (this means the sum of pi is not a multiplier of 2π).</p>
+<p>Of course, you should be able to figure out what is A and P :).</p>
+<h2 id="Input"><a href="#Input" class="headerlink" title="Input"></a>Input</h2><p>The first line contains an integer T, denoting the number of the test cases.</p>
+<p>For each test case, the first line contains an integer n denoting the number of the rotations. Then n lines follows, each containing 3 real numbers x, y and p, which means rotating around point (x, y) counter-clockwisely by a radian of p.</p>
+<p>We promise that the sum of all p’s is differed at least 0.1 from the nearest multiplier of 2π.</p>
+<p>T&lt;=100. 1&lt;=n&lt;=10. 0&lt;=x, y&lt;=100. $0&lt;=p&lt;=2\pi$.</p>
+<h2 id="Output"><a href="#Output" class="headerlink" title="Output"></a>Output</h2><p>For each test case, print 3 real numbers x, y, p, indicating that the overall rotation is around (x, y) counter-clockwisely by a radian of p. Note that you should print p where $0&lt;=p&lt;2\pi$.</p>
+<p>Your answer will be considered correct if and only if for x, y and p, the absolute error is no larger than 1e-5.</p>
+<h2 id="Sample-Input"><a href="#Sample-Input" class="headerlink" title="Sample Input"></a>Sample Input</h2><blockquote>
+<p>1<br>3<br>0 0 1<br>1 1 1<br>2 2 1</p>
+</blockquote>
+<h2 id="Sample-Output"><a href="#Sample-Output" class="headerlink" title="Sample Output"></a>Sample Output</h2><blockquote>
+<p>1.8088715944 0.1911284056 3.0000000000</p>
+</blockquote>
+<h2 id="题意"><a href="#题意" class="headerlink" title="题意"></a>题意</h2><p>对于每一组测试数据，给出一系列旋转命令，每次将整个平面空间绕着某一点逆时针旋转某一个弧度。而所有这些操作的最终结果可以等效为绕着A点旋转P弧度，题目的要求即求出这个坐标点A和弧度P。</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>当时看到这题解析几何，第一反应就是不想去管它了，因为手头没有趁手的模板可用，本来就数学不好，算起来太过耗时，还容易错，无奈水平有限，能做的题目不多，还是回来写这个了。</p>
+<p>既然题目确定了所有这些操作都可以等效为一个，那我们也不需呀去管这个结论是怎么证明出来的了。基本的思想是用一条线段去指代这个平面，每次将线段的两端点都进行一次旋转操作，就相当于整条线段都旋转了，更进一步地就代表平面旋转了。之后分析原始坐标与结果坐标之间的关系即可得出等效结果。</p>
+<p>一、原坐标与起始坐标相连的线段必然是以旋转中心为圆心的圆上的一条弦。则根据两个点的旋转结果，取线段中垂线算出交点即可求出圆心，即旋转中心；</p>
+<p>二、然后就是旋转角度了，画个三角形余弦定理求解即可。</p>
+<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>最开始一直WA是忽略了一个问题就是P的范围是0~2Pi，三角形余弦定理计算出的结果肯定是小于Pi的，就是最后必须判断一下旋转角度是否超过了Pi，超了则最终的输出结果应该是2Pi-P。这里要用到判断两点是否在一条直线的同一边。</p>
+<p>没有好的模板……下面的代码看着各种乱啊：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID    : Chen Fan</span></span><br><span class="line"><span class="comment">LANG    : G++</span></span><br><span class="line"><span class="comment">PROG    : B1002</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cmath&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> Pi 3.141592657</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">poi</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">double</span> x,y;</span><br><span class="line">&#125; point;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function">point <span class="title">rotate</span><span class="params">(point v,point p,<span class="keyword">double</span> angle)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    point ret=p;</span><br><span class="line">    v.x-=p.x,v.y-=p.y;</span><br><span class="line">    p.x=<span class="built_in">cos</span>(angle);</span><br><span class="line">    p.y=<span class="built_in">sin</span>(angle);</span><br><span class="line">    ret.x+=v.x*p.x-v.y*p.y;</span><br><span class="line">    ret.y+=v.x*p.y+v.y*p.x;</span><br><span class="line">    <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> t;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;t);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> tt=<span class="number">1</span>;tt&lt;=t;tt++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> n;</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;n);</span><br><span class="line">        point p1=&#123;<span class="number">20.123</span>,<span class="number">6.678</span>&#125;,p2=&#123;<span class="number">3.414</span>,<span class="number">10.123</span>&#125;;</span><br><span class="line">        point p0=&#123;(p1.x+p2.x)/<span class="number">2</span>,(p1.y+p2.y)/<span class="number">2</span>&#125;;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=n;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            point now;</span><br><span class="line">            <span class="keyword">double</span> p;</span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">"%lf%lf%lf"</span>,&amp;now.x,&amp;now.y,&amp;p);</span><br><span class="line">            p1=rotate(p1,now,p);</span><br><span class="line">            p2=rotate(p2,now,p);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        point p10;</span><br><span class="line">        p10.x=(p1.x+<span class="number">20.123</span>)/<span class="number">2</span>;</span><br><span class="line">        p10.y=(p1.y+<span class="number">6.678</span>)/<span class="number">2</span>;</span><br><span class="line">        <span class="keyword">double</span> k1=(p1.y-p10.y)/(p1.x-p10.x);</span><br><span class="line">        k1=<span class="number">-1</span>/k1;</span><br><span class="line">        <span class="keyword">double</span> b1=p10.y-k1*p10.x;</span><br><span class="line">        </span><br><span class="line">        point p20;</span><br><span class="line">        p20.x=(p2.x+<span class="number">3.414</span>)/<span class="number">2</span>;</span><br><span class="line">        p20.y=(p2.y+<span class="number">10.123</span>)/<span class="number">2</span>;</span><br><span class="line">        <span class="keyword">double</span> k2=(p2.y-p20.y)/(p2.x-p20.x);</span><br><span class="line">        k2=<span class="number">-1</span>/k2;</span><br><span class="line">        <span class="keyword">double</span> b2=p20.y-k2*p20.x;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">double</span> xx=(b2-b1)/(k1-k2);</span><br><span class="line">        <span class="keyword">double</span> yy=k1*xx+b1;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">double</span> bb=(xx<span class="number">-3.414</span>)*(xx<span class="number">-3.414</span>)+(yy<span class="number">-10.123</span>)*(yy<span class="number">-10.123</span>);</span><br><span class="line">        <span class="keyword">double</span> cc=(xx-p2.x)*(xx-p2.x)+(yy-p2.y)*(yy-p2.y);</span><br><span class="line">        <span class="keyword">double</span> aa=(p2.x<span class="number">-3.414</span>)*(p2.x<span class="number">-3.414</span>)+(p2.y<span class="number">-10.123</span>)*(p2.y<span class="number">-10.123</span>);</span><br><span class="line">        <span class="keyword">double</span> ct=(bb+cc-aa)/(<span class="number">2</span>*<span class="built_in">sqrt</span>(bb)*<span class="built_in">sqrt</span>(cc));</span><br><span class="line">        </span><br><span class="line">        point p3=&#123;<span class="number">2</span>*xx-p0.x,<span class="number">2</span>*yy-p0.y&#125;;</span><br><span class="line">        point p4=&#123;(p1.x+p2.x)/<span class="number">2</span>,(p1.y+p2.y)/<span class="number">2</span>&#125;;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">double</span> k3=(p3.y-p0.y)/(p3.x-p0.x);</span><br><span class="line">        <span class="keyword">double</span> b3=p3.y-k3*p3.x;</span><br><span class="line">        </span><br><span class="line">        point pp=&#123;xx,yy&#125;;</span><br><span class="line">        point p5=rotate(p0,pp,<span class="number">1</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> ((p4.x*k3+b3-p4.y)*(p5.x*k3+b3-p5.y)&gt;<span class="number">0</span>) <span class="built_in">printf</span>(<span class="string">"%.10lf %.10lf %.10lf\n"</span>,xx,yy,<span class="built_in">acos</span>(ct));</span><br><span class="line">        <span class="keyword">else</span> <span class="built_in">printf</span>(<span class="string">"%.10lf %.10lf %.10lf\n"</span>,xx,yy,<span class="number">2</span>*Pi-<span class="built_in">acos</span>(ct));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="启发"><a href="#启发" class="headerlink" title="启发"></a>启发</h2><p>对于计算几何的东西，真的需要提前准备下模板，主要的几何思想要看数学能力。</p>
+<hr>
+<h1 id="E、Walk"><a href="#E、Walk" class="headerlink" title="E、Walk"></a>E、Walk</h1><p>Time Limit: 30000/15000 MS (Java/Others)    Memory Limit: 65536/65536 K (Java/Others)</p>
+<h2 id="Problem-Description-1"><a href="#Problem-Description-1" class="headerlink" title="Problem Description"></a>Problem Description</h2><p>I used to think I could be anything, but now I know that I couldn’t do anything. So I started traveling.</p>
+<p>The nation looks like a connected bidirectional graph, and I am randomly walking on it. It means when I am at node i, I will travel to an adjacent node with the same probability in the next step. I will pick up the start node randomly (each node in the graph has the same probability.), and travel for d steps, noting that I may go through some nodes multiple times.</p>
+<p>If I miss some sights at a node, it will make me unhappy. So I wonder for each node, what is the probability that my path doesn’t contain it.</p>
+<h2 id="Input-1"><a href="#Input-1" class="headerlink" title="Input"></a>Input</h2><p>The first line contains an integer T, denoting the number of the test cases.</p>
+<p>For each test case, the first line contains 3 integers n, m and d, denoting the number of vertices, the number of edges and the number of steps respectively. Then m lines follows, each containing two integers a and b, denoting there is an edge between node a and node b.</p>
+<p>T&lt;=20, n&lt;=50, n-1&lt;=m&lt;=n*(n-1)/2, 1&lt;=d&lt;=10000. There is no self-loops or multiple edges in the graph, and the graph is connected. The nodes are indexed from 1.</p>
+<h2 id="Output-1"><a href="#Output-1" class="headerlink" title="Output"></a>Output</h2><p>For each test cases, output n lines, the i-th line containing the desired probability for the i-th node.</p>
+<p>Your answer will be accepted if its absolute error doesn’t exceed 1e-5.</p>
+<h2 id="Sample-Input-1"><a href="#Sample-Input-1" class="headerlink" title="Sample Input"></a>Sample Input</h2><blockquote>
+<p>2<br>5 10 100<br>1 2<br>2 3<br>3 4<br>4 5<br>1 5<br>2 4<br>3 5<br>2 5<br>1 4<br>1 3<br>10 10 10<br>1 2<br>2 3<br>3 4<br>4 5<br>5 6<br>6 7<br>7 8<br>8 9<br>9 10<br>4 9</p>
+</blockquote>
+<h2 id="Sample-Output-1"><a href="#Sample-Output-1" class="headerlink" title="Sample Output"></a>Sample Output</h2><blockquote>
+<p>0.0000000000<br>0.0000000000<br>0.0000000000<br>0.0000000000<br>0.0000000000<br>0.6993317967<br>0.5864284952<br>0.4440860821<br>0.2275896991<br>0.4294074591<br>0.4851048742<br>0.4896018842<br>0.4525044250<br>0.3406567483<br>0.6421630037</p>
+</blockquote>
+<h2 id="题意-1"><a href="#题意-1" class="headerlink" title="题意"></a>题意</h2><p>随机随机随机！！…在一张无向图中，随机选定一个起点出发，之后的每一步都是等概率的。有一些点不能被到达，这里要求的就是每一个点不能被到达的概率。</p>
+<h2 id="分析-1"><a href="#分析-1" class="headerlink" title="分析"></a>分析</h2><p>概率DP的题目做得太少了，以至于当时最后的时间基本都花在这里了，还是没有什么想法。每次都是这样，比完之后才能想到最后的正解，唉。当时纠结的是怎么记录访问过的路径，然后判断每一次遍历完之后有哪些点是该次没有被访问过的。这个想法完全是不可行的。</p>
+<p>既然是判断一个点不能到达的概率，则直接把这个点从图中去掉，依次递推其他所有点在走完d步之后到达的概率，结果的总和就是不能到达该点的概率。</p>
+<p>概率DP的状态转移方程：f(i,j)=f(i-1,front[j])/num[front[j]]</p>
+<p>求解的时候，依次枚举一个点，把这个点拿掉，然后递推DP结果，由于当前步的状态只与前一步有关，这里可以用滚动数组处理。</p>
+<p>前向星是我的个人习惯，这里恰好需要一个计算的变量，前向星的结构恰好满足。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID    : Chen Fan</span></span><br><span class="line"><span class="comment">LANG    : G++</span></span><br><span class="line"><span class="comment">PROG    : E1005</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstring&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">nod</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">int</span> a,b;</span><br><span class="line">&#125; node;</span><br><span class="line">node a[<span class="number">3000</span>];</span><br><span class="line"><span class="keyword">int</span> start[<span class="number">60</span>],num[<span class="number">60</span>],n,m,d,tot;</span><br><span class="line"><span class="keyword">bool</span> ma[<span class="number">60</span>][<span class="number">60</span>];</span><br><span class="line"><span class="keyword">double</span> ans[<span class="number">60</span>],temp[<span class="number">2</span>][<span class="number">60</span>];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">op</span><span class="params">(node a,node b)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (a.a==b.a) <span class="keyword">return</span> a.b&lt;b.b;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">return</span> a.a&lt;b.a;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    freopen(<span class="string">"E1005.txt"</span>,<span class="string">"r"</span>,<span class="built_in">stdin</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">int</span> t;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;t);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> tt=<span class="number">1</span>;tt&lt;=t;tt++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%d%d%d"</span>,&amp;n,&amp;m,&amp;d);</span><br><span class="line">        <span class="built_in">memset</span>(ma,<span class="number">0</span>,<span class="keyword">sizeof</span>(ma));</span><br><span class="line">        <span class="keyword">int</span> tail=<span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=m;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> x,y;</span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">"%d%d"</span>,&amp;x,&amp;y);</span><br><span class="line">            <span class="keyword">if</span> (!ma[x][y])</span><br><span class="line">            &#123;</span><br><span class="line">                ma[x][y]=<span class="literal">true</span>;</span><br><span class="line">                ma[y][x]=<span class="literal">true</span>;</span><br><span class="line">                tail++;</span><br><span class="line">                a[tail].a=x;</span><br><span class="line">                a[tail].b=y;</span><br><span class="line">                tail++;</span><br><span class="line">                a[tail].a=y;</span><br><span class="line">                a[tail].b=x;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        sort(&amp;a[<span class="number">1</span>],&amp;a[tail+<span class="number">1</span>],op);</span><br><span class="line">        <span class="keyword">int</span> o=<span class="number">0</span>;</span><br><span class="line">        <span class="built_in">memset</span>(num,<span class="number">0</span>,<span class="keyword">sizeof</span>(num));</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=tail;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (o!=a[i].a)</span><br><span class="line">            &#123;</span><br><span class="line">                o=a[i].a;</span><br><span class="line">                start[o]=i;</span><br><span class="line">            &#125;</span><br><span class="line">            num[o]++;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">memset</span>(ans,<span class="number">0</span>,<span class="keyword">sizeof</span>(ans));</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> k=<span class="number">1</span>;k&lt;=n;k++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">memset</span>(temp,<span class="number">0</span>,<span class="keyword">sizeof</span>(temp));</span><br><span class="line">            <span class="keyword">int</span> key=<span class="number">1</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=n;i++)</span><br><span class="line">            <span class="keyword">if</span> (i!=k) temp[<span class="number">0</span>][i]=<span class="number">1.0</span>/n;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=d;i++)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="built_in">memset</span>(temp[key],<span class="number">0</span>,<span class="keyword">sizeof</span>(temp[key]));</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j=<span class="number">1</span>;j&lt;=n;j++)</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="keyword">for</span> (<span class="keyword">int</span> o=<span class="number">0</span>;o&lt;num[j];o++)</span><br><span class="line">                    <span class="keyword">if</span> (a[start[j]+o].b!=k)</span><br><span class="line">                    temp[key][a[start[j]+o].b]+=temp[<span class="number">1</span>-key][j]/(<span class="keyword">double</span>)num[j];</span><br><span class="line">                &#125;</span><br><span class="line">                key=<span class="number">1</span>-key;</span><br><span class="line">            &#125;</span><br><span class="line">            key=<span class="number">1</span>-key;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=n;i++)</span><br><span class="line">            <span class="keyword">if</span> (i!=k) ans[k]+=temp[key][i];</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=n;i++)</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"%.10lf\n"</span>,ans[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="启发-1"><a href="#启发-1" class="headerlink" title="启发"></a>启发</h2><p>题目中碰到一个点对前后状态影响较大，无法直接推算或者直接算需要涉及到大量复杂记录的情况，可以考虑先把这个点拿掉，完成之后再放上去，或者先把其变为普通点，完成后再恢复（后面有广州赛区的D题就是这种思想）</p>
+<hr>
+<h1 id="G、Osu"><a href="#G、Osu" class="headerlink" title="G、Osu!"></a>G、Osu!</h1><p>Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/65536 K (Java/Others) </p>
+<p>Special Judge</p>
+<h2 id="Problem-Description-2"><a href="#Problem-Description-2" class="headerlink" title="Problem Description"></a>Problem Description</h2><p>Osu! is a famous music game that attracts a lot of people. In osu!, there is a performance scoring system, which evaluates your performance. Each song you have played will have a score. And the system will sort all you scores in descending order. After that, the i-th song scored ai will add 0.95^(i-1)*ai to your total score.</p>
+<p>Now you are given the task to write a calculator for this system.</p>
+<h2 id="Input-2"><a href="#Input-2" class="headerlink" title="Input"></a>Input</h2><p>The first line contains an integer T, denoting the number of the test cases.</p>
+<p>For each test case, the first line contains an integer n, denoting the number of songs you have played. The second line contains n integers a1, a2, …, an separated by a single space, denoting the score of each song.</p>
+<p>T&lt;=20, n&lt;=50, 1&lt;=ai&lt;=500.</p>
+<h2 id="Output-2"><a href="#Output-2" class="headerlink" title="Output"></a>Output</h2><p>For each test case, output one line for the answer.<br>Your answers will be considered correct if its absolute error is smaller than 1e-5.</p>
+<h2 id="Sample-Input-2"><a href="#Sample-Input-2" class="headerlink" title="Sample Input"></a>Sample Input</h2><blockquote>
+<p>1<br>2<br>530 478</p>
+</blockquote>
+<h2 id="Sample-Output-2"><a href="#Sample-Output-2" class="headerlink" title="Sample Output"></a>Sample Output</h2><blockquote>
+<p>984.1000000000</p>
+</blockquote>
+<h2 id="题意-2"><a href="#题意-2" class="headerlink" title="题意"></a>题意</h2><p>排序+pow函数输出即可。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/09/08/2014-09-08-The-2014-ACM-ICPC-Asia-Mudanjiang-Regional-First-Round/" rel="bookmark">The 2014 ACM-ICPC Asia Mudanjiang Regional First Round</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/09/15/2014-09-15-The-2014-ACMICPC-Asia-Regional-Xian-Online/" rel="bookmark">The 2014 ACMICPC Asia Regional Xian Online</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/09/23/2014-09-23-The-2014-ACMICPC-Asia-Regional-Guangzhou-Online/" rel="bookmark">The 2014 ACMICPC Asia Regional Guangzhou Online</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/09/23/2014-09-23-The-2014-ACMICPC-Asia-Regional-Beijing-Online/" rel="bookmark">The 2014 ACMICPC Asia Regional Beijing Online</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/09/28/2014-09-28-The-2014-ACMICPC-Asia-Regional-Shanghai-Online/" rel="bookmark">The 2014 ACMICPC Asia Regional Shanghai Online</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ACM-ICPC/" rel="tag"># ACM-ICPC</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2014/09/12/2014-09-12-HDU-1068-Girls-and-Boys/" rel="prev" title="HDU 1068 Girls and Boys 二分图最大独立集（最大二分匹配）">
+      <i class="fa fa-chevron-left"></i> HDU 1068 Girls and Boys 二分图最大独立集（最大二分匹配）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2014/09/15/2014-09-15-The-2014-ACMICPC-Asia-Regional-Xian-Online/" rel="next" title="The 2014 ACMICPC Asia Regional Xian Online">
+      The 2014 ACMICPC Asia Regional Xian Online <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#B、Rotate"><span class="nav-text">B、Rotate</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Problem-Description"><span class="nav-text">Problem Description</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Input"><span class="nav-text">Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output"><span class="nav-text">Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Input"><span class="nav-text">Sample Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Output"><span class="nav-text">Sample Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#题意"><span class="nav-text">题意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析"><span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#注意"><span class="nav-text">注意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启发"><span class="nav-text">启发</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#E、Walk"><span class="nav-text">E、Walk</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Problem-Description-1"><span class="nav-text">Problem Description</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Input-1"><span class="nav-text">Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output-1"><span class="nav-text">Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Input-1"><span class="nav-text">Sample Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Output-1"><span class="nav-text">Sample Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#题意-1"><span class="nav-text">题意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析-1"><span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启发-1"><span class="nav-text">启发</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#G、Osu"><span class="nav-text">G、Osu!</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Problem-Description-2"><span class="nav-text">Problem Description</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Input-2"><span class="nav-text">Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output-2"><span class="nav-text">Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Input-2"><span class="nav-text">Sample Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Output-2"><span class="nav-text">Sample Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#题意-2"><span class="nav-text">题意</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'af0e8ec7717832832c53d5fc8a8b5ccc',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

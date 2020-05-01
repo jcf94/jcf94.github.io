@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="半路上车，Deep Learning 这块还在断断续续地慢慢学，但是由于现在测 TensorFlow 性能的需要，所以来学一下 AlexNet（额，听说 CNN 的计算量不少）。 AlexNet 是 2012 年 ImageNet 竞赛冠军获得者 Alex Krizhevsky 设计的，所以叫这个名字，这个也一直是入门 CNN 的经典模型。 参考的材料有这里，以及从这里盗了张图：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AlexNet">
+<meta property="og:url" content="https://jcf94.com/2017/04/04/2017-04-04-alexnet/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="半路上车，Deep Learning 这块还在断断续续地慢慢学，但是由于现在测 TensorFlow 性能的需要，所以来学一下 AlexNet（额，听说 CNN 的计算量不少）。 AlexNet 是 2012 年 ImageNet 竞赛冠军获得者 Alex Krizhevsky 设计的，所以叫这个名字，这个也一直是入门 CNN 的经典模型。 参考的材料有这里，以及从这里盗了张图：">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2017-04-04-alexnet-alexnet.png">
+<meta property="article:published_time" content="2017-04-04T12:49:12.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="Deep Learning">
+<meta property="article:tag" content="TensorFlow">
+<meta property="article:tag" content="AlexNet">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2017-04-04-alexnet-alexnet.png">
+
+<link rel="canonical" href="https://jcf94.com/2017/04/04/2017-04-04-alexnet/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>AlexNet | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2017/04/04/2017-04-04-alexnet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AlexNet
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2017-04-04 20:49:12" itemprop="dateCreated datePublished" datetime="2017-04-04T20:49:12+08:00">2017-04-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index"><span itemprop="name">Machine Learning</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>半路上车，Deep Learning 这块还在断断续续地慢慢学，但是由于现在测 TensorFlow 性能的需要，所以来学一下 AlexNet（额，听说 CNN 的计算量不少）。</p>
+<p>AlexNet 是 2012 年 ImageNet 竞赛冠军获得者 Alex Krizhevsky 设计的，所以叫这个名字，这个也一直是入门 CNN 的经典模型。</p>
+<p>参考的材料有<a href="http://blog.csdn.net/sunbaigui/article/details/39938097" target="_blank" rel="noopener">这里</a>，以及从<a href="http://www.jianshu.com/p/58168fec534d" target="_blank" rel="noopener">这里</a>盗了张图：</p>
+<p><img data-src="http://jcf94.com/download/2017-04-04-alexnet-alexnet.png" alt="Alexnet Architecture"></p>
+<a id="more"></a>
+
+<hr>
+<h1 id="组成部分分析"><a href="#组成部分分析" class="headerlink" title="组成部分分析"></a>组成部分分析</h1><h2 id="卷积层（Convolutional）"><a href="#卷积层（Convolutional）" class="headerlink" title="卷积层（Convolutional）"></a>卷积层（Convolutional）</h2><p>CNN 既然叫卷积神经网络，最重要的就是卷积了。</p>
+<p>卷积这个操作是用于提取图像的某些特征，图像上的二维卷积其实与以前在信号系统中学过的<a href="http://jcf94.com/2015/07/01/2015-07-01-xinhaoxiangguan/">一维卷积</a>非常类似，公式大概是这个样子：</p>
+<p>$$f[x,y]*g[x,y]=\sum_{n_1=-\infty}^\infty \sum_{n_2=-\infty}^\infty f[n_1, n_2] \cdot g[x-n_1, y-n_2]$$</p>
+<p>用卷积核 g 对图像 f 作卷积就是将 g 沿着反对角线翻转，然后跟 f 上的对应位相乘，对相乘之后的所有位求和，所得的值作为卷积结果图的一个像素。</p>
+<p>CNN 中由于卷积核全是随机生成的，反对角线翻转这一步就不需要了。</p>
+<p>对应的几个术语：</p>
+<p><code>kernel_size</code> 表示卷积核的大小；<br><code>stride</code> 表示一次卷积之后，卷积核平移几个像素；<br><code>pad</code> 是对原图的边缘进行像素扩充。</p>
+<h2 id="池化-降采样层（Pooling）"><a href="#池化-降采样层（Pooling）" class="headerlink" title="池化/降采样层（Pooling）"></a>池化/降采样层（Pooling）</h2><p>选定一个区域进行降采样就是留下一个值，主要用于减少数据量。</p>
+<p>降采样的方法通常有取区域中的最大值留下，或者对区域中的像素求均值留下（滑动平均？）等等。</p>
+<h2 id="激活函数层"><a href="#激活函数层" class="headerlink" title="激活函数层"></a>激活函数层</h2><p>额，就是应用一个激活函数…</p>
+<p>常用的有 <code>sigmoid</code>、<code>tanh</code>、<code>ReLU</code> 等等函数，要看需要把值控制在什么区间范围内，然后反向求导的时候是不是好算……（话说选什么激活函数完全是经验+玄学吧？数学原理在哪里？）</p>
+<h2 id="标准化-归一化层（Normalization）"><a href="#标准化-归一化层（Normalization）" class="headerlink" title="标准化/归一化层（Normalization）"></a>标准化/归一化层（Normalization）</h2><p>有的实现里面能看到这个，有的没有，一般就是用个公式对数据进行归一化一遍。</p>
+<h2 id="全连接层（Fully-Connected）"><a href="#全连接层（Fully-Connected）" class="headerlink" title="全连接层（Fully Connected）"></a>全连接层（Fully Connected）</h2><p>接上一个深度神经网络，没啥好说的。</p>
+<h2 id="遗忘层（Dropout）"><a href="#遗忘层（Dropout）" class="headerlink" title="遗忘层（Dropout）"></a>遗忘层（Dropout）</h2><p>以一定概率<strong>随机</strong>（纯随机哦…）扔掉一些数据，不加很容易造成过拟合。</p>
+<p>据说是为了模拟人脑的过程（？？？）</p>
+<p>反正在我这里看来怎么看怎么玄学，是不是换个随机数生成器都可能有不同的效果？</p>
+<h1 id="Alexnet-结构详解"><a href="#Alexnet-结构详解" class="headerlink" title="Alexnet 结构详解"></a>Alexnet 结构详解</h1><h2 id="第一阶段"><a href="#第一阶段" class="headerlink" title="第一阶段"></a>第一阶段</h2><p>输入的是一些 <code>227*227</code> 大小的图像，RGB 三个通道，这是初始数据。</p>
+<p>第一个卷积层用的是 96 个大小为 <code>11*11</code> 的卷积核，<code>stride=4</code> 表示每次卷积完了之后移动 4 格，所以一张 <code>227*227</code> 的图经过一次卷积之后就会变成 $\frac{227-11}{4}+1=55$ 边长的图，3 个通道做完之后数值相加。96 个卷积核所以得到了 <code>55*55*96</code> 这样的数据。</p>
+<p>中间过一遍激活函数，ReLU。</p>
+<p>第一个降采样层用了 <code>3*3</code> 的采样核，<code>stride</code> 为 2，则每张图通过之后得到了 $\frac{55-3}{2}+1=27$ 边长的数据，一共为 <code>27*27*96</code> 个像素点。</p>
+<h2 id="第二阶段"><a href="#第二阶段" class="headerlink" title="第二阶段"></a>第二阶段</h2><p>输入从 <code>27*27*96</code> 开始。</p>
+<p>第二个卷积层用的是 256 个大小为 <code>5*5</code> 的卷积核，<code>stride</code> 这里是 1，<code>pad=2</code> 是扩充边缘，即对前面 <code>27*27</code> 的图像的上下左右四个方向各扩充 2 个像素变成 <code>31*31</code> 的图像，这是为了防止卷积操作使得图像大小缩小得过快。所以由于 <code>pad</code> 参数的存在，经过卷积之后图像的大小是 $\frac{27+2*2-5}{1}+1=27$ 没有发生改变。<code>group=2</code> 指定的是把前面 96 个通道分成 2 个子集，数据的累加在各自的子集内完成。输出是 <code>27*27*256</code>。</p>
+<p>过一遍激活函数。</p>
+<p>然后第二个降采样层与第一次一样，得到了 $\frac{27-3}{2}+1=13$ 边长的数据，一共 <code>13*13*256</code>。</p>
+<h2 id="第三阶段"><a href="#第三阶段" class="headerlink" title="第三阶段"></a>第三阶段</h2><p>输入从 <code>13*13*256</code> 开始。</p>
+<p>第三个卷积层用了 384 个大小为 <code>3*3</code> 的卷积核，<code>pad=1</code>，则得到了 $\frac{13+2*1-3}{1}+1=13$ 边长的图，一共 <code>13*13*384</code>。</p>
+<p>过一遍激活函数。</p>
+<h2 id="第四阶段"><a href="#第四阶段" class="headerlink" title="第四阶段"></a>第四阶段</h2><p>输入从 <code>13*13*384</code> 开始。</p>
+<p>第四个卷积层用了 384 个大小为 <code>3*3</code> 的卷积核，<code>pad=1</code>，则得到了$\frac{13+2*1-3}{1}+1=13$ 边长的图，一共 <code>13*13*384</code>。</p>
+<p>过一遍激活函数。</p>
+<h2 id="第五阶段"><a href="#第五阶段" class="headerlink" title="第五阶段"></a>第五阶段</h2><p>输入从 <code>13*13*384</code> 开始。</p>
+<p>第五个卷积层用了 256 个大小为 <code>3*3</code> 的卷积核，<code>pad=1</code>，则得到了$\frac{13+2*1-3}{1}+1=13$ 边长的图，一共 <code>13*13*256</code>。</p>
+<p>过一遍激活函数。</p>
+<p>第五个降采样层用了 <code>3*3</code> 的采样核，<code>stride=2</code>，则得到了 $\frac{13-3}{2}+1=6$ 边长的图，一共 <code>6*6*256</code>。</p>
+<h2 id="第六阶段"><a href="#第六阶段" class="headerlink" title="第六阶段"></a>第六阶段</h2><p>输入从 <code>6*6*256</code> 开始。</p>
+<p>连接了 4096 个隐层节点。</p>
+<p>开始时这一部分我不是很明白，以为 <code>6*6*256</code> 的数据怎么就变成 4096 个了，后来看了代码的实现才知道是把前面的 $6*6*256=9216$ 个像素作为输入层的 9216 个节点，跟接下来的 4096 个隐层节点全连接起来。所以这里的权值 W 是个 9216*4096 的矩阵，偏置 B 是长度为 4096 的向量。</p>
+<p>过一遍激活函数。</p>
+<p>再接一个 Dropout，随机把这 4096 个数据中的某些丢掉置为 0。</p>
+<h2 id="第七阶段"><a href="#第七阶段" class="headerlink" title="第七阶段"></a>第七阶段</h2><p>输入从 <code>4096*1</code> 开始。</p>
+<p>继续连接 4096 个隐层节点。</p>
+<p>权值 W 是个 4096*4096 的矩阵，偏置 B 是长度为 4096 的向量。</p>
+<p>过一遍激活函数。</p>
+<p>继续 Dropout。</p>
+<h2 id="第八阶段"><a href="#第八阶段" class="headerlink" title="第八阶段"></a>第八阶段</h2><p>输入从 <code>4096*1</code> 开始。</p>
+<p>连接 1000 个输出层节点。</p>
+<p>权值 W 是个 4096*1000 的矩阵，偏置 B 是长度为 1000 的向量。</p>
+<p>输出的 1000 个数据对应的就是分在 1000 个类别的概率了。</p>
+<hr>
+<p>To be continued.</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/02/04/2017-02-04-tensorflow/" rel="bookmark">TensorFlow</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/03/22/2017-03-22-deeplearning/" rel="bookmark">深度学习初探</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/06/21/2017-06-21-3dct/" rel="bookmark">医学影像 & AI</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/12/20/2017-12-20-distributeddl/" rel="bookmark">分布式机器学习 / 深度学习论文整理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/13/2018-01-13-tfunpacking/" rel="bookmark">TensorFlow 拆包（一）：Session.Run()</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+              <a href="/tags/TensorFlow/" rel="tag"># TensorFlow</a>
+              <a href="/tags/AlexNet/" rel="tag"># AlexNet</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/03/22/2017-03-22-deeplearning/" rel="prev" title="深度学习初探">
+      <i class="fa fa-chevron-left"></i> 深度学习初探
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/04/19/2017-04-19-memorypool/" rel="next" title="内存池">
+      内存池 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#组成部分分析"><span class="nav-text">组成部分分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#卷积层（Convolutional）"><span class="nav-text">卷积层（Convolutional）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#池化-降采样层（Pooling）"><span class="nav-text">池化&#x2F;降采样层（Pooling）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#激活函数层"><span class="nav-text">激活函数层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#标准化-归一化层（Normalization）"><span class="nav-text">标准化&#x2F;归一化层（Normalization）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#全连接层（Fully-Connected）"><span class="nav-text">全连接层（Fully Connected）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#遗忘层（Dropout）"><span class="nav-text">遗忘层（Dropout）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Alexnet-结构详解"><span class="nav-text">Alexnet 结构详解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#第一阶段"><span class="nav-text">第一阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第二阶段"><span class="nav-text">第二阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第三阶段"><span class="nav-text">第三阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第四阶段"><span class="nav-text">第四阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第五阶段"><span class="nav-text">第五阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第六阶段"><span class="nav-text">第六阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第七阶段"><span class="nav-text">第七阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第八阶段"><span class="nav-text">第八阶段</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '1451545826fc41fda1a74af2f3251457',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

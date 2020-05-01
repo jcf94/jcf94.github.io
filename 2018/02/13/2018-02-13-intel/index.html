@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="刚刚把《硬&#x2F;软件接口》重新过完了一遍，觉得对微处理器中间的结构有点意犹未尽，真的是很有趣啊，然鹅翻开《量化分析方法》的目录看了看，又吓得我把书扔回去了……内容略多，留着慢慢看吧。 其实 Intel 历年处理器架构演变这事老早我就很好奇了，尤其在 SC17 上今年我们摸过的 Xeon Platinum 8176 那一代 CPU 性能比上代 E5-269x 暴涨了一大截，更是让人好奇这里面有些什么变化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Intel 处理器架构演进">
+<meta property="og:url" content="https://jcf94.com/2018/02/13/2018-02-13-intel/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="刚刚把《硬&#x2F;软件接口》重新过完了一遍，觉得对微处理器中间的结构有点意犹未尽，真的是很有趣啊，然鹅翻开《量化分析方法》的目录看了看，又吓得我把书扔回去了……内容略多，留着慢慢看吧。 其实 Intel 历年处理器架构演变这事老早我就很好奇了，尤其在 SC17 上今年我们摸过的 Xeon Platinum 8176 那一代 CPU 性能比上代 E5-269x 暴涨了一大截，更是让人好奇这里面有些什么变化">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-13-intel-Intel-logo.svg">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-13-intel-Intel_Core2_arch.svg">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-13-intel-Intel_Nehalem_arch.svg">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-13-intel-sandybridge-uarch.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-13-intel-ring.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-13-intel-haswell_block_diagram.svg">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-13-intel-v4_24coreshcc.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-02-13-intel-mesh.jpeg">
+<meta property="article:published_time" content="2018-02-13T13:00:36.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="Intel">
+<meta property="article:tag" content="Microarchitecture">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2018-02-13-intel-Intel-logo.svg">
+
+<link rel="canonical" href="https://jcf94.com/2018/02/13/2018-02-13-intel/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Intel 处理器架构演进 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2018/02/13/2018-02-13-intel/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Intel 处理器架构演进
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-02-13 21:00:36" itemprop="dateCreated datePublished" datetime="2018-02-13T21:00:36+08:00">2018-02-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Architecture/" itemprop="url" rel="index"><span itemprop="name">Computer Architecture</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>刚刚把《硬/软件接口》重新过完了一遍，觉得对微处理器中间的结构有点<strong>意犹未尽</strong>，真的是很有趣啊，然鹅翻开《量化分析方法》的目录看了看，又吓得我把书扔回去了……内容略多，留着慢慢看吧。</p>
+<p>其实 Intel 历年处理器架构演变这事老早我就很好奇了，尤其在 SC17 上今年我们摸过的 Xeon Platinum 8176 那一代 CPU 性能比上代 E5-269x 暴涨了一大截，更是让人好奇这里面有些什么变化。</p>
+<p>所以准备来理一理 Intel 处理器架构的演进史。</p>
+<p><img data-src="http://jcf94.com/download/2018-02-13-intel-Intel-logo.svg" alt=""></p>
+<a id="more"></a>
+
+<h1 id="Intel-Micro-architecture"><a href="#Intel-Micro-architecture" class="headerlink" title="Intel Micro-architecture"></a>Intel Micro-architecture</h1><p>下面这个表是从<a href="https://www.wikiwand.com/en/Tick%E2%80%93tock_model" target="_blank" rel="noopener">维基百科</a>里面扒的：</p>
+
+<div class="table-area" style="overflow:auto">
+<table class="wikitable" style="margin:0.5em auto; width:auto;">
+<tbody>
+<tr>
+<th scope="col" rowspan="2">Archi­tectural change</th>
+<th scope="col" rowspan="2">Fabri­cation process</th>
+<th scope="col" rowspan="2">Micro-architecture</th>
+<th scope="col" rowspan="2">Code names</th>
+<th scope="col" rowspan="2">Release date</th>
+<th scope="col" colspan="5">Processors</th>
+</tr>
+<tr>
+<th scope="col">8P/4P Server</th>
+<th scope="col">4P/2P Server/ Workstation</th>
+<th scope="col">Enthusiast/ Workstation</th>
+<th scope="col">Desktop</th>
+<th scope="col">Mobile</th>
+</tr>
+<tr>
+<td>Tick (new fabrication process)</td>
+<td rowspan="2">65 nm</td>
+<td>P6, NetBurst</td>
+<td>Presle, Cedar Mill, Yonah</td>
+<td>2006-01-05</td>
+<td></td>
+<td></td>
+<td>Presler</td>
+<td>Cedar Mill</td>
+<td>Yonah</td>
+</tr>
+<tr>
+<td>Tock (new micro-architecture)</td>
+<td rowspan="2">Core</td>
+<td>Merom</td>
+<td>2006-07-27</td>
+<td>Tigerton</td>
+<td>Woodcrest Clovertown</td>
+<td>Kentsfield</td>
+<td>Conroe</td>
+<td>Merom</td>
+</tr>
+<tr>
+<td>Tick</td>
+<td rowspan="2">45 nm</td>
+<td>Penryn</td>
+<td>2007-11-11</td>
+<td>Dunnington</td>
+<td>Harpertown</td>
+<td>Yorkfield</td>
+<td>Wolfdale</td>
+<td>Penryn</td>
+</tr>
+<tr>
+<td>Tock</td>
+<td rowspan="2">Nehalem</td>
+<td>Nehalem</td>
+<td>2008-11-17</td>
+<td>Beckton</td>
+<td>Gainestown</td>
+<td>Bloomfield</td>
+<td>Lynnfield</td>
+<td>Clarksfield</td>
+</tr>
+<tr>
+<td>Tick</td>
+<td rowspan="2">32 nm</td>
+<td>Westmere</td>
+<td>2010-01-04</td>
+<td>Westmere-EX</td>
+<td>Westmere-EP</td>
+<td>Gulftown</td>
+<td>Clarkdale</td>
+<td>Arrandale</td>
+</tr>
+<tr>
+<td>Tock</td>
+<td rowspan="2">Sandy Bridge</td>
+<td>Sandy Bridge</td>
+<td>2011-01-09</td>
+<td>(Skipped)</td>
+<td>Sandy Bridge-EP</td>
+<td>Sandy Bridge-E</td>
+<td>Sandy Bridge</td>
+<td>Sandy Bridge-M</td>
+</tr>
+<tr>
+<td>Tick</td>
+<td rowspan="3">22 nm</td>
+<td>Ivy Bridge</td>
+<td>2012-04-29</td>
+<td>Ivy Bridge-EX</td>
+<td>Ivy Bridge-EP</td>
+<td>Ivy Bridge-E</td>
+<td>Ivy Bridge</td>
+<td>Ivy Bridge-M</td>
+</tr>
+<tr>
+<td>Tock</td>
+<td rowspan="3">Haswell</td>
+<td>Haswell</td>
+<td>2013-06-02</td>
+<td>Haswell-EX</td>
+<td>Haswell-EP</td>
+<td>Haswell-E</td>
+<td>Haswell-DT</td>
+<td>Haswell-MB (notebooks)<br>
+Haswell-LP (ultrabooks)</td>
+</tr>
+<tr>
+<td rowspan="1">Refresh</td>
+<td rowspan="1">Haswell Refresh, Devil's Canyon</td>
+<td rowspan="1">2014-05-11, 2014-06-02</td>
+<td rowspan="1"></td>
+<td rowspan="1"></td>
+<td rowspan="1"></td>
+<td rowspan="1"></td>
+<td rowspan="1"></td>
+</tr>
+<tr>
+<td>Tick</td>
+<td rowspan="5">14 nm</td>
+<td>Broadwell</td>
+<td>2014-09-05</td>
+<td>Broadwell-EX</td>
+<td>Broadwell-EP</td>
+<td>Broadwell-E</td><td></td><td></td>
+</tr>
+<tr>
+<td>Tock</td>
+<td rowspan="5">Skylake</td>
+<td>Skylake</td>
+<td>2015-08-05</td>
+<td>Skylake-SP</td>
+<td>Skylake-SP</td>
+<td>Skylake-X</td>
+<td>Skylake</td><td></td>
+</tr>
+<tr>
+<td rowspan="3">Optimizations (refreshes)</td>
+<td>Kaby Lake</td>
+<td>2017-01-03</td><td></td><td></td>
+<td>Kabylake-X</td>
+<td>Kabylake</td><td></td>
+</tr>
+<tr>
+<td>Kaby Lake R</td>
+<td>2017-08-21</td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+<td>Coffee Lake</td>
+<td>2017-10-05</td><td></td><td></td><td></td>
+<td>Coffee Lake</td><td></td>
+</tr>
+<tr>
+<td>Process</td>
+<td rowspan="3">10 nm</td>
+<td>Cannon Lake</td>
+<td>2018</td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+<td>Architecture</td>
+<td rowspan="3">Ice Lake</td>
+<td>Ice Lake</td>
+<td>2018/ 2019?</td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+<td>Optimization</td>
+<td>Tiger Lake</td>
+<td>2019?</td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+<td>Process</td>
+<td rowspan="3">7 nm</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+<td>Architecture</td>
+<td rowspan="3"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+<td>Optimization</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+<td>Process</td>
+<td rowspan="3">5 nm</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+<td>Architecture</td>
+<td rowspan="2"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+<td>Optimization</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+</tbody></table>
+</div>
+
+
+<hr>
+<h2 id="P6"><a href="#P6" class="headerlink" title="P6"></a>P6</h2><p><a href="https://www.wikiwand.com/en/P6_(microarchitecture)" target="_blank" rel="noopener">P6</a> 是 Intel 的第六代微架构，最早用于 1995 年的 <a href="https://www.wikiwand.com/en/Pentium_Pro" target="_blank" rel="noopener">Pentium Pro</a> 处理器，后面 2000 的 <a href="https://www.wikiwand.com/en/NetBurst_(microarchitecture)" target="_blank" rel="noopener">NetBurst</a> 感觉应该也算是包含在 P6 这个大系列里面，一直到 2006 年的 <a href="https://www.wikiwand.com/en/Core_(microarchitecture)" target="_blank" rel="noopener">Core</a> 为止。</p>
+<p>这个横跨了将近 10 年的架构系列最早是 600nm 的工艺，一直到最后达到了 65nm，算是不断摸索完善出来的，也是 Intel 走上比较规则的架构发展之路的一个起点。</p>
+<p>P6 相对于之前的架构加入了很多新的技术：</p>
+<ul>
+<li><strong>预测执行（Speculation）</strong>和<strong>乱序执行</strong>！！！</li>
+<li>14级流水线，第一代奔腾的流水线只有 5 级，P6 的 14 级在当时是最深的</li>
+<li><strong>片内的 L2 cache</strong>！！！</li>
+<li>物理地址扩展，达到最大36位，理论上这个位宽最大可以支持到 64G 的内存（虽然制程的地址空间还是只能用到 4G）</li>
+<li><strong>寄存器重命名</strong>！！！</li>
+<li>MMX 和 SSE 指令集扩展，开始 SIMD 的思路了</li>
+</ul>
+<p>以上这些都是现代处理器中非常重要的设计。</p>
+<p>更重要的是从这里开始，奠定了 Intel 沿着摩尔定律发展的 Tick-Tock 架构演进道路：</p>
+<ul>
+<li>Tick 改进制程工艺，微架构基本不做大改，重点在把晶体管的工艺水平往上提升</li>
+<li>Tock 改进微架构设计，保持工艺水平不变，重点在用更复杂、更高级的架构设计</li>
+</ul>
+<p>然后就是一代 Tick 再一代 Tock，交替演进。</p>
+<p>P6 的末尾阶段，首次出现了双核，当时的双核还是基本上像是把两个单核用胶水粘在一起的感觉。</p>
+<h2 id="Core"><a href="#Core" class="headerlink" title="Core"></a>Core</h2><p><img data-src="http://jcf94.com/download/2018-02-13-intel-Intel_Core2_arch.svg" alt="Core 架构"></p>
+<p>最早的名字里面带 Core 这个牌子的处理器是 Core Duo，它的架构代号是 Yonah，其实还是算是个 NetBurst 的改版，只是跟后期的 NetBurst 走向了不同的发展道路，虽然名字上有 Core 但不是 Core 架构。主要的设计目标是面向移动平台，因此很多设计都是偏向低功耗，<strong>高能效</strong>的。</p>
+<p>再后来的 Core 2 Duo 才是采用 Core 架构的新一代处理器，全线 65nm，然后微架构在 Yonah 之上做了比较大的改动。</p>
+<p>Core 架构把 NetBurst 做深了的流水线级数又砍下来了，主频虽然降下来了（而且即使后来工艺提升到 45nm 之后也没有超过 NetBurst 的水平），但是却提高了整个流水线中的资源利用率，所以性能还是提升了；把奔腾4上曾经用过的超线程也砍掉了；对各个部分进行了强化，双核共享 L2 cache 等等。</p>
+<p>从 Core 架构开始是真的走向多核了，就不再是以前“胶水粘的”伪双核了，这时候已经有最高 4 核的处理器设计了。</p>
+<h2 id="Nehalem"><a href="#Nehalem" class="headerlink" title="Nehalem"></a>Nehalem</h2><p><img data-src="http://jcf94.com/download/2018-02-13-intel-Intel_Nehalem_arch.svg" alt="Nehalem 架构"></p>
+<p>Core 从 65nm 改到 45nm 之后，基于 45nm 又推出了新一代架构叫 Nehalem，这一代的提升引入了相当多的新技术，算是个非常重要的里程碑。</p>
+<p>Core 这个名字变成了桌面 PC 以及笔记本处理器的系列名，后面架构继续更新，然而 Core（酷睿） 这个名字就留下来了，然后系列开始细分，这个架构推出了<strong>第一代的 i7</strong>。</p>
+<p>相对上一代的主要改进：</p>
+<ul>
+<li>引入了<strong>片内 4-12 MB 的 L3 cache</strong>！！！</li>
+<li>重新加入<strong>超线程</strong>（奔腾4时代有，后来砍掉了，这一代开始重新引入）</li>
+<li><strong>Intel Turbo Boost 1.0</strong>！！！</li>
+<li><strong>分支预测器分级</strong>！！！</li>
+<li>二级的 TLB</li>
+<li>每个核上有 3 个整数 ALU, 2 个向量 ALU and 2 个 AGU</li>
+<li><strong>采用 Intel QPI 来代替原来的前端总线</strong>！！！</li>
+<li><strong>PCIE 和 DMI 控制器直接做到片内了</strong>，不再需要北桥</li>
+<li><strong>IMC（集成内存控制器）</strong>，内存控制也从北桥移到了片内</li>
+<li>第二代的 Intel 虚拟化技术</li>
+<li>流水线加到 20 到 24 级</li>
+<li>其他指令扩展升级等等</li>
+</ul>
+<p>相对上一代的性能：</p>
+<ul>
+<li>同等功耗下，10-25% 的单线程性能提升，<strong>20-100% 的多线程性能提升</strong>！！！</li>
+<li>同等性能下功耗降低 30%</li>
+<li>15-20% 的 clock-to-clock（不知道这个词应该怎么翻译） 性能提升</li>
+</ul>
+<p>工艺提升到 32nm 的 Westmere 后，推出了<strong>第一代的 i5 和 i3</strong>。</p>
+<p>Xeon 系列也从 Westmere 开始推出了第一代 E 命名的 E7-x8xx 系列。</p>
+<h2 id="Sandy-Bridge"><a href="#Sandy-Bridge" class="headerlink" title="Sandy Bridge"></a>Sandy Bridge</h2><p><img data-src="http://jcf94.com/download/2018-02-13-intel-sandybridge-uarch.png" alt=""></p>
+<p>32nm 的下一代 Tock 是 Sandy Bridge，<strong>二代 Core i 系列</strong>以及<strong>第一代 Xeon E3、E5 系列</strong>也基于这个架构：</p>
+<ul>
+<li>Intel Turbo Boost 2.0</li>
+<li>增大了 L1 和 L2 cache</li>
+<li>共享的 L3 cache 也同时支持片上的<strong>核芯显卡</strong></li>
+<li>IMC 强化成了 GMCH（integrated graphics and memory controller），片上显卡共用主存作为它的显存</li>
+<li>每个核上的运算部件增强</li>
+<li>分支预测增强</li>
+<li><strong>微操作译码部分新增了一个 cache（uop cache）</strong></li>
+<li>14 到 19 级<strong>指令流水线</strong>！！！（长度区别基于上面那个 uop cache 是否命中）</li>
+<li>多个核间、核芯显卡、cache 间用了<strong>环状总线（ring bus）</strong></li>
+<li>Intel Quick Sync Video，<strong>支持视频的硬解码</strong></li>
+<li>其他指令扩展升级等等</li>
+</ul>
+<p>Ring Bus:</p>
+<p><img data-src="http://jcf94.com/download/2018-02-13-intel-ring.jpg" alt=""></p>
+<p>真是令人惊叹的操作啊。</p>
+<blockquote>
+<p>这个故事教育我们，cache 这个思路很多地方都能用到！！！<br>这个简单的想法能起到的效果可不简单~~</p>
+</blockquote>
+<p>相对上一代的性能：</p>
+<ul>
+<li>11.3% 的 clock-to-clock 性能提升</li>
+<li>2 倍的显示性能提升（…这个不用想都知道会很多…）</li>
+</ul>
+<p>Tick 到 22nm 的下一代架构叫 Ivy Bridge，<strong>三代 Core i 系列</strong>和<strong>二代 Xeon E 系列</strong>：</p>
+<ul>
+<li>16 位浮点指令</li>
+<li>片内硬件随机数生成器</li>
+<li><strong>PCIE 3.0</strong></li>
+<li>其他各个部分都做了很多提升</li>
+</ul>
+<h2 id="Haswell"><a href="#Haswell" class="headerlink" title="Haswell"></a>Haswell</h2><p><img data-src="http://jcf94.com/download/2018-02-13-intel-haswell_block_diagram.svg" alt=""></p>
+<p>22nm 的 Tock 到了 Haswell，<strong>四代 Core i 系列</strong>和<strong>三代 Xeon E 系列</strong>：</p>
+<ul>
+<li>每个核内的部分进一步升级，更多的 ALU、各种带宽增加等等</li>
+<li>支持 DDR4 内存</li>
+<li>提供部分雷电接口（Thunderbolt）支持</li>
+<li><strong>完整集成电压调节器（FIVR）</strong>，把主板上的一部分电源控制做到了片内</li>
+<li>更高级的功耗控制系统，增加了 L6 和 L7 两级 CPU 睡眠状态</li>
+<li>其他指令扩展升级等等</li>
+</ul>
+<p>相对上一代的性能：</p>
+<ul>
+<li>8% 的向量运算能力提升</li>
+<li>5% 的单线程性能和 6% 的多线程性能</li>
+</ul>
+<blockquote>
+<p>好像提的不是很多，Intel 开始挤牙膏了</p>
+</blockquote>
+<p>14nm 的 Tick 到了 Broadwell，<strong>五代 Core i 系列</strong>和<strong>四代 Xeon E 系列</strong>。各种指令集升级、支持了很多新功能特性。</p>
+<h2 id="Skylake"><a href="#Skylake" class="headerlink" title="Skylake"></a>Skylake</h2><p>14nm 的 Tock 到了 Skylake，进入 XXlake 时代，<strong>六代 Core i 系列</strong>。</p>
+<p>一系列指令集升级、新功能特性等等。上一代加入的 FIVR 这里又拿掉了，其他包括雷电 3.0 等等好多升级什么的。</p>
+<blockquote>
+<p>从比较粗粒度的架构图来看，Skylake 的架构基本上跟前面那张 Haswell 的没什么差别，大概就是寄存器什么的数字上往上涨了一些，所以图这里就不贴了。<br>（当然细节上肯定还是有挺多升级的）<br>挤牙膏啊挤牙膏，疯狂挤牙膏</p>
+</blockquote>
+<p>这个阶段的微架构除了升级指令、加上更多扩展功能以外，不像 Nehalem 和 Sandy Bridge 那时候能有更多革新的设计了，而且由于制程已经达到了很小的程度，再往下可能很快就要碰到工艺极限了，所以摩尔定律开始放缓，性能很难有特别大的提升了。</p>
+<p>所以 Intel 开始从 Tick-Tock 两步升级战略转变到 Process-Architecture-Optimization 的三步升级战略，分别是提升工艺制程，升级微架构，然后再在微架构基础上进行优化。</p>
+<p>其实这个三步战略从上面 Haswell 时代就已经开始了，Broadwell 前面还有个 refresh 的 Haswell 升级版，i3/i5/i7 4x20 系列。</p>
+<p>Skylake 优化版的下一代是 Kaby Lake，即<strong>七代 Core i 系列</strong>。相比 Skylake 提升了主频，频率切换更快，提升了显示核心等等。</p>
+<p>Kaby Lake 继续优化到了 Coffee Lake，<strong>八代 Core i 系列</strong>。这个系列的 i3 提到了 4 核，i5、i7 都从 6 核开始起步，然后继续提升主频，各种优化等等。</p>
+<h3 id="What’s-new"><a href="#What’s-new" class="headerlink" title="What’s new!"></a>What’s new!</h3><p>话说 Kaby Lake 和 Coffee Lake 这个时代，Intel 又推出了新的 Core i 系列，命名为 <strong>Core i9</strong>，第一代的桌面版 Core i9 是 Skylake 架构（Skylake-X），第一代笔记本版 i9 是 Coffee Lake 架构。</p>
+<p>那么本该在这个时候推出的<strong>第五代 Xeon</strong>，也就是 E3/E5/E7 的 xxxx v5 版呢？</p>
+<p>Skylake 的第五代 Xeon 摆脱了原本的系列名，而是重新改成了 <strong>Bronze</strong>、<strong>Silver</strong>、<strong>Gold</strong>、<strong>Platinum</strong> 4 个系列（一股浓浓的网络游戏装备风，说不定再下次改名就可能改名叫稀有、史诗、传说什么的，→_→）。青铜和白银系列支持双路（原本的 E5-24xx、E7-28xx 系列），黄金系列支持四路（原本的 E5-46xx、E7-48xx 系列），白金系列支持八路（原本的 E7-88xx 系列）。</p>
+<p>这里还有个重要变动，Intel 沿用了很多年的 Ring Bus 片内总线从 Skylake-X 开始改掉了！前面说 Sandy Bridge 开始，微架构设计上已经全面采用了 Ring Bus，其实最早到 Nehalem 时代的 Xeon 系列就已经开始用上 Ring Bus了，主要用于解决多核（非常非常多的核）之间的共享、扩展等等的问题。</p>
+<p>然而随着 CPU 的发展，核越来越多，所以一个 CPU 片内还可能有多个 Ring Bus，就像下面这样。这会有什么问题呢？</p>
+<p>以前我们考虑多路服务器里面的 CPU 亲和性的时候，只考虑过 socket 之间的 NUMA 关系，两片 CPU 核之间会有亲和性问题。。。。。。谁想过在下面这种结构的单片 CPU 里面其实也已经是个 NUMA 结构了！！！</p>
+<p><img data-src="http://jcf94.com/download/2018-02-13-intel-v4_24coreshcc.png" alt="E5 v4 的 Ring Bus 架构"></p>
+<p>但是当核的数量持续增长，Ring Bus 的延迟也会越来越高，终究不是个办法，Intel 在 KNL 上已经试过 2D Mesh 的总线结构了，大概是效果比较好，于是从 Skylake-X 开始，之后的系列开始全面改用 Mesh 结构。</p>
+<p><img data-src="http://jcf94.com/download/2018-02-13-intel-mesh.jpeg" alt="Mesh 架构"></p>
+<ul>
+<li><a href="https://zhuanlan.zhihu.com/p/32216294" target="_blank" rel="noopener">破茧化蝶，从Ring Bus到Mesh网络，CPU片内总线的进化之路</a></li>
+</ul>
+<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>emmm……所以 Platinum 8176 疯狂吊打 E5-269x v4 是妥妥的事情。毕竟微架构差了一代，而且白金版原本对应的是八路的 E7 系列，再加上 Mesh 相比 Ring Bus 解决了很多问题。</p>
+<blockquote>
+<p>然后我就有个疑问了：话说……为啥以前我们不用 E7 呢</p>
+</blockquote>
+<hr>
+<p>更新一下两个资料参考网站：</p>
+<ul>
+<li><p><a href="https://en.wikichip.org/wiki/WikiChip" target="_blank" rel="noopener">WikiChip</a></p>
+</li>
+<li><p><a href="http://www.moepc.net/" target="_blank" rel="noopener">MOEPC</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+      
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Intel/" rel="tag"># Intel</a>
+              <a href="/tags/Microarchitecture/" rel="tag"># Microarchitecture</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/02/12/2018-02-12-cod3/" rel="prev" title="计算机组成与设计.硬件/软件接口 学习笔记（三）">
+      <i class="fa fa-chevron-left"></i> 计算机组成与设计.硬件/软件接口 学习笔记（三）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/02/28/2018-02-28-tfunpacking3/" rel="next" title="TensorFlow 拆包（三）：Graph 和 Node">
+      TensorFlow 拆包（三）：Graph 和 Node <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Intel-Micro-architecture"><span class="nav-text">Intel Micro-architecture</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#P6"><span class="nav-text">P6</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Core"><span class="nav-text">Core</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Nehalem"><span class="nav-text">Nehalem</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sandy-Bridge"><span class="nav-text">Sandy Bridge</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Haswell"><span class="nav-text">Haswell</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Skylake"><span class="nav-text">Skylake</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#What’s-new"><span class="nav-text">What’s new!</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#后记"><span class="nav-text">后记</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '146010ab65f4b6e048ac5a789ddb4234',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

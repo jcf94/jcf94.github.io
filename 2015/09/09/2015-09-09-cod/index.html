@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="《Computer Organization and Design, Hardware&#x2F;Software Interface》以及《Computer Architecture: A Quantitative Approach》被誉为体系结构界的两本圣经。 最近除了编译原理外，还在补的就是《硬件&#x2F;软件接口》这一本了。 这本书讲解得非常透彻。原本我只是对体系结构、CPU有个模糊的很难学的概念，，，书中">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机组成与设计.硬件&#x2F;软件接口 学习笔记（一）">
+<meta property="og:url" content="https://jcf94.com/2015/09/09/2015-09-09-cod/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="《Computer Organization and Design, Hardware&#x2F;Software Interface》以及《Computer Architecture: A Quantitative Approach》被誉为体系结构界的两本圣经。 最近除了编译原理外，还在补的就是《硬件&#x2F;软件接口》这一本了。 这本书讲解得非常透彻。原本我只是对体系结构、CPU有个模糊的很难学的概念，，，书中">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-chip.png">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-multi.png">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-divi.png">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-3.5.1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-3.5.2.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-09-09-cod-3.5.3.jpg">
+<meta property="article:published_time" content="2015-09-09T02:56:01.000Z">
+<meta property="article:modified_time" content="2018-10-04T02:46:34.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="体系结构">
+<meta property="article:tag" content="组成与设计.硬软件接口">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2015-09-09-cod-chip.png">
+
+<link rel="canonical" href="https://jcf94.com/2015/09/09/2015-09-09-cod/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>计算机组成与设计.硬件/软件接口 学习笔记（一） | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2015/09/09/2015-09-09-cod/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机组成与设计.硬件/软件接口 学习笔记（一）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-09-09 10:56:01" itemprop="dateCreated datePublished" datetime="2015-09-09T10:56:01+08:00">2015-09-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-10-04 10:46:34" itemprop="dateModified" datetime="2018-10-04T10:46:34+08:00">2018-10-04</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Architecture/" itemprop="url" rel="index"><span itemprop="name">Computer Architecture</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>《Computer Organization and Design, Hardware/Software Interface》以及《Computer Architecture: A Quantitative Approach》被誉为体系结构界的两本圣经。</p>
+<p>最近除了编译原理外，还在补的就是《硬件/软件接口》这一本了。</p>
+<p>这本书讲解得非常透彻。原本我只是对体系结构、CPU有个模糊的很难学的概念，，，书中由浅至深详细地解释了其中的工作原理，，，，真的好难啊Q_Q…</p>
+<blockquote>
+<p>2018-02-02</p>
+<p>当时还剩下最后一章的一点东西没看，回来把这些内容看完。</p>
+<p>算是在这个方面做了这么久的工作，对里面的好多东西也都有了新的理解，顺便重新整理一下。</p>
+</blockquote>
+<a id="more"></a>
+
+<p>本书的官方主页：<a href="http://booksite.elsevier.com/9780124077263/index.php" target="_blank" rel="noopener">Elsevier Store</a></p>
+<p>笔记的内容基本上按照目录，这一篇记的是前三章的主要内容。</p>
+<h1 id="CHAPTER-1-Computer-Abstractions-and-Technology"><a href="#CHAPTER-1-Computer-Abstractions-and-Technology" class="headerlink" title="CHAPTER 1. Computer Abstractions and Technology"></a>CHAPTER 1. Computer Abstractions and Technology</h1><h2 id="1-1-Instruction"><a href="#1-1-Instruction" class="headerlink" title="1.1. Instruction"></a>1.1. Instruction</h2><h2 id="1-2-Eight-Great-Ideas-in-Computer-Architecture"><a href="#1-2-Eight-Great-Ideas-in-Computer-Architecture" class="headerlink" title="1.2. Eight Great Ideas in Computer Architecture"></a>1.2. Eight Great Ideas in Computer Architecture</h2><p>计算机系统结构中的八个 Great Ideas</p>
+<blockquote>
+<p>其实系统结构设计发展这么多年了，很多核心的设计思想本质上都是几个基本原理。</p>
+</blockquote>
+<ul>
+<li>Design for Moore’s Law</li>
+</ul>
+<p>系统结构设计的周期通常都比较长，由于摩尔定律的存在，很有可能项目开始时和项目结束时能够提供的原件在工艺方面的性能就有很大的差距了，因此做系统结构设计需要考虑到这方面的因素。</p>
+<p>话说 Intel 每年的 CPU 升级战略也有一点这个意思，“Tick-Tock”一年升级工艺制程，一年升级架构设计。</p>
+<blockquote>
+<p>然后到了 2017 年，摩尔定律开始唱衰了，各方都开始吹摩尔定律要走到头了，一大波人转而去搞领域专用的 ASIC 芯片设计去了。</p>
+</blockquote>
+<ul>
+<li>Use Abstraction to Simplify Design</li>
+</ul>
+<p>分层次进行设计，底层的细节对上层不透明，意思就是上层不用去管底层里面是怎么做的，只要给我想要的接口就好了。</p>
+<p>其实也就是模块化。这样做的好处是，比如做某一层工作的人可以专心钻在那层里面，在自己的范围内做改进啊做优化啊，不用去管别人的工作需要做什么。</p>
+<blockquote>
+<p>当然层次分的太多，可能也会引起性能的下降，有的时候我们搞优化的反而就想要层次简单点，一波直通到底。</p>
+</blockquote>
+<ul>
+<li>Make the Common Case Fast</li>
+</ul>
+<p>做优化要把工作放在 <strong>Common Case</strong> 上， 花大力气在 <strong>Rare Case</strong> 上就浪费了。另一方面要找到最耗时的点，找到瓶颈所在才有用。</p>
+<p>那么哪些地方是 Common Case 呢？这就需要做针对性的测试来找出来了（见 Section 1.6）。</p>
+<ul>
+<li>Performance via Parallelism</li>
+</ul>
+<p>并行也没啥好说的，这几年的发展趋势就是硬件上单核往多核甚至众核走，算法上也都要往并行方面设计。</p>
+<ul>
+<li><strong>Performance via Pipelining</strong></li>
+</ul>
+<p>流水线是一个非常重要的思想，在硬件和软件的架构设计里面都能用的到。</p>
+<p>多级流水可以提高资源利用率、隐藏延迟等等。</p>
+<ul>
+<li>Performance via Prediction</li>
+</ul>
+<p>这块主要指的是处理器指令预测、指令预取等等。</p>
+<ul>
+<li>Hierarchy of Memories</li>
+</ul>
+<p>存储器分级最突出的体现还是在 cache 上，现在主流的处理器上 cache 已经做到了 L3，可能过几年就有 L4 了。</p>
+<ul>
+<li>Dependability via Redundancy</li>
+</ul>
+<p>通过<strong>冗余设计</strong>来保证系统可靠性，这个主要是容灾备份的思想。</p>
+<h2 id="1-3-Below-Your-Program"><a href="#1-3-Below-Your-Program" class="headerlink" title="1.3. Below Your Program"></a>1.3. Below Your Program</h2><p>这里有一句特别有意思的话：</p>
+<blockquote>
+<p>Just as the 26 letters of the English alphabet do not limit how much can be written, the two letters of the computer alphabet do not limit what computer can do.</p>
+</blockquote>
+<p>程序运行的过程：</p>
+<p><code>高级语言</code>编译成<code>汇编语言（低级语言）</code>，再汇编成<code>机器语言</code>，然后硬件运行</p>
+<h2 id="1-4-Under-the-Covers"><a href="#1-4-Under-the-Covers" class="headerlink" title="1.4. Under the Covers"></a>1.4. Under the Covers</h2><p>这一节拿 iPad2 简单介绍了一下硬件实现。在电子元件的层面，无论是屏幕显示还是计算都是 0 和 1，从元件往上开始就涉及到了前面说的抽象思想了，<strong>指令集</strong>就是对机器码实现的抽象。</p>
+<h2 id="1-5-Technologies-for-Building-Processors-and-Memory"><a href="#1-5-Technologies-for-Building-Processors-and-Memory" class="headerlink" title="1.5. Technologies for Building Processors and Memory"></a>1.5. Technologies for Building Processors and Memory</h2><p>电子元件的发展演变：</p>
+<table>
+<thead>
+<tr>
+<th>年份</th>
+<th>电子元件技术</th>
+<th>单位资源消耗能得到的相对性能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1951</td>
+<td>电子管</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1965</td>
+<td>晶体管</td>
+<td>35</td>
+</tr>
+<tr>
+<td>1975</td>
+<td>集成电路</td>
+<td>900</td>
+</tr>
+<tr>
+<td>1995</td>
+<td>（Very）大规模集成电路</td>
+<td>2,400,000</td>
+</tr>
+<tr>
+<td>2013</td>
+<td>（Ultra）超大规模集成电路</td>
+<td>250,000,000,000</td>
+</tr>
+</tbody></table>
+<p>话说理论上来说从 1965 年一直到现在本质上用的原件都还是晶体管，只不过工艺水平一直在提升，集成度也在不断增加，摩尔定律本质上是对单块芯片里面晶体管数量增长率的估计。</p>
+<p>来看下 CPU 这些芯片是怎么造出来的：</p>
+<p><img data-src="http://jcf94.com/download/2015-09-09-cod-chip.png" alt=""></p>
+<p>首先原料是从硅开始，硅是一种出色的半导体材料，它本身的导电性介于导体和绝缘体之间，但是经过某些化学处理之后，可以变成三种不同性质的结构：</p>
+<ol>
+<li>用微观铜线或者铝线（microscopic copper or aluminum wire，不知道这个具体处理过程是啥）处理之后，可以变成良导体</li>
+<li>绝缘体</li>
+<li>可控进行导电或者不导电，起到开关的作用（晶体管）</li>
+</ol>
+<p>把纯的单晶硅熔化了，从里面拉出来硅锭（silicon crystal ingot）；硅锭是圆柱形的，对其进行横向切片，得到了厚度小于 0.1 英寸的晶圆（wafers）；然后经过 20<del>40 道工序的化学处理，就把晶圆上的不同位置变成了前面说的三种结构，要么导电、要么不导电、要么变成晶体管，这个过程也就是电路蚀刻（现在的半导体工艺已经做到了单层晶体管，2</del>8 层用绝缘体隔开的导体结构）。</p>
+<p>电路蚀刻的过程非常复杂，由于工序太多，而且中间都是各种物理化学反应，很难做到一整个晶圆上的电路都是完美的，所以芯片制造工艺从一开始就考虑了这一点，一个晶圆上蚀刻了很多片（dies）芯片（chips）。这样虽然很难保证整块晶圆上的电路都是完美的，但是切出来的单块芯片是完美的的可能性还是很大的。后续就是对这些芯片做测试，通过测试的再封装上外围电路等等，就生产出来完整的 CPU 了。</p>
+<p>封装这件事情上面还有个比较有趣的点。同代的某种型号的 i7、i5、i3 有可能出自同一个晶圆！！！完美的芯片做成 i7，有瑕疵然后测试挂了几个核的就封装的时候关掉几个核做成 i5，瑕疵更多挂了更多个核的就封装成 i3。</p>
+<p>一些资料：</p>
+<ul>
+<li><a href="https://zhuanlan.zhihu.com/p/29743431" target="_blank" rel="noopener">CPU制造的那些事之一：i7和i5其实是孪生兄弟！？</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/29767262" target="_blank" rel="noopener">CPU制造的那些事之二：Die的大小和良品率</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/30513730" target="_blank" rel="noopener">为什么晶圆都是圆的不是方的？</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/30549356" target="_blank" rel="noopener">为什么”电路”要铺满整个晶圆？</a></li>
+</ul>
+<h2 id="1-6-Performance"><a href="#1-6-Performance" class="headerlink" title="1.6. Performance"></a>1.6. Performance</h2><p>两个需要区别开的概念：</p>
+<ul>
+<li>wall clock time、response time、elapsed time：指的都是跑一个任务实际花费的时间，包含了 I/O 啊，访存啊，操作系统 overhead 啊等等等等，相当于用秒表记出来的时间；</li>
+<li>CPU execution time、CPU time：指的是 CPU 跑这个任务消耗的时间，实际上对应的是 CPU 跑了多少个时钟周期，里面不包含其他部分消耗所花费的时间（I/O，线程切换等等其他这些）。</li>
+</ul>
+<p>后面说系统性能针对的时间计量方式是前者，而 CPU 性能针对的时间计算方式是后者。</p>
+<blockquote>
+<p>面向某个具体的优化任务时，要考虑清楚要用哪种方式来计量。优化要达到的性能指标跟性能定义是直接相关的，也需要针对具体的指标来找出性能瓶颈所在。</p>
+</blockquote>
+<p>性能的定义：</p>
+<p>$$性能_X=\frac{1}{运行时间_X}$$</p>
+<p>X比Y快n倍：</p>
+<p>$$\frac{性能_X}{性能_Y}=\frac{运行时间_Y}{运行时间_X}=n$$</p>
+<p>CPU运行时间/CPU时间：</p>
+<p>$$CPU运行时间=CPU时钟周期数*时钟周期时间=\frac{CPU时钟周期数}{时钟频率（主频）}$$</p>
+<p>CPI（时钟周期/指令）：</p>
+<p>$$CPU时钟周期数=指令数*CPI$$</p>
+<p>$$CPU运行时间=指令数*CPI*时钟周期时间=\frac{指令数*CPI}{时钟频率}$$</p>
+<h2 id="1-7-The-Power-Wall"><a href="#1-7-The-Power-Wall" class="headerlink" title="1.7. The Power Wall"></a>1.7. The Power Wall</h2><p>功耗与主频几乎是同等上升的，主频越高功耗越高。前期主频提升很快，而最近一个阶段，处理器的主频基本不再提升，因为功耗已经达到了一个相当高的程度，在散热等其他方面还没办法跟上的时候只能限制主频的提升。</p>
+<ul>
+<li>动态功耗</li>
+</ul>
+<p>CPU 的功耗主要是动态功耗，来源于晶体管的开关切换，即高低电平（0 和 1）之间的翻转，这中间本质上是个充放电的过程，所以这部分能量消耗是无法避免的：</p>
+<p>$$动态功耗\propto *电容性负载*电压^2*开关频率$$</p>
+<p>动态功耗与主频成正比，与电压的平方成正比。</p>
+<ul>
+<li>静态功耗</li>
+</ul>
+<p>静态功耗主要来自于晶体管的漏电流，也几乎是无法避免的，只能通过工艺改进来减少。</p>
+<p>一些资料：</p>
+<ul>
+<li><a href="/2016/05/07/2016-05-07-icpower">【转】功耗对处理器的限制究竟有多大？</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/30409360" target="_blank" rel="noopener">为什么CPU的频率止步于4G?我们触到频率天花板了吗？</a></li>
+</ul>
+<h2 id="1-8-The-Sea-Change-The-Switch-from-Uniprocessors-to-Multiprocessors"><a href="#1-8-The-Sea-Change-The-Switch-from-Uniprocessors-to-Multiprocessors" class="headerlink" title="1.8. The Sea Change: The Switch from Uniprocessors to Multiprocessors"></a>1.8. The Sea Change: The Switch from Uniprocessors to Multiprocessors</h2><p>受到工艺、功耗等的限制，单纯地提升主频来提高处理器的性能已经是做不到了，因此转向提高处理器的并行能力来继续发展CPU，即往一个芯片中集成更多的处理核心，而从单核开始向多核转变。</p>
+<p>之前由于性能的提升主要在工艺、硬件层面，对于软件来说影响很小，但是多核处理器出现之后，也推动了并行算法的发展，因为只有从算法上进行改进才能够更好地利用上多核处理的优势。</p>
+<h2 id="1-9-Real-Stuff-Benchmarking-the-Intel-Core-i7"><a href="#1-9-Real-Stuff-Benchmarking-the-Intel-Core-i7" class="headerlink" title="1.9. Real Stuff: Benchmarking the Intel Core i7"></a>1.9. Real Stuff: Benchmarking the Intel Core i7</h2><p>实例：Intel Core i7的基准测试</p>
+<h2 id="1-12-Historial-Perspectives-and-Further-Reading"><a href="#1-12-Historial-Perspectives-and-Further-Reading" class="headerlink" title="1.12. Historial Perspectives and Further Reading"></a>1.12. Historial Perspectives and Further Reading</h2><p><a href="http://booksite.elsevier.com/9780124077263/downloads/historial%20perspectives/section_1.12.pdf" target="_blank" rel="noopener">PDF材料</a></p>
+<h2 id="1-13-Exercises"><a href="#1-13-Exercises" class="headerlink" title="1.13. Exercises"></a>1.13. Exercises</h2><p><a href="http://jcf94.com/download/2015-09-09-cod-CH01_Solution.pdf">答案</a></p>
+<hr>
+<h1 id="CHAPTER-2-Instructions-Language-of-the-Computer"><a href="#CHAPTER-2-Instructions-Language-of-the-Computer" class="headerlink" title="CHAPTER 2. Instructions: Language of the Computer"></a>CHAPTER 2. Instructions: Language of the Computer</h1><p>第二章主要是以 MIPS 为例，介绍计算机指令。</p>
+<h2 id="2-1-Instruction"><a href="#2-1-Instruction" class="headerlink" title="2.1. Instruction"></a>2.1. Instruction</h2><h2 id="2-2-Operations-of-the-Computer-Hardware"><a href="#2-2-Operations-of-the-Computer-Hardware" class="headerlink" title="2.2. Operations of the Computer Hardware"></a>2.2. Operations of the Computer Hardware</h2><p>设计原则1：简单有助于规整</p>
+<p>定义一些基本的操作，再用基本的操作来组成复杂操作。</p>
+<h2 id="2-3-Operands-of-the-Computer-Hardware"><a href="#2-3-Operands-of-the-Computer-Hardware" class="headerlink" title="2.3. Operands of the Computer Hardware"></a>2.3. Operands of the Computer Hardware</h2><p>设计原则2：越少越快</p>
+<p>为了保证每个寄存器的读取速度，寄存器数量不能太多。</p>
+<h2 id="2-4-Signed-and-Unsigned-Numbers"><a href="#2-4-Signed-and-Unsigned-Numbers" class="headerlink" title="2.4. Signed and Unsigned Numbers"></a>2.4. Signed and Unsigned Numbers</h2><h2 id="2-5-Representing-Instructions-in-the-Computer"><a href="#2-5-Representing-Instructions-in-the-Computer" class="headerlink" title="2.5. Representing Instructions in the Computer"></a>2.5. Representing Instructions in the Computer</h2><p>设计原则3：好的设计需要适宜的折中方案</p>
+<p>计算机指令的设计需要考虑到指令长度等等一系列复杂的因素。</p>
+<h2 id="2-6-Logical-Operations"><a href="#2-6-Logical-Operations" class="headerlink" title="2.6. Logical Operations"></a>2.6. Logical Operations</h2><h2 id="2-7-Instructions-for-Making-Decisions"><a href="#2-7-Instructions-for-Making-Decisions" class="headerlink" title="2.7. Instructions for Making Decisions"></a>2.7. Instructions for Making Decisions</h2><h2 id="2-8-Supporting-Procedures-in-Computer-Hardware"><a href="#2-8-Supporting-Procedures-in-Computer-Hardware" class="headerlink" title="2.8. Supporting Procedures in Computer Hardware"></a>2.8. Supporting Procedures in Computer Hardware</h2><p>函数和过程的实现，主要通过地址跳转和堆栈来完成。</p>
+<h2 id="2-9-MIPS-Addressing-for-32-Bit-Immediates-and-Addresses"><a href="#2-9-MIPS-Addressing-for-32-Bit-Immediates-and-Addresses" class="headerlink" title="2.9. MIPS Addressing for 32-Bit Immediates and Addresses"></a>2.9. MIPS Addressing for 32-Bit Immediates and Addresses</h2><p>32位立即数和地址的MIPS编址</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>说明</th>
+<th>op</th>
+<th>rs</th>
+<th>rt</th>
+<th>rd</th>
+<th>shamt</th>
+<th>funct</th>
+<th>address</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>R-format</td>
+<td>算术/寄存器操作</td>
+<td>6位</td>
+<td>5位</td>
+<td>5位</td>
+<td>5位</td>
+<td>5位</td>
+<td>6位</td>
+<td></td>
+</tr>
+<tr>
+<td>I-format</td>
+<td>转移/分支/立即数操作</td>
+<td>6位</td>
+<td>5位</td>
+<td>5位</td>
+<td></td>
+<td></td>
+<td></td>
+<td>16位</td>
+</tr>
+<tr>
+<td>J-format</td>
+<td>跳转操作</td>
+<td>6位</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>26位</td>
+</tr>
+</tbody></table>
+<p>条件转移范围：<br>16位地址码，但是MIPS中是按4字节寻址，即实际上可以表示18位的地址<br>18位首位为符号位，即可跳转到当前PC位置的$(-32K\sim32K-1)*4=-128K\sim(128K-4)$字节</p>
+<p>立即数范围：<br>与上同理，都属于I-format的指令，因此可表示的立即数范围为$-32K\sim32K-1$</p>
+<p>跳转指令范围：<br>26位地址码，4字节寻址，实际可表示28位地址<br>28位为无符号数地址，可跳转到$(0\sim2^{26}-1)*4=0\sim(256M-4)$字节</p>
+<h2 id="2-10-Parallelism-and-Instructions-Synchronization"><a href="#2-10-Parallelism-and-Instructions-Synchronization" class="headerlink" title="2.10. Parallelism and Instructions: Synchronization"></a>2.10. Parallelism and Instructions: Synchronization</h2><p>并行编程的指令中最重要的是原子操作，即多个不同进程之间的同步。</p>
+<p>这里介绍了一下 ll（load link）和sc（store conditional）指令。</p>
+<h2 id="2-11-Translating-and-Starting-a-Program"><a href="#2-11-Translating-and-Starting-a-Program" class="headerlink" title="2.11. Translating and Starting a Program"></a>2.11. Translating and Starting a Program</h2><p>高级语言编译成汇编语言，再汇编成机器码的二进制对象，之后链接上一些必要的库文件（也是机器码二进制对象），最终才得到了机器码的二进制可执行文件，然后 load 到内存里运行。</p>
+<h2 id="2-12-A-C-Sort-Example-to-Put-It-All-Together"><a href="#2-12-A-C-Sort-Example-to-Put-It-All-Together" class="headerlink" title="2.12. A C Sort Example to Put It All Together"></a>2.12. A C Sort Example to Put It All Together</h2><p>一个C语言的排序示例</p>
+<h2 id="2-13-Advanced-Material-Compiling-C"><a href="#2-13-Advanced-Material-Compiling-C" class="headerlink" title="2.13. Advanced Material: Compiling C"></a>2.13. Advanced Material: Compiling C</h2><p>提升材料：编译C语言</p>
+<p><a href="http://booksite.elsevier.com/9780124077263/downloads/advance_contents_and_appendices/section_2.15.pdf" target="_blank" rel="noopener">PDF材料</a></p>
+<h2 id="2-14-Real-Stuff-ARMv7-32-bit-Instructions"><a href="#2-14-Real-Stuff-ARMv7-32-bit-Instructions" class="headerlink" title="2.14. Real Stuff: ARMv7 (32-bit) Instructions"></a>2.14. Real Stuff: ARMv7 (32-bit) Instructions</h2><p>实例：ARMv7（32位）指令</p>
+<h2 id="2-15-Real-Stuff-x86-Instructions"><a href="#2-15-Real-Stuff-x86-Instructions" class="headerlink" title="2.15. Real Stuff: x86 Instructions"></a>2.15. Real Stuff: x86 Instructions</h2><p>实例：x86指令</p>
+<h2 id="2-16-Real-Stuff-ARMv8-64-bit-Instructions"><a href="#2-16-Real-Stuff-ARMv8-64-bit-Instructions" class="headerlink" title="2.16. Real Stuff: ARMv8 (64-bit) Instructions"></a>2.16. Real Stuff: ARMv8 (64-bit) Instructions</h2><p>实例：ARMv8（64位）指令</p>
+<h2 id="2-19-Historial-Perspectives-and-Further-Reading"><a href="#2-19-Historial-Perspectives-and-Further-Reading" class="headerlink" title="2.19. Historial Perspectives and Further Reading"></a>2.19. Historial Perspectives and Further Reading</h2><p><a href="http://booksite.elsevier.com/9780124077263/downloads/historial%20perspectives/section_2.21.pdf" target="_blank" rel="noopener">PDF材料</a></p>
+<h2 id="2-20-Exercises"><a href="#2-20-Exercises" class="headerlink" title="2.20. Exercises"></a>2.20. Exercises</h2><p><a href="http://jcf94.com/download/2015-09-09-cod-CH02_Solution.pdf">答案</a></p>
+<hr>
+<h1 id="CHAPTER-3-Arithmetic-for-Computers"><a href="#CHAPTER-3-Arithmetic-for-Computers" class="headerlink" title="CHAPTER 3. Arithmetic for Computers"></a>CHAPTER 3. Arithmetic for Computers</h1><p>计算机中的算术运算</p>
+<h2 id="3-1-Instruction"><a href="#3-1-Instruction" class="headerlink" title="3.1. Instruction"></a>3.1. Instruction</h2><h2 id="3-2-Addition-and-Subtraction"><a href="#3-2-Addition-and-Subtraction" class="headerlink" title="3.2. Addition and Subtraction"></a>3.2. Addition and Subtraction</h2><p>加减的硬件实现考虑数电中的加减电路，原理还是很简单的。</p>
+<h2 id="3-3-Multiplication"><a href="#3-3-Multiplication" class="headerlink" title="3.3. Multiplication"></a>3.3. Multiplication</h2><p>乘法的硬件实现也可以看成是用纸笔列竖式乘法方法的衍生，即移位和加法。</p>
+<p><img data-src="http://jcf94.com/download/2015-09-09-cod-multi.png" alt=""></p>
+<h2 id="3-4-Division"><a href="#3-4-Division" class="headerlink" title="3.4. Division"></a>3.4. Division</h2><p>移位加比较，原理类似。</p>
+<p><img data-src="http://jcf94.com/download/2015-09-09-cod-divi.png" alt=""></p>
+<h2 id="3-5-Floating-Point"><a href="#3-5-Floating-Point" class="headerlink" title="3.5. Floating Point"></a>3.5. Floating Point</h2><p>计算机中的实数用科学计数法来表示，将一个存储空间的一部分用于表示指数，另一部分用于表示尾数。</p>
+<p>存储空间的总大小是一定的，指数数位越多，则表示的数的范围越大，但是由于尾数数位少了，有效数位下降了；反之，指数数位越少，表示的数有效数位越多，精确度越高，但是能够表示的范围就小了。</p>
+<p>以MIPS中常见的32位浮点数表示为例：</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-3.5.1.jpg" title="MIPS中常见的浮点数表示法"/>
+
+<p>首位为符号位，接下来8位是带符号的指数部分，最后23位是尾数，则整个数最后表示的内容是：</p>
+<p>$$(-1)^S*F*2^E$$</p>
+<p>它能表示的范围在：$2*10^{-38}\sim2*10^{38}$</p>
+<p>64位的浮点数结构则是这样的：</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-3.5.2.jpg" title="双精度浮点数表示"/>
+
+<p>表示的范围在：$2*10^{-308}\sim2*10^{308}$</p>
+<hr>
+<p>IEEE754标准对零、无穷与无效数据格式作了规定：</p>
+<img data-src="http://jcf94.com/download/2015-09-09-cod-3.5.3.jpg" title="IEEE754浮点数编码">
+
+<p>除此之外，对浮点数有两个比较重要的规定：</p>
+<ol>
+<li>忽略尾数的前导1</li>
+<li>指数带偏阶</li>
+</ol>
+<p>标准格式的10进制科学计数法中，整数位一定是个介于1~9之间的数，否则就可进一步进行标准化，把多出来的数位算到指数上去。</p>
+<p>那么2进制的科学计数法也是一样的道理。因此尾数第1个数位一定是1，则约定俗成的，若是隐藏这个前导1，实际可以多表示一位数位。</p>
+<p>指数的偏阶是为了避免一个看上去似乎是很大的数，因为指数是负数，而结果很小的情况。</p>
+<p>32位浮点数中，默认将阶数加上127作为存储的指数。</p>
+<p>这样$128_{10}=10000000_2$的指数实际上表示1；而$0_{10}=00000000_2$实际上表示-127。</p>
+<p>则最终，实际上浮点数的表示是：</p>
+<p>$$(-1)^S*(1+F)*2^{E-Bias}$$</p>
+<h2 id="3-6-Parallelism-and-Computer-Arithmetic-Subword-Parallelism"><a href="#3-6-Parallelism-and-Computer-Arithmetic-Subword-Parallelism" class="headerlink" title="3.6. Parallelism and Computer Arithmetic: Subword Parallelism"></a>3.6. Parallelism and Computer Arithmetic: Subword Parallelism</h2><p>处理图像和声音等等数据时，可能会有一堆类似的操作一起出现，考虑并行处理。</p>
+<p>这里的子字并行（subword parallelism）这个词其实就是平常更常说的向量化或者 SIMD。就是一条指令对一组数据进行相同的操作。</p>
+<h2 id="3-7-Real-Stuff-Streaming-SIMD-Extensions-and-Advanced-Vector-Extensions-in-x86"><a href="#3-7-Real-Stuff-Streaming-SIMD-Extensions-and-Advanced-Vector-Extensions-in-x86" class="headerlink" title="3.7. Real Stuff: Streaming SIMD Extensions and Advanced Vector Extensions in x86"></a>3.7. Real Stuff: Streaming SIMD Extensions and Advanced Vector Extensions in x86</h2><p>实例：x86中的SIMD流扩展和高级向量扩展</p>
+<h2 id="3-8-Going-Faster-Subword-Parallelism-and-Matrix-Multiply"><a href="#3-8-Going-Faster-Subword-Parallelism-and-Matrix-Multiply" class="headerlink" title="3.8. Going Faster: Subword Parallelism and Matrix Multiply"></a>3.8. Going Faster: Subword Parallelism and Matrix Multiply</h2><p>DGEMM: Double precision GEneral Matrix Multiply</p>
+<p>对比了x86架构中 scalar double 与 parallel double 两种指令集的性能。其中 parallel double 在运算时执行的是并行的浮点乘法运算（SIMD）。</p>
+<p>优化前性能：1.7GFLOPS<br>优化后性能：6.4GFLOPS</p>
+<h2 id="3-11-Historial-Perspectives-and-Further-Reading"><a href="#3-11-Historial-Perspectives-and-Further-Reading" class="headerlink" title="3.11. Historial Perspectives and Further Reading"></a>3.11. Historial Perspectives and Further Reading</h2><p><a href="http://booksite.elsevier.com/9780124077263/downloads/historial%20perspectives/section_3.11.pdf" target="_blank" rel="noopener">PDF材料</a></p>
+<h2 id="3-12-Exercises"><a href="#3-12-Exercises" class="headerlink" title="3.12. Exercises"></a>3.12. Exercises</h2><p><a href="http://jcf94.com/download/2015-09-09-cod-CH03_Solution.pdf">答案</a></p>
+<hr>
+<p>后接下一部分：</p>
+<ul>
+<li><a href="/2018/02/06/2018-02-06-cod2/">计算机组成与设计.硬件/软件接口 学习笔记（二）</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/10/23/2015-10-23-virtualmemory/" rel="bookmark">硬件/软件接口 Virtual Memory</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/02/06/2018-02-06-cod2/" rel="bookmark">计算机组成与设计.硬件/软件接口 学习笔记（二）</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/02/12/2018-02-12-cod3/" rel="bookmark">计算机组成与设计.硬件/软件接口 学习笔记（三）</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/08/16/2015-08-16-compilers/" rel="bookmark">编译原理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/11/03/2015-11-03-mpi/" rel="bookmark">并行编程 MPI初探</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 学习笔记</a>
+              <a href="/tags/%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/" rel="tag"># 体系结构</a>
+              <a href="/tags/%E7%BB%84%E6%88%90%E4%B8%8E%E8%AE%BE%E8%AE%A1-%E7%A1%AC%E8%BD%AF%E4%BB%B6%E6%8E%A5%E5%8F%A3/" rel="tag"># 组成与设计.硬软件接口</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/09/07/2015-09-07-nothing/" rel="prev" title="杂记">
+      <i class="fa fa-chevron-left"></i> 杂记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/09/13/2015-09-13-Changchun-Online/" rel="next" title="The 2015 ACM-ICPC Asia Regional Changchun Online">
+      The 2015 ACM-ICPC Asia Regional Changchun Online <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#CHAPTER-1-Computer-Abstractions-and-Technology"><span class="nav-text">CHAPTER 1. Computer Abstractions and Technology</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-Instruction"><span class="nav-text">1.1. Instruction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-Eight-Great-Ideas-in-Computer-Architecture"><span class="nav-text">1.2. Eight Great Ideas in Computer Architecture</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-Below-Your-Program"><span class="nav-text">1.3. Below Your Program</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-Under-the-Covers"><span class="nav-text">1.4. Under the Covers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-5-Technologies-for-Building-Processors-and-Memory"><span class="nav-text">1.5. Technologies for Building Processors and Memory</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-6-Performance"><span class="nav-text">1.6. Performance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-7-The-Power-Wall"><span class="nav-text">1.7. The Power Wall</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-8-The-Sea-Change-The-Switch-from-Uniprocessors-to-Multiprocessors"><span class="nav-text">1.8. The Sea Change: The Switch from Uniprocessors to Multiprocessors</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-9-Real-Stuff-Benchmarking-the-Intel-Core-i7"><span class="nav-text">1.9. Real Stuff: Benchmarking the Intel Core i7</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-12-Historial-Perspectives-and-Further-Reading"><span class="nav-text">1.12. Historial Perspectives and Further Reading</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-13-Exercises"><span class="nav-text">1.13. Exercises</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CHAPTER-2-Instructions-Language-of-the-Computer"><span class="nav-text">CHAPTER 2. Instructions: Language of the Computer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-Instruction"><span class="nav-text">2.1. Instruction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-Operations-of-the-Computer-Hardware"><span class="nav-text">2.2. Operations of the Computer Hardware</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-Operands-of-the-Computer-Hardware"><span class="nav-text">2.3. Operands of the Computer Hardware</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-Signed-and-Unsigned-Numbers"><span class="nav-text">2.4. Signed and Unsigned Numbers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-5-Representing-Instructions-in-the-Computer"><span class="nav-text">2.5. Representing Instructions in the Computer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-6-Logical-Operations"><span class="nav-text">2.6. Logical Operations</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-7-Instructions-for-Making-Decisions"><span class="nav-text">2.7. Instructions for Making Decisions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-8-Supporting-Procedures-in-Computer-Hardware"><span class="nav-text">2.8. Supporting Procedures in Computer Hardware</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-9-MIPS-Addressing-for-32-Bit-Immediates-and-Addresses"><span class="nav-text">2.9. MIPS Addressing for 32-Bit Immediates and Addresses</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-10-Parallelism-and-Instructions-Synchronization"><span class="nav-text">2.10. Parallelism and Instructions: Synchronization</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-11-Translating-and-Starting-a-Program"><span class="nav-text">2.11. Translating and Starting a Program</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-12-A-C-Sort-Example-to-Put-It-All-Together"><span class="nav-text">2.12. A C Sort Example to Put It All Together</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-13-Advanced-Material-Compiling-C"><span class="nav-text">2.13. Advanced Material: Compiling C</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-14-Real-Stuff-ARMv7-32-bit-Instructions"><span class="nav-text">2.14. Real Stuff: ARMv7 (32-bit) Instructions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-15-Real-Stuff-x86-Instructions"><span class="nav-text">2.15. Real Stuff: x86 Instructions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-16-Real-Stuff-ARMv8-64-bit-Instructions"><span class="nav-text">2.16. Real Stuff: ARMv8 (64-bit) Instructions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-19-Historial-Perspectives-and-Further-Reading"><span class="nav-text">2.19. Historial Perspectives and Further Reading</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-20-Exercises"><span class="nav-text">2.20. Exercises</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CHAPTER-3-Arithmetic-for-Computers"><span class="nav-text">CHAPTER 3. Arithmetic for Computers</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-Instruction"><span class="nav-text">3.1. Instruction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-Addition-and-Subtraction"><span class="nav-text">3.2. Addition and Subtraction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-Multiplication"><span class="nav-text">3.3. Multiplication</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-Division"><span class="nav-text">3.4. Division</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-Floating-Point"><span class="nav-text">3.5. Floating Point</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-6-Parallelism-and-Computer-Arithmetic-Subword-Parallelism"><span class="nav-text">3.6. Parallelism and Computer Arithmetic: Subword Parallelism</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-7-Real-Stuff-Streaming-SIMD-Extensions-and-Advanced-Vector-Extensions-in-x86"><span class="nav-text">3.7. Real Stuff: Streaming SIMD Extensions and Advanced Vector Extensions in x86</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-8-Going-Faster-Subword-Parallelism-and-Matrix-Multiply"><span class="nav-text">3.8. Going Faster: Subword Parallelism and Matrix Multiply</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-11-Historial-Perspectives-and-Further-Reading"><span class="nav-text">3.11. Historial Perspectives and Further Reading</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-12-Exercises"><span class="nav-text">3.12. Exercises</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '4c7ac93e229ac5351fd1a8cf93728a0b',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

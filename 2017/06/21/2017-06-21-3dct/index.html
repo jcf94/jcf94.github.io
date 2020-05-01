@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="嗯，在杭州待了半个月，想了想还是把一个月前的这篇从草稿堆里面恢复出来了。 被老板外派出去参与健培公司的合作项目，正常的话，大概今年8月就能在央视的节目上看到我们的工作啦 ^0^&#x2F; 这篇日志里面记录的都是网上的开源资料，主要来源于 Kaggle。 参考资料：  3D ConvNet For Kaggle Data Science Bowl 2017 Lung Cancer Detection">
+<meta property="og:type" content="article">
+<meta property="og:title" content="医学影像 &amp; AI">
+<meta property="og:url" content="https://jcf94.com/2017/06/21/2017-06-21-3dct/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="嗯，在杭州待了半个月，想了想还是把一个月前的这篇从草稿堆里面恢复出来了。 被老板外派出去参与健培公司的合作项目，正常的话，大概今年8月就能在央视的节目上看到我们的工作啦 ^0^&#x2F; 这篇日志里面记录的都是网上的开源资料，主要来源于 Kaggle。 参考资料：  3D ConvNet For Kaggle Data Science Bowl 2017 Lung Cancer Detection">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2017-06-21-3dct-lung.png">
+<meta property="article:published_time" content="2017-06-21T08:22:28.000Z">
+<meta property="article:modified_time" content="2018-10-04T02:46:34.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="Deep Learning">
+<meta property="article:tag" content="Kaggle">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2017-06-21-3dct-lung.png">
+
+<link rel="canonical" href="https://jcf94.com/2017/06/21/2017-06-21-3dct/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>医学影像 & AI | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2017/06/21/2017-06-21-3dct/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          医学影像 & AI
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2017-06-21 16:22:28" itemprop="dateCreated datePublished" datetime="2017-06-21T16:22:28+08:00">2017-06-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-10-04 10:46:34" itemprop="dateModified" datetime="2018-10-04T10:46:34+08:00">2018-10-04</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index"><span itemprop="name">Machine Learning</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <img data-src="http://jcf94.com/download/2017-06-21-3dct-lung.png" />
+
+<p>嗯，在杭州待了半个月，想了想还是把一个月前的这篇从草稿堆里面恢复出来了。</p>
+<p>被老板外派出去参与<a href="http://www.jianpeicn.com/" target="_blank" rel="noopener">健培</a>公司的合作项目，正常的话，大概今年8月就能在央视的节目上看到我们的工作啦 ^0^/</p>
+<p>这篇日志里面记录的都是网上的开源资料，主要来源于 Kaggle。</p>
+<p>参考资料：</p>
+<ul>
+<li><p><a href="https://www.youtube.com/playlist?list=PLQVvvaa0QuDd5meH8cStO9cMi98tPT12_" target="_blank" rel="noopener">3D ConvNet For Kaggle Data Science Bowl 2017 Lung Cancer Detection</a></p>
+</li>
+<li><p><a href="https://www.kaggle.com/gzuidhof/full-preprocessing-tutorial" target="_blank" rel="noopener">Guido Zuidhof’s Full Preprocessing Tutorial</a></p>
+</li>
+</ul>
+<a id="more"></a>
+
+<hr>
+<h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1><p>深度学习的这把火已经烧遍了几乎所有领域，尤其在图像识别方面。</p>
+<p>医疗放射图像方面的疾病监测自然也早就有人盯上了。</p>
+<p><a href="https://luna16.grand-challenge.org/" target="_blank" rel="noopener">LUNA16</a>是一个肺部结节检测的数据集…0.0…不知道是关于肺结节的深度学习检测火了才有了这个数据集还是先有了这个数据集然后肺结节检测才火了。</p>
+<p>反正在我们这些领域外行来看，好像特别多的机构和公司都在钻这块的研究。其他的，好像有例如乳腺癌检测等等也是个做的比较多的课题。</p>
+<p>除了 LUNA16 数据集本身的排名以外，<a href="https://tianchi.aliyun.com/competition/introduction.htm?spm=5176.100066.0.0.14b6b957Elo1tD&raceId=231601" target="_blank" rel="noopener">阿里的天池</a>，还有<a href="https://www.kaggle.com/c/data-science-bowl-2017" target="_blank" rel="noopener">Kaggle</a>都搞了类似的比赛。</p>
+<p>不过相较国外的比赛，阿里的最后要求队伍还要上交所有代码，我感觉就有点砸钱套算法的意味了。嗯，你有钱你牛。</p>
+<p>Kaggle 上学术分享的氛围很浓，赛方并没有什么要求，而比赛的前几名往往都会主动把代码开源出来供整个社区一起学习。</p>
+<hr>
+<h1 id="Pre-Processing"><a href="#Pre-Processing" class="headerlink" title="Pre-Processing"></a>Pre-Processing</h1><p>首先是数据的预处理部分。</p>
+<h2 id="Reading-CT-Data"><a href="#Reading-CT-Data" class="headerlink" title="Reading CT Data"></a>Reading CT Data</h2><p>CT 数据扫描出来会保存成 <code>.dcm</code> 格式的数据，每个文件表示一层 CT 扫描的结果。一个病例则是将一组好多层的结果拼在一起的三维影像。</p>
+<p><code>.dcm</code> 格式中包含了像素大小，图片像素与实际物理尺度的关系等等，相当复杂，python 这边可以用 <code>dicom</code> 这个库直接读取 <code>.dcm</code> 文件，处理起来还比较方便。纯 C++ 操作的话，有个叫 <code>simpleitk</code> 的库可以用。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np <span class="comment"># linear algebra</span></span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd <span class="comment"># data processing, CSV file I/O (e.g. pd.read_csv)</span></span><br><span class="line"><span class="keyword">import</span> dicom</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> scipy.ndimage</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> skimage <span class="keyword">import</span> measure, morphology</span><br><span class="line"><span class="keyword">from</span> mpl_toolkits.mplot3d.art3d <span class="keyword">import</span> Poly3DCollection</span><br><span class="line"></span><br><span class="line"><span class="comment"># Some constants</span></span><br><span class="line">INPUT_FOLDER = <span class="string">'../input/sample_images/'</span></span><br><span class="line">patients = os.listdir(INPUT_FOLDER)</span><br><span class="line">patients.sort()</span><br></pre></td></tr></table></figure>
+
+<p>上面这段是从 Kaggle 提供的病例数据中把每个病例的目录列在 <code>patients</code> 中。</p>
+<p>之后需要做的就是使用 dicom 库把某个病例目录下所有的 <code>.dcm</code> 文件都读进来，然后处理成人眼能够看的灰度图像。</p>
+<p>CT 数据用的是一个叫 Hounsfield 的单位，表示身体的某个部分对于 X 光的不透光性（这个好神奇…）。</p>
+<p>根据维基百科上的数据：</p>
+<p>|Substance|HU|<br>|-|<br>|Air|−1000|<br>|Lung|-700 to −600|<br>|Fat|−120 to −90|<br>|Chyle|−30|<br>|Water|0|<br>|Urine|-5 to +15|<br>|Bile|-5 to +15|<br>|CSF|+15|<br>|Kidney|+20 to +45|<br>|Liver|60 ± 6|<br>|Lymph nodes|+10 to +20|<br>|Blood|+30 to +45|<br>|Muscle|+35 to +55|<br>|White matter|+20 to +30|<br>|Grey matter|+37 to +45|<br>|Soft Tissue, Contrast|+100 to +300|<br>|Bone|+200 (craniofacial bone), +700 (cancellous bone) to +3000 (cortical bone)|</p>
+<p>人体中的每个不同组织的透光性不同，因此可以通过这个来直接过滤出需要的部位数据来。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Load the scans in given folder path</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">load_scan</span><span class="params">(path)</span>:</span></span><br><span class="line">    slices = [dicom.read_file(path + <span class="string">'/'</span> + s) <span class="keyword">for</span> s <span class="keyword">in</span> os.listdir(path)]</span><br><span class="line">    slices.sort(key = <span class="keyword">lambda</span> x: float(x.ImagePositionPatient[<span class="number">2</span>]))</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        slice_thickness = np.abs(slices[<span class="number">0</span>].ImagePositionPatient[<span class="number">2</span>] - slices[<span class="number">1</span>].ImagePositionPatient[<span class="number">2</span>])</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        slice_thickness = np.abs(slices[<span class="number">0</span>].SliceLocation - slices[<span class="number">1</span>].SliceLocation)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> s <span class="keyword">in</span> slices:</span><br><span class="line">        s.SliceThickness = slice_thickness</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> slices</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_pixels_hu</span><span class="params">(slices)</span>:</span></span><br><span class="line">    image = np.stack([s.pixel_array <span class="keyword">for</span> s <span class="keyword">in</span> slices])</span><br><span class="line">    <span class="comment"># Convert to int16 (from sometimes int16), </span></span><br><span class="line">    <span class="comment"># should be possible as values should always be low enough (&lt;32k)</span></span><br><span class="line">    image = image.astype(np.int16)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Set outside-of-scan pixels to 0</span></span><br><span class="line">    <span class="comment"># The intercept is usually -1024, so air is approximately 0</span></span><br><span class="line">    image[image == <span class="number">-2000</span>] = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># Convert to Hounsfield units (HU)</span></span><br><span class="line">    <span class="keyword">for</span> slice_number <span class="keyword">in</span> range(len(slices)):</span><br><span class="line"></span><br><span class="line">        intercept = slices[slice_number].RescaleIntercept</span><br><span class="line">        slope = slices[slice_number].RescaleSlope</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> slope != <span class="number">1</span>:</span><br><span class="line">            image[slice_number] = slope * image[slice_number].astype(np.float64)</span><br><span class="line">            image[slice_number] = image[slice_number].astype(np.int16)</span><br><span class="line"></span><br><span class="line">        image[slice_number] += np.int16(intercept)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> np.array(image, dtype=np.int16)</span><br><span class="line"></span><br><span class="line"><span class="comment"># ----------------------------------------------</span></span><br><span class="line"></span><br><span class="line">first_patient = load_scan(INPUT_FOLDER + patients[<span class="number">0</span>])</span><br><span class="line">first_patient_pixels = get_pixels_hu(first_patient)</span><br><span class="line">plt.hist(first_patient_pixels.flatten(), bins=<span class="number">80</span>, color=<span class="string">'c'</span>)</span><br><span class="line">plt.xlabel(<span class="string">"Hounsfield Units (HU)"</span>)</span><br><span class="line">plt.ylabel(<span class="string">"Frequency"</span>)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br><span class="line"><span class="comment"># Show some slice in the middle</span></span><br><span class="line">plt.imshow(first_patient_pixels[<span class="number">80</span>], cmap=plt.cm.gray)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><code>get_pixels_hu</code> 这个函数返回的直接是一个 numpy 的三维矩阵了，其中每个点的数据就是 CT 拍出来的 HU 值。</p>
+<p>CT 扫描出来的各个方向的物理尺度不一定一致，之后需要对原数据进行重新采样。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">resample</span><span class="params">(image, scan, new_spacing=[<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>])</span>:</span></span><br><span class="line">    <span class="comment"># Determine current pixel spacing</span></span><br><span class="line">    spacing = np.array([scan[<span class="number">0</span>].SliceThickness] + scan[<span class="number">0</span>].PixelSpacing, dtype=np.float32)</span><br><span class="line"></span><br><span class="line">    resize_factor = spacing / new_spacing</span><br><span class="line">    new_real_shape = image.shape * resize_factor</span><br><span class="line">    new_shape = np.round(new_real_shape)</span><br><span class="line">    real_resize_factor = new_shape / image.shape</span><br><span class="line">    new_spacing = spacing / real_resize_factor</span><br><span class="line"></span><br><span class="line">    image = scipy.ndimage.interpolation.zoom(image, real_resize_factor, mode=<span class="string">'nearest'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> image, new_spacing</span><br><span class="line"></span><br><span class="line">pix_resampled, spacing = resample(first_patient_pixels, first_patient, [<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>])</span><br><span class="line">print(<span class="string">"Shape before resampling\t"</span>, first_patient_pixels.shape)</span><br><span class="line">print(<span class="string">"Shape after resampling\t"</span>, pix_resampled.shape)</span><br></pre></td></tr></table></figure>
+
+<p>现在我们得到了一个三个维度缩放比例一致的图像，可以输出来看一下。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">plot_3d</span><span class="params">(image, threshold=<span class="number">-300</span>)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># Position the scan upright,</span></span><br><span class="line">    <span class="comment"># so the head of the patient would be at the top facing the camera</span></span><br><span class="line">    p = image.transpose(<span class="number">2</span>,<span class="number">1</span>,<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">    verts, faces = measure.marching_cubes(p, threshold)</span><br><span class="line"></span><br><span class="line">    fig = plt.figure(figsize=(<span class="number">10</span>, <span class="number">10</span>))</span><br><span class="line">    ax = fig.add_subplot(<span class="number">111</span>, projection=<span class="string">'3d'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Fancy indexing: `verts[faces]` to generate a collection of triangles</span></span><br><span class="line">    mesh = Poly3DCollection(verts[faces], alpha=<span class="number">0.70</span>)</span><br><span class="line">    face_color = [<span class="number">0.45</span>, <span class="number">0.45</span>, <span class="number">0.75</span>]</span><br><span class="line">    mesh.set_facecolor(face_color)</span><br><span class="line">    ax.add_collection3d(mesh)</span><br><span class="line"></span><br><span class="line">    ax.set_xlim(<span class="number">0</span>, p.shape[<span class="number">0</span>])</span><br><span class="line">    ax.set_ylim(<span class="number">0</span>, p.shape[<span class="number">1</span>])</span><br><span class="line">    ax.set_zlim(<span class="number">0</span>, p.shape[<span class="number">2</span>])</span><br><span class="line"></span><br><span class="line">    plt.show()</span><br><span class="line"></span><br><span class="line">plot_3d(pix_resampled, <span class="number">400</span>)</span><br></pre></td></tr></table></figure>
+
+<p><code>measure.marching_cubes</code> 这个函数是在三维的图中对二维表面进行分割……或者说就是在找三维凸包？</p>
+<p>400 可以从上面的表里面找到是骨骼的 Hounsfield 值，所以这里打印出来的会是一张肋骨和胸骨的图像。</p>
+<h2 id="Lung-Segmentation"><a href="#Lung-Segmentation" class="headerlink" title="Lung Segmentation"></a>Lung Segmentation</h2><p>有了数据，后面需要做的是把肺这个部分从整块 CT 图像中分割出来，毕竟后面的处理和操作都是针对肺的。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">largest_label_volume</span><span class="params">(im, bg=<span class="number">-1</span>)</span>:</span></span><br><span class="line">    vals, counts = np.unique(im, return_counts=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    counts = counts[vals != bg]</span><br><span class="line">    vals = vals[vals != bg]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> len(counts) &gt; <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span> vals[np.argmax(counts)]</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">segment_lung_mask</span><span class="params">(image, fill_lung_structures=True)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># not actually binary, but 1 and 2.</span></span><br><span class="line">    <span class="comment"># 0 is treated as background, which we do not want</span></span><br><span class="line">    binary_image = np.array(image &gt; <span class="number">-320</span>, dtype=np.int8)+<span class="number">1</span></span><br><span class="line">    labels = measure.label(binary_image)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Pick the pixel in the very corner to determine which label is air.</span></span><br><span class="line">    <span class="comment">#   Improvement: Pick multiple background labels from around the patient</span></span><br><span class="line">    <span class="comment">#   More resistant to "trays" on which the patient lays cutting the air </span></span><br><span class="line">    <span class="comment">#   around the person in half</span></span><br><span class="line">    background_label = labels[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Fill the air around the person</span></span><br><span class="line">    binary_image[background_label == labels] = <span class="number">2</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment"># Method of filling the lung structures (that is superior to something like </span></span><br><span class="line">    <span class="comment"># morphological closing)</span></span><br><span class="line">    <span class="keyword">if</span> fill_lung_structures:</span><br><span class="line">        <span class="comment"># For every slice we determine the largest solid structure</span></span><br><span class="line">        <span class="keyword">for</span> i, axial_slice <span class="keyword">in</span> enumerate(binary_image):</span><br><span class="line">            axial_slice = axial_slice - <span class="number">1</span></span><br><span class="line">            labeling = measure.label(axial_slice)</span><br><span class="line">            l_max = largest_label_volume(labeling, bg=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> l_max <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>: <span class="comment">#This slice contains some lung</span></span><br><span class="line">                binary_image[i][labeling != l_max] = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    binary_image -= <span class="number">1</span> <span class="comment">#Make the image actual binary</span></span><br><span class="line">    binary_image = <span class="number">1</span>-binary_image <span class="comment"># Invert it, lungs are now 1</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># Remove other air pockets insided body</span></span><br><span class="line">    labels = measure.label(binary_image, background=<span class="number">0</span>)</span><br><span class="line">    l_max = largest_label_volume(labels, bg=<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">if</span> l_max <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>: <span class="comment"># There are air pockets</span></span><br><span class="line">        binary_image[labels != l_max] = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> binary_image</span><br><span class="line"></span><br><span class="line">segmented_lungs = segment_lung_mask(pix_resampled, <span class="literal">False</span>)</span><br><span class="line">segmented_lungs_fill = segment_lung_mask(pix_resampled, <span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">plot_3d(segmented_lungs, <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这里肺分割采用的方法是连通域分析。</p>
+<p>先把 -320 阈值以上的所有点都筛掉，剩下在这个值以下的就是肺和空气了。</p>
+<p>用 <code>measure.label</code> 这个函数做一次连通域分析，包裹在肺外部的是空气，与 <code>[0][0][0]</code> 相连通的部分全部标记成空。</p>
+<p>由于 <code>measure.label</code> 函数默认把 0 作为背景值，因此这里用于连通域分析的二值图像的值实际是 1 和 2。</p>
+<p>完成第一次标记之后，将数据恢复成 0 和 1 的二值，再做第二次连通域分析。</p>
+<p>保留整个图中最大的连通域就是肺了，剩下的部分都是需要被筛掉的空气。</p>
+<p>上面这段代码的输出就是题图的结果。</p>
+<p>在输出肺的时候用的是 CPU 进行直接渲染，非常消耗内存，显示出来也很慢。</p>
+<hr>
+<p>之后可以对这一块初步分割出来的肺部做进一步的处理，让结果更加精准。</p>
+<p>例如 <a href="https://www.kaggle.com/ankasor/improved-lung-segmentation-using-watershed" target="_blank" rel="noopener">Improved Lung Segmentation using Watershed</a> 等等 Kaggle 上的 Kernels 还提供了更多的参考。</p>
+<p>To be continued.</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/02/04/2017-02-04-tensorflow/" rel="bookmark">TensorFlow</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/03/22/2017-03-22-deeplearning/" rel="bookmark">深度学习初探</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/04/04/2017-04-04-alexnet/" rel="bookmark">AlexNet</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/12/20/2017-12-20-distributeddl/" rel="bookmark">分布式机器学习 / 深度学习论文整理</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+              <a href="/tags/Kaggle/" rel="tag"># Kaggle</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/06/15/2017-06-15-nodejs/" rel="prev" title="Node.js 踩坑">
+      <i class="fa fa-chevron-left"></i> Node.js 踩坑
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/07/10/2017-07-10-libuv/" rel="next" title="向 Node.js 的底层再走一步">
+      向 Node.js 的底层再走一步 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Introduction"><span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Pre-Processing"><span class="nav-text">Pre-Processing</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Reading-CT-Data"><span class="nav-text">Reading CT Data</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lung-Segmentation"><span class="nav-text">Lung Segmentation</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '49c9633c24d747b9ddaa43fc95e6655f',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

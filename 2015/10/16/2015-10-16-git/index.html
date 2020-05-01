@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Git -- The stupid content tracker. Linus Torvalds   使用git已经有一段时间了，从刚开始的陌生到慢慢熟悉 掌握基本的用法之后，会让人对开发、尤其是多人合作开发有了新的理解……甚至于平时写文档的时候都想用了  脑海中出现这么个画面 毕业论文.doc毕业论文修改版.doc毕业论文完结版.doc毕业论文最终版.doc毕业论文再也不改了版.doc… 这">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Git使用小结">
+<meta property="og:url" content="https://jcf94.com/2015/10/16/2015-10-16-git/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="Git -- The stupid content tracker. Linus Torvalds   使用git已经有一段时间了，从刚开始的陌生到慢慢熟悉 掌握基本的用法之后，会让人对开发、尤其是多人合作开发有了新的理解……甚至于平时写文档的时候都想用了  脑海中出现这么个画面 毕业论文.doc毕业论文修改版.doc毕业论文完结版.doc毕业论文最终版.doc毕业论文再也不改了版.doc… 这">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-10-16T08:44:30.000Z">
+<meta property="article:modified_time" content="2017-03-03T15:31:27.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="Git">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2015/10/16/2015-10-16-git/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Git使用小结 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2015/10/16/2015-10-16-git/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Git使用小结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-10-16 16:44:30" itemprop="dateCreated datePublished" datetime="2015-10-16T16:44:30+08:00">2015-10-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2017-03-03 23:31:27" itemprop="dateModified" datetime="2017-03-03T23:31:27+08:00">2017-03-03</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote class="blockquote-center">
+Git -- The stupid content tracker.
+Linus Torvalds
+</blockquote>
+
+<p>使用git已经有一段时间了，从刚开始的陌生到慢慢熟悉</p>
+<p>掌握基本的用法之后，会让人对开发、尤其是多人合作开发有了新的理解……甚至于平时写文档的时候都想用了</p>
+<blockquote>
+<p>脑海中出现这么个画面</p>
+<p>毕业论文.doc<br>毕业论文修改版.doc<br>毕业论文完结版.doc<br>毕业论文最终版.doc<br>毕业论文再也不改了版.doc<br>…</p>
+<p>这时候要是有git在，一个文件就足够了，多次保存之后commit好即可</p>
+</blockquote>
+<p>把平时常用的一些操作做一下整理。</p>
+<a id="more"></a>
+
+<h1 id="开始一个项目"><a href="#开始一个项目" class="headerlink" title="开始一个项目"></a>开始一个项目</h1><p>一般开始项目有2种情况：复制一个现成的git项目或者创建新项目</p>
+<p>复制：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> [<span class="built_in">source</span>] [destination]</span><br></pre></td></tr></table></figure>
+
+<p>[source]里面是项目的位置，可以是本地/服务器上的某个目录，也可以是远程库（例如github）中项目的地址（HTTPS或者SSH地址）</p>
+<p>[destination]是拷到本地存放的位置，不加就是默认当前目录下</p>
+<p>事实上……这个命令就是复制粘贴，尤其是如果是从本地clone到本地的时候。当然，只有git项目可以clone，对一个普通的文件夹调用clone命令还是不行的</p>
+<p>创建:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git init [name]</span><br></pre></td></tr></table></figure>
+
+<p>[name]是项目的名字，不加就是把当前目录初始化成git库</p>
+<p>初始化之后，目录下面会多出一个隐藏的.git文件夹，里面保存了git库需要的各种信息文件</p>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p>就拿一开始的论文脑洞来举例吧，我这里是装好git之后，配好运行环境，然后就可以在cmd里面操作git了</p>
+<p>命令行到桌面，然后：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\lenovo\Desktop&gt;git init <span class="built_in">test</span></span><br><span class="line">Initialized empty Git repository <span class="keyword">in</span> C:/Users/lenovo/Desktop/<span class="built_in">test</span>/.git/</span><br></pre></td></tr></table></figure>
+
+<p>clone一下试试</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\lenovo\Desktop&gt;git <span class="built_in">clone</span> <span class="built_in">test</span> lunwen</span><br><span class="line">Cloning into <span class="string">'lunwen'</span>...</span><br><span class="line">warning: You appear to have cloned an empty repository.</span><br><span class="line"><span class="keyword">done</span>.</span><br></pre></td></tr></table></figure>
+
+<p>然后就可以开始工作啦，接下来的操作都会在这个名字叫做lunwen的目录（库）下面完成</p>
+<h1 id="开始工作"><a href="#开始工作" class="headerlink" title="开始工作"></a>开始工作</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git status</span><br></pre></td></tr></table></figure>
+
+<p>这条命令是显示当前库中（其实就是当前目录中）需要被跟踪的文件的状态。</p>
+<p>文件的状态有三种，一开始新文件的状态是“<strong>Untracked</strong>”或者“<strong>Changes not staged for commit</strong>”，表示是刚创建的新文件还没有被git所追踪，或者是库中原本已有的文件发生了修改还没有被git所追踪，添加跟踪需要用到下面的这条add指令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git add [file]</span><br><span class="line">$ git add -A</span><br></pre></td></tr></table></figure>
+
+<p>-A 是默认把当前目录下所有需要追踪的文件都添加追踪，或者手动输入文件名进行各个文件的单独追踪</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git reset [file]</span><br></pre></td></tr></table></figure>
+
+<p>什么参数都不带表示把刚刚add上去的文件取消追踪，或者手动输入文件名进行各个文件的单独取消</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git diff</span><br></pre></td></tr></table></figure>
+
+<p>对库中原本已有的修改文件进行新旧版本对比，显示文件的区别</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git diff --staged</span><br></pre></td></tr></table></figure>
+
+<p>跟上一条指令类似，区别是这个是对已add进库中的文件进行新旧版本对比</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git commit -m <span class="string">"[descriptive message]"</span></span><br></pre></td></tr></table></figure>
+
+<p>当把所有文件都add进来之后，文件的状态变成了“<strong>Changes to be committed</strong>”，表示所有修改都已经被追踪，等待提交</p>
+<p>然后就需要上面这条命令，descriptive message是对本次提交的描述，如果不加-m和描述，git会打开一个编辑器要求输入描述</p>
+<h2 id="示例-1"><a href="#示例-1" class="headerlink" title="示例"></a>示例</h2><p>现在库里面是空的，新建个文本文档lunwen.txt，里面写上test1，然后查看一下状态：</p>
+<blockquote>
+<p>lunwen.txt</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">test1</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\lenovo\Desktop\lunwen&gt;git status</span><br><span class="line">On branch master</span><br><span class="line"></span><br><span class="line">Initial commit</span><br><span class="line"></span><br><span class="line">Untracked files:</span><br><span class="line">  (use <span class="string">"git add &lt;file&gt;..."</span> to include <span class="keyword">in</span> what will be committed)</span><br><span class="line"></span><br><span class="line">        lunwen.txt</span><br><span class="line"></span><br><span class="line">nothing added to commit but untracked files present (use <span class="string">"git add"</span> to track)</span><br></pre></td></tr></table></figure>
+
+<p>显示新的文件还没有被追踪过，先提交一下第一个版本：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\lenovo\Desktop\lunwen&gt;git add -A</span><br><span class="line"></span><br><span class="line">C:\Users\lenovo\Desktop\lunwen&gt;git status</span><br><span class="line">On branch master</span><br><span class="line"></span><br><span class="line">Initial commit</span><br><span class="line"></span><br><span class="line">Changes to be committed:</span><br><span class="line">  (use <span class="string">"git rm --cached &lt;file&gt;..."</span> to unstage)</span><br><span class="line"></span><br><span class="line">        new file:   lunwen.txt</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">C:\Users\lenovo\Desktop\lunwen&gt;git commit -m <span class="string">"first"</span></span><br><span class="line">[master (root-commit) 2561997] first</span><br><span class="line"> 1 file changed, 1 insertion(+)</span><br><span class="line"> create mode 100644 lunwen.txt</span><br><span class="line"></span><br><span class="line">C:\Users\lenovo\Desktop\lunwen&gt;git status</span><br><span class="line">On branch master</span><br><span class="line">nothing to commit, working directory clean</span><br></pre></td></tr></table></figure>
+
+<p>提交完成，接下来对lunwen.txt稍微做点修改，然后再创建个新的文件test.txt：</p>
+<blockquote>
+<p>lunwen.txt</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">test2</span><br><span class="line">test3</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>test.txt</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">test2</span><br><span class="line">test3</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\lenovo\Desktop\lunwen&gt;git status</span><br><span class="line">On branch master</span><br><span class="line">Changes not staged <span class="keyword">for</span> commit:</span><br><span class="line">  (use <span class="string">"git add &lt;file&gt;..."</span> to update what will be committed)</span><br><span class="line">  (use <span class="string">"git checkout -- &lt;file&gt;..."</span> to discard changes <span class="keyword">in</span> working directory)</span><br><span class="line"></span><br><span class="line">        modified:   lunwen.txt</span><br><span class="line"></span><br><span class="line">Untracked files:</span><br><span class="line">  (use <span class="string">"git add &lt;file&gt;..."</span> to include <span class="keyword">in</span> what will be committed)</span><br><span class="line"></span><br><span class="line">        test.txt</span><br><span class="line"></span><br><span class="line">no changes added to commit (use <span class="string">"git add"</span> and/or <span class="string">"git commit -a"</span>)</span><br></pre></td></tr></table></figure>
+
+<p>status里面清楚地显示了库中文件的改变情况即：lunwen.txt是已被追踪但是修改了的，test.txt是还没有被追踪的，接下来试一下diff这个命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\lenovo\Desktop\lunwen&gt;git diff</span><br><span class="line">diff --git a/lunwen.txt b/lunwen.txt</span><br><span class="line">index f079749..66bb064 100644</span><br><span class="line">--- a/lunwen.txt</span><br><span class="line">+++ b/lunwen.txt</span><br><span class="line">@@ -1 +1,2 @@</span><br><span class="line">-test1</span><br><span class="line">\ No newline at end of file</span><br><span class="line">+test2</span><br><span class="line">+test3</span><br><span class="line">\ No newline at end of file</span><br><span class="line"></span><br><span class="line">C:\Users\lenovo\Desktop\lunwen&gt;git add -A</span><br><span class="line"></span><br><span class="line">C:\Users\lenovo\Desktop\lunwen&gt;git diff --staged</span><br><span class="line">diff --git a/lunwen.txt b/lunwen.txt</span><br><span class="line">index f079749..66bb064 100644</span><br><span class="line">--- a/lunwen.txt</span><br><span class="line">+++ b/lunwen.txt</span><br><span class="line">@@ -1 +1,2 @@</span><br><span class="line">-test1</span><br><span class="line">\ No newline at end of file</span><br><span class="line">+test2</span><br><span class="line">+test3</span><br><span class="line">\ No newline at end of file</span><br><span class="line">diff --git a/test.txt b/test.txt</span><br><span class="line">new file mode 100644</span><br><span class="line">index 0000000..66bb064</span><br><span class="line">--- /dev/null</span><br><span class="line">+++ b/test.txt</span><br><span class="line">@@ -0,0 +1,2 @@</span><br><span class="line">+test2</span><br><span class="line">+test3</span><br><span class="line">\ No newline at end of file</span><br><span class="line"></span><br><span class="line">C:\Users\lenovo\Desktop\lunwen&gt;git commit -m <span class="string">"second"</span></span><br><span class="line">[master 50e143b] second</span><br><span class="line"> 2 files changed, 4 insertions(+), 1 deletion(-)</span><br><span class="line"> create mode 100644 test.txt</span><br><span class="line"></span><br><span class="line">C:\Users\lenovo\Desktop\lunwen&gt;git status</span><br><span class="line">On branch master</span><br><span class="line">nothing to commit, working directory clean</span><br></pre></td></tr></table></figure>
+
+<p>diff显示的只有lunwen.txt这个文件的变化，因为这个文件本来就在库里面，也是一直都被追踪着的。a/显示的是旧版本，b/显示的是新版本</p>
+<p>diff –staged显示的则是所有被add过的文件的差异，test.txt由于是新创建的，所有没有旧版本</p>
+<h1 id="删除文件"><a href="#删除文件" class="headerlink" title="删除文件"></a>删除文件</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git rm [file]</span><br></pre></td></tr></table></figure>
+
+<p>删除文件以及所有信息</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git rm --cached [file]</span><br></pre></td></tr></table></figure>
+
+<p>删除文件的追踪信息，但是文件仍然保留</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git mv [file-original] [file-renamed]</span><br></pre></td></tr></table></figure>
+
+<p>重命名文件</p>
+<h1 id="版本保存和恢复"><a href="#版本保存和恢复" class="headerlink" title="版本保存和恢复"></a>版本保存和恢复</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">log</span></span><br></pre></td></tr></table></figure>
+
+<p>显示所有commit的记录</p>
+<p>重点来了，git保存了库中所有文件完整的演变过程，以每一次commit作为一个保存点，如果发生问题，可以直接回滚到之前的任何一个版本，而需要的指令则是上面用过的这一条：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git reset</span><br></pre></td></tr></table></figure>
+
+<p>reset的作用是使目录会退到上一次的状态，在前面用来取消掉add，其实它的完整用法是这样的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git reset [--hard|soft|mixed|merge|keep] [&lt;commit&gt;或HEAD]</span><br></pre></td></tr></table></figure>
+
+<p>reset这个命令比较复杂，可以<a href="http://guibin.iteye.com/blog/1014369" target="_blank" rel="noopener">戳这个</a>了解更详细的实例</p>
+<hr>
+<p>先整体明确一下整个git的结构：</p>
+<p>首先是当前正在操作的内容，就是现在正在修改/编辑的文件，这一块叫做“<strong>Working Directory</strong>”</p>
+<p>通过add之后，追踪的内容被保存到了“<strong>Git Index</strong>”里面，这一块可以看成是当前目录和版本库之间的暂存区</p>
+<p>最后再用commit写上标注，把index里面更新的内容修改到“<strong>GIT Directory</strong>”即版本库里面</p>
+<hr>
+<p>好，那么回到reset</p>
+<p>commit字段用于选择哪一个版本，如果不加，则默认为HEAD，代表离当前最近的一个版本，也就是上一次最近的commit</p>
+<p>简单地说一下常用的几个：</p>
+<p>–hard 是强制将当前所做的所有修改都清除掉，HEAD、index和working directory全部恢复到目标commit</p>
+<p>–mixed 是不加参数时的默认选择，将HEAD和index都恢复到目标commit，但是保留目录下面修改了的文件。即此时只要add一下，再commit一下就能把当前修改的版本保存为下一个版本</p>
+<p>–soft 程度更弱，只将HEAD指向commit，index和当前的工作文件都保持不变，因此自目标commit以来的所有改变都会显示为“<strong>Changes to be committed</strong>”。此时只要commit一下，就能将当前修改的版本保存为下一个版本</p>
+<h1 id="版本暂存"><a href="#版本暂存" class="headerlink" title="版本暂存"></a>版本暂存</h1><p>这个功能用来遇到突发状况需要对最后一次的commit进行操作，然后又不想提交当前修改的时候用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git stash</span><br></pre></td></tr></table></figure>
+
+<p>将当前工作文件保存进栈，然后把工作区恢复到上一次的commit</p>
+<p>然后这样的操作还可以多次进行，每次的暂存就都会被压进栈</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git stash list</span><br></pre></td></tr></table></figure>
+
+<p>显示栈中保存的所有暂存信息</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git stash pop</span><br></pre></td></tr></table></figure>
+
+<p>弹出栈顶的保存信息，就是把栈顶的保存信息恢复到工作区</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git stash drop</span><br></pre></td></tr></table></figure>
+
+<p>不恢复，直接删除栈顶的保存信息</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git stash clean</span><br></pre></td></tr></table></figure>
+
+<p>清除栈中的所有信息</p>
+<h1 id="远程操作"><a href="#远程操作" class="headerlink" title="远程操作"></a>远程操作</h1><p>刚刚的都是针对本地库的操作，如果不需要上传到他地方，这些内容就足够了，而git的一大强大之处就是能方便多人协作，因此远程功能是少不了的</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git remote [-v]</span><br></pre></td></tr></table></figure>
+
+<p>不带选项时，remote命令会列出所有远程主机的名字</p>
+<p>-v 则会列出远程主机的地址</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git remote add &lt;name&gt;&lt;url&gt;</span><br></pre></td></tr></table></figure>
+
+<p>用于添加一台主机</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git remote rm &lt;name&gt;</span><br></pre></td></tr></table></figure>
+
+<p>用于删除一台主机</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git remote &lt;old-name&gt;&lt;new-name&gt;</span><br></pre></td></tr></table></figure>
+
+<p>重命名一台主机</p>
+<h2 id="示例-2"><a href="#示例-2" class="headerlink" title="示例"></a>示例</h2><p>一开始我创建的lunwen库是从test库clone过来的，所以查看lunwen库的远程主机情况就是这样的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\lenovo\Desktop\lunwen&gt;git remote</span><br><span class="line">origin</span><br><span class="line"></span><br><span class="line">C:\Users\lenovo\Desktop\lunwen&gt;git remote -v</span><br><span class="line">origin  C:/Users/lenovo/Desktop/<span class="built_in">test</span> (fetch)</span><br><span class="line">origin  C:/Users/lenovo/Desktop/<span class="built_in">test</span> (push)</span><br></pre></td></tr></table></figure>
+
+<p>默认clone过来的主机名是origin</p>
+<h1 id="分支控制"><a href="#分支控制" class="headerlink" title="分支控制"></a>分支控制</h1><p>这个也是git中相当重要的一个内容</p>
+<p>一个库中可以有多个分支，可以用来更方便地管理整个版本信息</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git branch [-a|r]</span><br></pre></td></tr></table></figure>
+
+<p>不加参数时，默认列出本地库中所有的分支信息，并在当前分支前面加*号</p>
+<p>-r 是列出远程库</p>
+<p>-a 列出本地和远程库</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git branch [branch-name]</span><br></pre></td></tr></table></figure>
+
+<p>创建一个新的分支</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout [branch-name]</span><br></pre></td></tr></table></figure>
+
+<p>切换到某个分支上，如果分支不存在，则会首先创建新分支再切换过去</p>
+<p>切换到分支上时，当前工作目录下面的所有文件都会直接变掉（第一次用的时候觉得这个很神奇）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git merge [branch]</span><br></pre></td></tr></table></figure>
+
+<p>将目标分支合并到当前分支里面来</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git branch -m [oldname] [newname]</span><br></pre></td></tr></table></figure>
+
+<p>分支重命名</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git branch -d [branch-name]</span><br></pre></td></tr></table></figure>
+
+<p>删除某一个特定的分支</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git fetch &lt;name&gt;</span><br></pre></td></tr></table></figure>
+
+<p>从某一台远程主机上获取所有的更新</p>
+<h1 id="远程分支操作"><a href="#远程分支操作" class="headerlink" title="远程分支操作"></a>远程分支操作</h1><p>如果 fork 了一个别人的项目，然后对方更新了库，想要保持自己的库跟对方一直，则需要先把源库 fetch 下来，跟自己的 merge 之后，再 push 回自己的库上。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git remote add upstream xxx.git</span><br></pre></td></tr></table></figure>
+
+<p>添加 upstream 的远程库信息。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git fetch upstream</span><br></pre></td></tr></table></figure>
+
+<p>fetch upstream 源的新版本到本地</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git merge upstream/master</span><br></pre></td></tr></table></figure>
+
+<p>将 upstream 库的 master 分支跟当前分支合并。</p>
+<p>之后再 push 回去就行了。</p>
+
+    </div>
+
+    
+    
+    
+      
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Git/" rel="tag"># Git</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/09/22/2015-09-22-back/" rel="prev" title="住院日记">
+      <i class="fa fa-chevron-left"></i> 住院日记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/10/23/2015-10-23-virtualmemory/" rel="next" title="硬件/软件接口 Virtual Memory">
+      硬件/软件接口 Virtual Memory <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#开始一个项目"><span class="nav-text">开始一个项目</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#示例"><span class="nav-text">示例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#开始工作"><span class="nav-text">开始工作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#示例-1"><span class="nav-text">示例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#删除文件"><span class="nav-text">删除文件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#版本保存和恢复"><span class="nav-text">版本保存和恢复</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#版本暂存"><span class="nav-text">版本暂存</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#远程操作"><span class="nav-text">远程操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#示例-2"><span class="nav-text">示例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#分支控制"><span class="nav-text">分支控制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#远程分支操作"><span class="nav-text">远程分支操作</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'dc66babf73ad85a4d7c261f44732183d',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

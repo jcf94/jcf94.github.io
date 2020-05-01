@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一套强大的文档排版系统。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LaTeX学习">
+<meta property="og:url" content="https://jcf94.com/2016/02/13/2016-02-13-latex/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="一套强大的文档排版系统。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2016-02-13-latex-1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2016-02-13-latex-2.jpg">
+<meta property="article:published_time" content="2016-02-13T08:38:21.000Z">
+<meta property="article:modified_time" content="2018-10-04T02:46:34.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="LaTeX">
+<meta property="article:tag" content="排版">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2016-02-13-latex-1.jpg">
+
+<link rel="canonical" href="https://jcf94.com/2016/02/13/2016-02-13-latex/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>LaTeX学习 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2016/02/13/2016-02-13-latex/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LaTeX学习
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-02-13 16:38:21" itemprop="dateCreated datePublished" datetime="2016-02-13T16:38:21+08:00">2016-02-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-10-04 10:46:34" itemprop="dateModified" datetime="2018-10-04T10:46:34+08:00">2018-10-04</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <img data-src="http://jcf94.com/download/2016-02-13-latex-1.jpg" />
+
+<p>一套强大的文档排版系统。</p>
+<a id="more"></a>
+
+<p>日常生活中，Office一般足以完成各类文档的处理，后来再到记事、写博客这样需要一些格式化而又方便的排版功能时，Markdown+Mathjax就足以搞定一切了。然而当遇到大型论文排版的需求时，则需要一套更为专业的文档排版系统 —— $\LaTeX$。</p>
+<h1 id="历史"><a href="#历史" class="headerlink" title="历史"></a>历史</h1><p>最早Donald Ervin Knuth写了一套叫$\TeX$的排版系统，很容易用它来生成高质量排版的文档。</p>
+<p>$\TeX$大概就是类似机器语言or汇编语言一样的存在吧（大雾），而它也支持使用宏来简化操作，后人为让人们了更方便地使用它，在原始$\TeX$宏集的基础上增加了许多功能，定义了许多命令和模板，将其作了扩展，于是$\LaTeX$出现了。</p>
+<p>$\LaTeX$的使用者不需要知道每一条$\TeX$命令是怎么写的，只要按照$\LaTeX$的标准来写文章，就能够得到非常漂亮的效果。</p>
+<p>尤其是$\LaTeX$中的公式显示非常完美，Mathjax支持的也就是$\LaTeX$的公式格式。</p>
+<hr>
+<p>装完$\LaTeX$之后，在命令行中输入</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">texdoc tex-overview</span><br></pre></td></tr></table></figure>
+
+<p>可以看到$\TeX$发展多年的黑历史。</p>
+<h1 id="有个有趣的地方"><a href="#有个有趣的地方" class="headerlink" title="有个有趣的地方"></a>有个有趣的地方</h1><p>$\TeX$是用$\pi$来作为版本号的，每完善发布一个新版本，就多一位小数，表示版本在不断趋近完美（$\pi$）。</p>
+<p>值得一提的是，$\TeX$发布四十多年，只更新了九次，确实是“完美的系统啊”。</p>
+<p>更值得一提的是，Knuth写的另外一个东西Metafont是用自然对数e来作为版本号的，也是每更新一个版本，就往上面加一位小数。-_-///</p>
+<img data-src="http://jcf94.com/download/2016-02-13-latex-2.jpg"/>
+
+<h1 id="开始使用-LaTeX"><a href="#开始使用-LaTeX" class="headerlink" title="开始使用$\LaTeX$"></a>开始使用$\LaTeX$</h1><p>$\LaTeX$与Word这种所见即所得的文档软件不同，用它写文章出来会有一种写代码的感觉，这一点与Markdown非常像。而要得到完成的文章，则需要在写完文章的<strong>源代码</strong>之后，将其<strong>编译</strong>成PDF等固定格式。</p>
+<p>因此通常要使用$\LaTeX$，我们需要一个文本编辑器或者IDE，还需要一个$\LaTeX$编译器。（这个跟编程的过程是一致的。）</p>
+<p>与Linux类似，$\LaTeX$有很多种引擎（编译器），也有很多种发行版，选择一种自己常用的发行版装起来就好了。</p>
+<p>比如TeX Live就是一套跨平台的$\TeX$发行版。</p>
+<p>整个TeX Live 2015的安装包的大小大概2G左右，在线安装会很慢，可以找个镜像站把镜像下过来之后手动装上。</p>
+<hr>
+<p>装完$\LaTeX$之后，生成PDF的流程是这样的：</p>
+<p>首先文章的源代码写在.tex的文件中，通过<code>latex xxx</code>或者<code>latex xxx.tex</code>可以得到一个<code>xxx.dvi</code>的文件（Device Independent，即与设备无关，用这个文件拿到能够识别的设备上就能直接打印成文章），然后<code>dvips xxx</code>或者<code>dvips xxx.dvi</code>生成<code>xxx.ps</code>，即打印字体文件，最后<code>ps2pdf xxx</code>或者<code>ps2pdf xxx.ps</code>即生成了<code>xxx.pdf</code>文件。</p>
+<p><code>xxx.dvi</code>也可以直接使用<code>dvipdfm xxx</code>或<code>dvipdfm xxx.dvi</code>得到<code>xxx.pdf</code>。</p>
+<p>再简便一些，可以使用<code>pdflatex xxx</code>或<code>pdflatex xxx.tex</code>一次得到<code>xxx.pdf</code>。</p>
+<p>明白了这些编译指令之后，使用Sublime Text再加一些配置即可不依靠其他IDE来完成$\LaTeX$文档的编写和生成。</p>
+<hr>
+<h1 id="中文的实现"><a href="#中文的实现" class="headerlink" title="中文的实现"></a>中文的实现</h1><p>中文字符与英文字符在排版时有很大的不同，例如英文是以词为单位而中文是以字为单位，英文的字母宽度与标点宽度与中文也有一定的区别等等。所以默认的$\LaTeX$是不支持中文的。</p>
+<p>这里就要再提到XeTeX，这也是一套在原基础上扩展而来的引擎，用XeLaTeX来完成<code>.tex</code>的编译，它的特点是原生支持Unicode和OpenType，配合ctex的宏包即可比较完美地支持中文了。</p>
+<hr>
+<h1 id="配置SublimeText2"><a href="#配置SublimeText2" class="headerlink" title="配置SublimeText2"></a>配置SublimeText2</h1><p>又到了Sublime时间，TexLive自带的那个编辑器感觉没啥功能，用着也很不舒服，于是准备继续使用Sublime来写和编译。</p>
+<p>Sublime默认能够自动识别.tex的文本为LaTex文件，因此只需要稍微做一些配置即可。</p>
+<p>首先还是要确保cmd下能够正常运行<code>xelatex</code>命令。一开始的时候我这里只能运行<code>xetex</code>、<code>tex</code>等命令，但是就是运行不了<code>xelatex</code>命令，而在TexLive自带的那个控制台中是正常的。</p>
+<p>后来查询TexLive控制台的启动命令，发现它在启动时会把TexLive的运行目录放在系统环境变量的第一个，于是我调整了系统环境变量，遂成功运行。</p>
+<blockquote>
+<p>我不明白为什么需要这样，也不知道这样会不会出现别的什么问题？</p>
+</blockquote>
+<p>接下来在Sublime中Tools &gt; Build System中新建一个Build System，填入：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="attr">"cmd"</span>: [<span class="string">"xelatex"</span>, <span class="string">"$&#123;file&#125;"</span>],</span><br><span class="line">	<span class="attr">"file_regex"</span>: <span class="string">"^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$"</span>,</span><br><span class="line">	<span class="attr">"working_dir"</span>: <span class="string">"$&#123;file_path&#125;"</span>,</span><br><span class="line">	<span class="attr">"selector"</span>: <span class="string">"text.tex.latex"</span>,</span><br><span class="line">	<span class="attr">"variants"</span>:</span><br><span class="line">	[</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="attr">"name"</span>: <span class="string">"Run"</span>,</span><br><span class="line">			<span class="attr">"cmd"</span>: [<span class="string">"cmd"</span>, <span class="string">"/c"</span>, <span class="string">"start"</span>, <span class="string">"$&#123;file_base_name&#125;.pdf"</span>]</span><br><span class="line">		&#125;</span><br><span class="line">	]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>即配置完成。</p>
+<p>之后Ctrl+B进行编译，Ctrl+Shift+B查看生成的Pdf文档。</p>
+<hr>
+<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><p>具体的$\LaTeX$使用还是得花时间学习的，或者像我用Markdown一样，常见的一些操作多用就熟了，遇到解决不了的再去搜使用方法。</p>
+<p>这里有<a href="http://jcf94.com/download/2016-02-13-latex-latexlog.pdf">一份简单的教程</a></p>
+<p>网上还推荐参照模板来学习：</p>
+<p>这个是<a href="http://www.latextemplates.com/" target="_blank" rel="noopener">国外一个不错的$\LaTeX$模板网站</a></p>
+<p>比如这里这份通用论文模板：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">%----------------------------------------------------------------------------------------</span></span><br><span class="line"><span class="comment">%   宏包以及其他文档配置信息</span></span><br><span class="line"><span class="comment">%----------------------------------------------------------------------------------------</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">documentclass</span><span class="string">[twoside]</span><span class="string">&#123;article&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">usepackage</span><span class="string">&#123;lipsum&#125;</span></span> <span class="comment">% 用于生成本模板中虚拟内容的宏包</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">usepackage</span><span class="string">[sc]</span><span class="string">&#123;mathpazo&#125;</span></span> <span class="comment">% 使用Palatino字体</span></span><br><span class="line"><span class="tag">\<span class="name">usepackage</span><span class="string">[T1]</span><span class="string">&#123;fontenc&#125;</span></span> <span class="comment">% 使用8位编码256个字形</span></span><br><span class="line"><span class="tag">\<span class="name">linespread</span><span class="string">&#123;1.05&#125;</span></span> <span class="comment">% Palatino字体需要更多行距</span></span><br><span class="line"><span class="tag">\<span class="name">usepackage</span><span class="string">&#123;microtype&#125;</span></span> <span class="comment">% 另外一种字体</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">usepackage</span><span class="string">[hmarginratio=1:1,top=32mm,columnsep=20pt]</span><span class="string">&#123;geometry&#125;</span></span> <span class="comment">% 文章边距</span></span><br><span class="line"><span class="tag">\<span class="name">usepackage</span><span class="string">&#123;multicol&#125;</span></span> <span class="comment">% 使用多栏布局</span></span><br><span class="line"><span class="tag">\<span class="name">usepackage</span><span class="string">[hang, small,labelfont=bf,up,textfont=it,up]</span><span class="string">&#123;caption&#125;</span></span> <span class="comment">% 设定表格和图片的题注格式</span></span><br><span class="line"><span class="tag">\<span class="name">usepackage</span><span class="string">&#123;booktabs&#125;</span></span> <span class="comment">% 表格水平对齐</span></span><br><span class="line"><span class="tag">\<span class="name">usepackage</span><span class="string">&#123;float&#125;</span></span> <span class="comment">% 在多栏布局中使用表格和图片时需要的宏包(e.g. \begin&#123;table&#125;[H])</span></span><br><span class="line"><span class="tag">\<span class="name">usepackage</span><span class="string">&#123;hyperref&#125;</span></span> <span class="comment">% 超链接</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">usepackage</span><span class="string">&#123;lettrine&#125;</span></span> <span class="comment">% 首字大写</span></span><br><span class="line"><span class="tag">\<span class="name">usepackage</span><span class="string">&#123;paralist&#125;</span></span> <span class="comment">% Used for the compactitem environment which makes bullet points with less space between them</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">usepackage</span><span class="string">&#123;abstract&#125;</span></span> <span class="comment">% 允许定制摘要</span></span><br><span class="line"><span class="tag">\<span class="name">renewcommand</span><span class="string">&#123;\abstractnamefont&#125;</span><span class="string">&#123;\normalfont\bfseries&#125;</span></span> <span class="comment">% 摘要设为黑体</span></span><br><span class="line"><span class="tag">\<span class="name">renewcommand</span><span class="string">&#123;\abstracttextfont&#125;</span><span class="string">&#123;\normalfont\small\itshape&#125;</span></span> <span class="comment">% 摘要设为小斜体</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">usepackage</span><span class="string">&#123;titlesec&#125;</span></span> <span class="comment">% 允许定制标题</span></span><br><span class="line"><span class="tag">\<span class="name">renewcommand</span></span><span class="tag">\<span class="name">thesection</span><span class="string">&#123;\Roman&#123;section&#125;</span></span>&#125; <span class="comment">% 节标题使用罗马字母</span></span><br><span class="line"><span class="tag">\<span class="name">renewcommand</span></span><span class="tag">\<span class="name">thesubsection</span><span class="string">&#123;\Roman&#123;subsection&#125;</span></span>&#125; <span class="comment">% 第二级节标题使用罗马字母</span></span><br><span class="line"><span class="tag">\<span class="name">titleformat</span><span class="string">&#123;\section&#125;</span><span class="string">[block]</span><span class="string">&#123;\large\scshape\centering&#125;</span><span class="string">&#123;\thesection.&#125;</span><span class="string">&#123;1em&#125;</span><span class="string">&#123;&#125;</span></span> <span class="comment">% 改变节标题的外观</span></span><br><span class="line"><span class="tag">\<span class="name">titleformat</span><span class="string">&#123;\subsection&#125;</span><span class="string">[block]</span><span class="string">&#123;\large&#125;</span><span class="string">&#123;\thesubsection.&#125;</span><span class="string">&#123;1em&#125;</span><span class="string">&#123;&#125;</span></span> <span class="comment">% 改变第二级节标题的外观</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">usepackage</span><span class="string">&#123;fancyhdr&#125;</span></span> <span class="comment">% 页眉和页脚</span></span><br><span class="line"><span class="tag">\<span class="name">pagestyle</span><span class="string">&#123;fancy&#125;</span></span> <span class="comment">% 所有页都有页眉和页脚</span></span><br><span class="line"><span class="tag">\<span class="name">fancyhead</span><span class="string">&#123;&#125;</span></span> <span class="comment">% 取消默认的页眉</span></span><br><span class="line"><span class="tag">\<span class="name">fancyfoot</span><span class="string">&#123;&#125;</span></span> <span class="comment">% 取消默认的页脚</span></span><br><span class="line"><span class="tag">\<span class="name">fancyhead</span><span class="string">[C]</span><span class="string">&#123;Running title $\bullet$ November 2012 $\bullet$ Vol. XXI, No. 1&#125;</span></span> <span class="comment">% 修改页眉文字</span></span><br><span class="line"><span class="tag">\<span class="name">fancyfoot</span><span class="string">[RO,LE]</span><span class="string">&#123;\thepage&#125;</span></span> <span class="comment">% 修改页脚文字</span></span><br><span class="line"></span><br><span class="line"><span class="comment">%----------------------------------------------------------------------------------------</span></span><br><span class="line"><span class="comment">%	标题部分</span></span><br><span class="line"><span class="comment">%----------------------------------------------------------------------------------------</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">title</span><span class="string">&#123;\vspace&#123;-15mm&#125;</span></span><span class="tag">\<span class="name">fontsize</span><span class="string">&#123;24pt&#125;</span><span class="string">&#123;10pt&#125;</span></span><span class="tag">\<span class="name">selectfont</span></span><span class="tag">\<span class="name">textbf</span><span class="string">&#123;Article Title&#125;</span></span>&#125; <span class="comment">% 文章标题</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">author</span><span class="string">&#123;</span></span></span><br><span class="line"><span class="tag"><span class="string">\large</span></span></span><br><span class="line"><span class="tag"><span class="string">\textsc&#123;John Smith&#125;</span></span><span class="tag">\<span class="name">thanks</span><span class="string">&#123;A thank you or further information&#125;</span></span><span class="tag">\<span class="name">\</span><span class="string">[2mm]</span></span> <span class="comment">% 名字</span></span><br><span class="line"><span class="tag">\<span class="name">normalsize</span></span> University of California <span class="tag">\<span class="name">\</span></span> <span class="comment">% 来源</span></span><br><span class="line"><span class="tag">\<span class="name">normalsize</span></span> <span class="tag">\<span class="name">href</span><span class="string">&#123;mailto:john@smith.com&#125;</span><span class="string">&#123;john@smith.com&#125;</span></span> <span class="comment">% Email</span></span><br><span class="line"><span class="tag">\<span class="name">vspace</span><span class="string">&#123;-5mm&#125;</span></span></span><br><span class="line">&#125;</span><br><span class="line"><span class="tag">\<span class="name">date</span><span class="string">&#123;&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">%----------------------------------------------------------------------------------------</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">begin</span><span class="string">&#123;document&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">maketitle</span></span> <span class="comment">% 插入标题</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">thispagestyle</span><span class="string">&#123;fancy&#125;</span></span> <span class="comment">% 所有页都有页眉和页脚</span></span><br><span class="line"></span><br><span class="line"><span class="comment">%----------------------------------------------------------------------------------------</span></span><br><span class="line"><span class="comment">%	摘要部分</span></span><br><span class="line"><span class="comment">%----------------------------------------------------------------------------------------</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">begin</span><span class="string">&#123;abstract&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">noindent</span></span> <span class="tag">\<span class="name">lipsum</span><span class="string">[1]</span></span> <span class="comment">% 虚拟一段摘要文本</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">end</span><span class="string">&#123;abstract&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">%----------------------------------------------------------------------------------------</span></span><br><span class="line"><span class="comment">%	文章内容</span></span><br><span class="line"><span class="comment">%----------------------------------------------------------------------------------------</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">begin</span><span class="string">&#123;multicols&#125;</span><span class="string">&#123;2&#125;</span></span> <span class="comment">% 双栏布局</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">section</span><span class="string">&#123;Introduction&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">lettrine</span><span class="string">[nindent=0em,lines=3]</span><span class="string">&#123;L&#125;</span></span> orem ipsum dolor sit amet, consectetur adipiscing elit. <span class="comment">% 一段文字，首字母L大写</span></span><br><span class="line"><span class="tag">\<span class="name">lipsum</span><span class="string">[2-3]</span></span> <span class="comment">% 虚拟文字</span></span><br><span class="line"></span><br><span class="line"><span class="comment">%------------------------------------------------</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">section</span><span class="string">&#123;Methods&#125;</span></span></span><br><span class="line"></span><br><span class="line">Maecenas sed ultricies felis. Sed imperdiet dictum arcu a egestas.</span><br><span class="line"><span class="tag">\<span class="name">begin</span><span class="string">&#123;compactitem&#125;</span></span></span><br><span class="line"><span class="tag">\<span class="name">item</span></span> Donec dolor arcu, rutrum id molestie in, viverra sed diam</span><br><span class="line"><span class="tag">\<span class="name">item</span></span> Curabitur feugiat</span><br><span class="line"><span class="tag">\<span class="name">item</span></span> turpis sed auctor facilisis</span><br><span class="line"><span class="tag">\<span class="name">item</span></span> arcu eros accumsan lorem, at posuere mi diam sit amet tortor</span><br><span class="line"><span class="tag">\<span class="name">item</span></span> Fusce fermentum, mi sit amet euismod rutrum</span><br><span class="line"><span class="tag">\<span class="name">item</span></span> sem lorem molestie diam, iaculis aliquet sapien tortor non nisi</span><br><span class="line"><span class="tag">\<span class="name">item</span></span> Pellentesque bibendum pretium aliquet</span><br><span class="line"><span class="tag">\<span class="name">end</span><span class="string">&#123;compactitem&#125;</span></span></span><br><span class="line"><span class="tag">\<span class="name">lipsum</span><span class="string">[4]</span></span> <span class="comment">% 虚拟文字</span></span><br><span class="line"></span><br><span class="line"><span class="comment">%------------------------------------------------</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">section</span><span class="string">&#123;Results&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">begin</span><span class="string">&#123;table&#125;</span><span class="string">[H]</span></span></span><br><span class="line"><span class="tag">\<span class="name">caption</span><span class="string">&#123;Example table&#125;</span></span></span><br><span class="line"><span class="tag">\<span class="name">centering</span></span></span><br><span class="line"><span class="tag">\<span class="name">begin</span><span class="string">&#123;tabular&#125;</span><span class="string">&#123;llr&#125;</span></span></span><br><span class="line"><span class="tag">\<span class="name">toprule</span></span></span><br><span class="line"><span class="tag">\<span class="name">multicolumn</span><span class="string">&#123;2&#125;</span><span class="string">&#123;c&#125;</span><span class="string">&#123;Name&#125;</span></span> <span class="tag">\<span class="name">\</span></span></span><br><span class="line"><span class="tag">\<span class="name">cmidrule</span></span>(r)&#123;1-2&#125;</span><br><span class="line">First name &amp; Last Name &amp; Grade <span class="tag">\<span class="name">\</span></span></span><br><span class="line"><span class="tag">\<span class="name">midrule</span></span></span><br><span class="line">John &amp; Doe &amp; <span class="formula">$7.5$</span> <span class="tag">\<span class="name">\</span></span></span><br><span class="line">Richard &amp; Miles &amp; <span class="formula">$2$</span> <span class="tag">\<span class="name">\</span></span></span><br><span class="line"><span class="tag">\<span class="name">bottomrule</span></span></span><br><span class="line"><span class="tag">\<span class="name">end</span><span class="string">&#123;tabular&#125;</span></span></span><br><span class="line"><span class="tag">\<span class="name">end</span><span class="string">&#123;table&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">lipsum</span><span class="string">[5]</span></span> <span class="comment">% 虚拟文字</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">begin</span><span class="string">&#123;equation&#125;</span></span></span><br><span class="line"><span class="tag">\<span class="name">label</span><span class="string">&#123;eq:emc&#125;</span></span></span><br><span class="line">e = mc^2</span><br><span class="line"><span class="tag">\<span class="name">end</span><span class="string">&#123;equation&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">lipsum</span><span class="string">[6]</span></span> <span class="comment">% 虚拟文字</span></span><br><span class="line"></span><br><span class="line"><span class="comment">%------------------------------------------------</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">section</span><span class="string">&#123;Discussion&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">subsection</span><span class="string">&#123;Subsection One&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">lipsum</span><span class="string">[7]</span></span> <span class="comment">% 虚拟文字</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">subsection</span><span class="string">&#123;Subsection Two&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">lipsum</span><span class="string">[8]</span></span> <span class="comment">% 虚拟文字</span></span><br><span class="line"></span><br><span class="line"><span class="comment">%----------------------------------------------------------------------------------------</span></span><br><span class="line"><span class="comment">%	引用列表</span></span><br><span class="line"><span class="comment">%----------------------------------------------------------------------------------------</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">begin</span><span class="string">&#123;thebibliography&#125;</span><span class="string">&#123;99&#125;</span></span> <span class="comment">% 参考书目</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">bibitem</span><span class="string">[Figueredo and Wolf, 2009]</span><span class="string">&#123;Figueredo:2009dg&#125;</span></span></span><br><span class="line">Figueredo, A.~J. and Wolf, P. S.~A. (2009).</span><br><span class="line"><span class="tag">\<span class="name">newblock</span></span> Assortative pairing and life history strategy - a cross-cultural</span><br><span class="line">  study.</span><br><span class="line"><span class="tag">\<span class="name">newblock</span></span> &#123;<span class="tag">\<span class="name">em</span></span> Human Nature&#125;, 20:317--330.</span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">end</span><span class="string">&#123;thebibliography&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">%----------------------------------------------------------------------------------------</span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">end</span><span class="string">&#123;multicols&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">end</span><span class="string">&#123;document&#125;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>附上一个简单的$\LaTeX$测试文本：</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">\<span class="name">documentclass</span><span class="string">&#123;article&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">usepackage</span><span class="string">&#123;ctex&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">author</span><span class="string">&#123;Jcf94&#125;</span></span></span><br><span class="line"><span class="tag">\<span class="name">title</span><span class="string">&#123;这是标题Title&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">begin</span><span class="string">&#123;document&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">maketitle</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">tableofcontents</span></span></span><br><span class="line"></span><br><span class="line">Hello, World!</span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">section</span><span class="string">&#123;中国&#125;</span></span> China is in East Asia.</span><br><span class="line"><span class="tag">\<span class="name">subsection</span><span class="string">&#123;北京&#125;</span></span> Beijing is the capital of China.</span><br><span class="line"><span class="tag">\<span class="name">subsubsection</span><span class="string">&#123;东城区&#125;</span></span></span><br><span class="line"><span class="tag">\<span class="name">paragraph</span><span class="string">&#123;Tian'anmen Square&#125;</span></span>is in the center of Beijing</span><br><span class="line"><span class="tag">\<span class="name">subparagraph</span><span class="string">&#123;毛泽东纪念堂&#125;</span></span> is in the center of Tian'anmen Square</span><br><span class="line"><span class="tag">\<span class="name">subsection</span><span class="string">&#123;广州&#125;</span></span></span><br><span class="line"><span class="tag">\<span class="name">paragraph</span><span class="string">&#123;Sun Yat-sen University&#125;</span></span> is the best university in Guangzhou.</span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">section</span><span class="string">&#123;段落和换行测试&#125;</span></span></span><br><span class="line"></span><br><span class="line">Beijing is</span><br><span class="line">the capital</span><br><span class="line">of China.</span><br><span class="line"></span><br><span class="line">New York is</span><br><span class="line"></span><br><span class="line">the capital</span><br><span class="line"></span><br><span class="line">of America.</span><br><span class="line"></span><br><span class="line">Amsterdam is <span class="tag">\<span class="name">\</span></span> the capital <span class="tag">\<span class="name">\</span></span></span><br><span class="line">of Netherlands.</span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">section</span><span class="string">&#123;表格测试&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">begin</span><span class="string">&#123;tabular&#125;</span><span class="string">&#123;|c|c|&#125;</span></span></span><br><span class="line">a &amp; b <span class="tag">\<span class="name">\</span></span></span><br><span class="line">c &amp; d<span class="tag">\<span class="name">\</span></span></span><br><span class="line"><span class="tag">\<span class="name">end</span><span class="string">&#123;tabular&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">begin</span><span class="string">&#123;tabular&#125;</span><span class="string">&#123;|c|c|&#125;</span></span></span><br><span class="line"><span class="tag">\<span class="name">hline</span></span></span><br><span class="line">a &amp; b <span class="tag">\<span class="name">\</span></span></span><br><span class="line"><span class="tag">\<span class="name">hline</span></span></span><br><span class="line">c &amp; d<span class="tag">\<span class="name">\</span></span></span><br><span class="line"><span class="tag">\<span class="name">hline</span></span></span><br><span class="line"><span class="tag">\<span class="name">end</span><span class="string">&#123;tabular&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">begin</span><span class="string">&#123;center&#125;</span></span></span><br><span class="line"><span class="tag">\<span class="name">begin</span><span class="string">&#123;tabular&#125;</span><span class="string">&#123;|c|c|&#125;</span></span></span><br><span class="line"><span class="tag">\<span class="name">hline</span></span></span><br><span class="line">a &amp; b <span class="tag">\<span class="name">\</span></span> <span class="tag">\<span class="name">hline</span></span></span><br><span class="line">c &amp; d<span class="tag">\<span class="name">\</span></span></span><br><span class="line"><span class="tag">\<span class="name">hline</span></span></span><br><span class="line"><span class="tag">\<span class="name">end</span><span class="string">&#123;tabular&#125;</span></span></span><br><span class="line"><span class="tag">\<span class="name">end</span><span class="string">&#123;center&#125;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">\<span class="name">end</span><span class="string">&#123;document&#125;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>很多特性其实感觉跟Markdown非常像。</p>
+
+    </div>
+
+    
+    
+    
+      
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/LaTeX/" rel="tag"># LaTeX</a>
+              <a href="/tags/%E6%8E%92%E7%89%88/" rel="tag"># 排版</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/01/22/2016-01-22-dragonbook/" rel="prev" title="编译原理 龙书">
+      <i class="fa fa-chevron-left"></i> 编译原理 龙书
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/02/21/2016-02-21-pl0/" rel="next" title="编译原理课设尝试（一）——PL/0编译器分析">
+      编译原理课设尝试（一）——PL/0编译器分析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#历史"><span class="nav-text">历史</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#有个有趣的地方"><span class="nav-text">有个有趣的地方</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#开始使用-LaTeX"><span class="nav-text">开始使用$\LaTeX$</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#中文的实现"><span class="nav-text">中文的实现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置SublimeText2"><span class="nav-text">配置SublimeText2</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#其他"><span class="nav-text">其他</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '5c1825a312bdda13f5f59a27f1017e94',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="逛知乎的时候发现的这个问题：  Tarjan（自己&#x2F;合作）创造了哪些算法和数据结构？  一开始只是觉得这个名字熟悉（脑子里面冒出来的是 Tarjan 离线 LCA），点进去一看越看越心惊。 强连通分量？哦，那个经典算法好像确实叫 Tarjan。LCT 动态树…卧槽他写的？斐波那契堆…卧槽他写的？Splay 伸展树…卧槽他写的？ 从 1971 年至今，Tarjan 大佬大概发了 300 篇左右的论">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tarjan 大佬的算法们">
+<meta property="og:url" content="https://jcf94.com/2017/09/27/2017-09-27-tarjan/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="逛知乎的时候发现的这个问题：  Tarjan（自己&#x2F;合作）创造了哪些算法和数据结构？  一开始只是觉得这个名字熟悉（脑子里面冒出来的是 Tarjan 离线 LCA），点进去一看越看越心惊。 强连通分量？哦，那个经典算法好像确实叫 Tarjan。LCT 动态树…卧槽他写的？斐波那契堆…卧槽他写的？Splay 伸展树…卧槽他写的？ 从 1971 年至今，Tarjan 大佬大概发了 300 篇左右的论">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2017-09-27-tarjan-tarjan.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2017-09-27-tarjan-1.jpg">
+<meta property="article:published_time" content="2017-09-27T01:06:45.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="Splay">
+<meta property="article:tag" content="伸展树">
+<meta property="article:tag" content="动态树">
+<meta property="article:tag" content="LCT">
+<meta property="article:tag" content="Paper">
+<meta property="article:tag" content="Tarjan">
+<meta property="article:tag" content="Algorithm">
+<meta property="article:tag" content="LCA">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2017-09-27-tarjan-tarjan.jpg">
+
+<link rel="canonical" href="https://jcf94.com/2017/09/27/2017-09-27-tarjan/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Tarjan 大佬的算法们 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2017/09/27/2017-09-27-tarjan/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Tarjan 大佬的算法们
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2017-09-27 09:06:45" itemprop="dateCreated datePublished" datetime="2017-09-27T09:06:45+08:00">2017-09-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">算法学习</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img data-src="http://jcf94.com/download/2017-09-27-tarjan-tarjan.jpg" alt=""></p>
+<p>逛知乎的时候发现的这个问题：</p>
+<ul>
+<li><a href="https://www.zhihu.com/question/65155704" target="_blank" rel="noopener">Tarjan（自己/合作）创造了哪些算法和数据结构？</a></li>
+</ul>
+<p>一开始只是觉得这个名字熟悉（脑子里面冒出来的是 Tarjan 离线 LCA），点进去一看越看越心惊。</p>
+<p>强连通分量？哦，那个经典算法好像确实叫 Tarjan。LCT 动态树…卧槽他写的？斐波那契堆…卧槽他写的？Splay 伸展树…卧槽他写的？</p>
+<p>从 1971 年至今，Tarjan 大佬大概发了 300 篇左右的论文，还在不断产出，他创造了一堆图论、树结构上的经典算法，还获得过 1986 年的图灵奖。</p>
+<a id="more"></a>
+
+<p>后面准备把他的一些经典算法都重新过一遍，看看他的原著论文什么的。</p>
+<hr>
+<p>我知道的几种算法/数据结构：</p>
+<h1 id="Tarjan-双连通分量-amp-强连通分量"><a href="#Tarjan-双连通分量-amp-强连通分量" class="headerlink" title="Tarjan 双连通分量 &amp; 强连通分量"></a>Tarjan 双连通分量 &amp; 强连通分量</h1><p>【1972 - Depth-first search and linear graph algorithms】</p>
+<p>Google 学术引用数 6049。</p>
+<p>这篇论文似乎可以算是 Tarjan 的开山之作，其中提到了图上 DFS 序的一些重要特性。</p>
+<p>论文里面直接提出了经典的<strong>无向图点双连通分量算法</strong>和<strong>有向图强连通分量算法</strong>。Tarjan 的这两个算法都是基于 DFS 栈的。</p>
+<p>首先是割点的概念：一个连通图中，如果删掉一个顶点，整个图变成了两个连通图，则该顶点叫割点。</p>
+<p>点双连通分量就是一张图中不含有割点的子图（块）。</p>
+<p>论文中给出的 Tarjan 点双连通的过程大致是这样：</p>
+<p><code>dfn</code> 是 DFS 过程中访问节点的顺序（或者说时间戳？），<code>low</code> 是 DFS 过程中，某个点能够连接到的栈中的最底层的点。DFS 栈中<strong>存边</strong>。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">tarjan</span><span class="params">(<span class="keyword">int</span> x,<span class="keyword">int</span> fa)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    dfn[x]=low[x]=++idx;</span><br><span class="line">    repe(i,fst[x]) <span class="comment">// 对于 x 邻接的每一条边 i</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (i-&gt;v!=fa) <span class="comment">// 不走回头路</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (!dfn[i-&gt;v]) <span class="comment">// 如果该边对应的顶点没有被访问过</span></span><br><span class="line">            &#123;</span><br><span class="line">                st[++top]=i; <span class="comment">// 边入栈</span></span><br><span class="line">                tarjan(i-&gt;v,x); <span class="comment">// 继续 DFS</span></span><br><span class="line">                low[x]=min(low[x],low[i-&gt;v]);</span><br><span class="line">                <span class="keyword">if</span> (low[i-&gt;v]&gt;=dfn[x]) <span class="comment">// 找到一个割点</span></span><br><span class="line">                &#123;</span><br><span class="line">                    ++fct[x]; <span class="comment">// 标记 x 是割点</span></span><br><span class="line">                    <span class="comment">// 记录双连通分量</span></span><br><span class="line">                    bl[++tot].clear();</span><br><span class="line">                    bl[tot].push_back(x);</span><br><span class="line">                    <span class="keyword">do</span></span><br><span class="line">                    &#123;</span><br><span class="line">                        bl[tot].push_back(st[top]-&gt;v);</span><br><span class="line">                    &#125; <span class="keyword">while</span> (st[top--]!=i);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> low[x]=min(low[x],dfn[i-&gt;v]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>有向图的强连通分量，我以前用的一直是 Kosaraju 算法，配合时间戳正反两次 DFS。Tarjan 的强连通分量算法跟双连通非常像，大致是这样的：</p>
+<p><code>dfn</code> 和 <code>low</code> 的意义相同，DFS 栈中<strong>存点</strong>。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">tarjan</span><span class="params">(<span class="keyword">int</span> i)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    DFN[i]=LOW[i]=++idx;</span><br><span class="line">    instack[i]=<span class="literal">true</span>;</span><br><span class="line">    Stap[++Stop]=i; <span class="comment">// 点入栈</span></span><br><span class="line">    <span class="keyword">for</span> (edge *e=V[i];e;e=e-&gt;next) <span class="comment">// 对于 i 邻接的每一条边 e</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> j=e-&gt;t;</span><br><span class="line">        <span class="keyword">if</span> (!DFN[j]) <span class="comment">// 该边对应的顶点没有访问过</span></span><br><span class="line">        &#123;</span><br><span class="line">            tarjan(j);</span><br><span class="line">            <span class="keyword">if</span> (LOW[j]&lt;LOW[i])</span><br><span class="line">                LOW[i]=LOW[j];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (instack[j] &amp;&amp; DFN[j]&lt;LOW[i])</span><br><span class="line">            LOW[i]=DFN[j];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (DFN[i]==LOW[i]) <span class="comment">// 当 dfn 和 low 相等时，栈顶的点构成了强连通分量</span></span><br><span class="line">    &#123;</span><br><span class="line">        Bcnt++;</span><br><span class="line">        <span class="keyword">do</span></span><br><span class="line">        &#123;</span><br><span class="line">            j=Stap[Stop--];</span><br><span class="line">            instack[j]=<span class="literal">false</span>;</span><br><span class="line">            Belong[j]=Bcnt;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> (j!=i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>嗯，看这篇论文的时候有点在看《算法导论》的感觉，证明、推理过程都非常严谨（虽然我从不看证明）。</p>
+<hr>
+<p>【1973 - Algorithm 447: efficient algorithms for graph manipulation】</p>
+<p>Google 学术引用数 795。</p>
+<p>文中用流程图描述了找连通分量、找双连通分量、把图划分成多个简单路径的算法，大致的想法跟上面那篇 DFS 基本是一致的。划分简单路径要在双连通分量的基础上做。</p>
+<h1 id="Tarjan-离线-LCA"><a href="#Tarjan-离线-LCA" class="headerlink" title="Tarjan 离线 LCA"></a>Tarjan 离线 LCA</h1><p>【1979 - Applications of path compression on balanced trees】</p>
+<p>Google 学术引用数 356。</p>
+<p>额…在 Google 学术上下到的 1979 年版是个迷之影印版，另外搜到个写着 1975 年的版本，感觉过去太多年以后，论文的时间确实都有点乱了。</p>
+<p>看到这篇论文的标题“路径压缩”首先想到的是并查集，论文里面开头确实也提到了前人写的有关“等价问题”的算法，估计跟并查集有点关系。</p>
+<p>文章一开始是一堆图和树的定义，然后定义了一个树上求值和构造的操作。求值是定义一个函数 <code>eval(v)</code> 计算从当前节点到根节点的某种数值关系，构造 <code>link(v, w, x)</code> 连接两个节点，树边长度是 <code>x</code>。由于这里求值函数的定义是从当前节点算到根节点，因此是有个结合律在里面的，所以可以用到<strong>路径压缩</strong>。</p>
+<p>论文这里讲的路径压缩的思路大概跟并查集（关系传递）和线段树（lazy标记）里面用到的方法类似。嗯，跟线段树对比可能还不是很一致，线段树算是自顶向下求，这里应该是从当前节点一直向上求。</p>
+<p>果然，文章的第 4 部分讲到了 2 个这套方法的算法应用：并查集和 LCA。</p>
+<p>并查集没啥好说的，这里重点要说的 Tarjan 的离线 LCA。</p>
+<p>为什么要特别指出是“离线”的 LCA 呢？看完算法的整个过程就知道了：</p>
+<p>Tarjan 的 LCA 用 DFS 来遍历整棵树，并且依靠并查集来完成线性时间的查询。</p>
+<ul>
+<li>首先对所有的 LCA 询问进行排序，交换 <code>{vi, wi}</code> 使得 <code>vi &lt;= wi</code></li>
+<li>然后在树上把所有的 wi 标记出来</li>
+<li>之后在图中开始 DFS：<ol>
+<li>找到一个带标记的节点 wi，则对应的 vi 肯定已经事先访问过了（排序的作用），直接返回 <code>getfather(vi)</code> 就是它们的 LCA 了</li>
+<li>DFS 回溯时，将当前节点并进父节点的集合中</li>
+</ol>
+</li>
+</ul>
+<p>这个算法要求 LCA 询问事先得到，并且之后树的结构肯定是不能再改变的，所以是个离线算法。</p>
+<p>参考<a href="https://comzyh.com/blog/archives/492/" target="_blank" rel="noopener">这里</a>的一个 Flash 动画演示可能会更清楚一点。</p>
+<p>后文暂时没再往下看了，基本讲的是 <code>eval</code> 和 <code>link</code> 这两个操作的扩展玩法，甚至还有验证最小生成树的用途（？），应用面看起来还是非常不错的。</p>
+<h1 id="Link-Cut-Tree-动态树"><a href="#Link-Cut-Tree-动态树" class="headerlink" title="Link/Cut Tree 动态树"></a>Link/Cut Tree 动态树</h1><p>【1981 - A Data Structure for Dynamic Trees】</p>
+<p>Google 学术引用数 1069。</p>
+<p>我之前知道的动态树算法是跟 Splay 配合用的，更进阶的还有树链剖分跟这个也有点关系，前面<a href="/tags/动态树/">在这里</a>记过两道题。不过论文顺序上居然是 LCT 先写的。</p>
+<p>摘要部分介绍了这是一种用于维护一个由若干棵不相交树组成的森林的数据结构，主要有<code>link</code>和<code>cut</code>操作来连接两棵树或者把一棵树拆成两棵。当然复杂度是非常优的，保证在<code>O(logn)</code>（复杂度太高的话就没有意义了）。</p>
+<p>应用方面，摘要提到了 LCT 可以求：</p>
+<ol>
+<li>LCA 最近公共祖先</li>
+<li>多种网络流问题，包括最大流等等（！）</li>
+<li>某些特殊情况下的最小生成树（！）</li>
+<li>某种最小费用流的简化算法（？）</li>
+</ol>
+<p>如果单纯地只是要实现这样的数据结构，难度不是很大，直接模拟就好，最简单粗暴的实现也可以达到<code>link</code>和<code>cut</code>这样的操作在<code>O(1)</code>时间内完成，但是树上的其他查询操作就可能要花上<code>O(n)</code>（那就没有意义了）。</p>
+<p>所以还是得想个办法解决具体实现的问题。</p>
+<p>Tarjan 的高效实现不直接存树的原始结构，而是<strong>把整棵树按照路径集合</strong>的方式来维护。论文第三章是对这种转化的复杂度证明，保证 m 个对动态树的操作可以转化成<code>O(mlogn)</code>个对路径集合的操作。然后第四章接下来讲如何用二叉树来维护这个<strong>路径集合</strong>，话说这部分才是这个算法的核心实现吧。</p>
+<p>嗯，我现在所知道的 LCT 的实际基本都是基于 Splay 的，话说论文里面后面这部分写到的二叉树实现中的左右旋等等的操作看上去就已经是 Splay 的雏形了，不过 Tarjan 的 Splay 论文是发在这一篇之后的，可能后面还有经过更多的改进或者验证吧。</p>
+<p>这段暂时跳过，直接看看现代经过后人补充修正过的 LCT 是怎么实现的好了：</p>
+<ul>
+<li><a href="https://1drv.ms/b/s!AuxK9QzqA6LQjs8e28ynQJaN9Cw2Bw" target="_blank" rel="noopener">【SPOJ375 QTREE 解法的一些研究 杨哲】</a></li>
+</ul>
+<p>（OneDrive 上共享的，可能链接会被墙，不过在网上用这个标题应该也能搜到对应的文章。）</p>
+<p>QTREE 一文中的<code>Preferred Path</code>跟 Tarjan 论文中的<code>Solid Path</code>应该是一致的。这里的核心操作是<code>Access(v)</code>，访问 v 这个节点所经过的路径就是这次访问所产生的<code>Preferred Path</code>，LCT 算法就是把原本的树结构转化为维护这样的一些<code>Preferred Path</code>集合，树本身是可以分解成一堆<code>Preferred Path</code>的，只需要再知道这些路径之间的连接关系，就可以表示出这棵树了。<code>Preferred Path</code>保存在 Splay 上，Splay 就是 LCT 这个数据结构的辅助树（Auxiliary Tree）。</p>
+<blockquote>
+<p>所以 Preferred Path 和 Auxiliary Tree 这俩名字是哪来的呢？。。。Tarjan 的论文里面好像没出现这两个词。</p>
+</blockquote>
+<p>QTREE 文中对 LCT 的定义：</p>
+<blockquote>
+<p>Link-Cut Trees 就是将要维护的森林中的每棵树 T 表示为若干个 Auxiliary Tree, 并通过 Path Parent 将这些 Auxiliary Tree 连接起来的数据结构.</p>
+</blockquote>
+<hr>
+<p>比较尴尬的是这里的实现确实都是要基于 Splay 来理解了，所以先跳一步，重新来复习一下下面的 Splay 先。</p>
+<hr>
+<p>有了 Splay 之后，接下来 LCT 的操作就很简单了。前面说过，LCT 的核心操作是 <code>Access()</code>。</p>
+<p>以 QTREE 一文中的例子来解释（找不到什么比较好的画图工具，只好手画了）：</p>
+<p><img data-src="http://jcf94.com/download/2017-09-27-tarjan-1.jpg" alt=""></p>
+<p>LCT 存储的是树结构上的 <code>Preferred Path</code>，例如对左边的树进行 <code>Access(N)</code> 操作之后，从根节点 A 到目标节点 N 就形成了一条 <code>Preferred Path</code>，跟这条路径上的点相连的原有的 <code>Preferred Path</code> 都恢复成普通边（例如 A-B 和 N-O 都从 <code>Preferred Path</code> 恢复成了普通边）。</p>
+<p>我们把 <code>Preferred Path</code> 存储在 Splay 森林上，然后每次 <code>Access</code> 操作之后对 <code>Preferred Path</code> 进行的修改则相应地需要依靠 Splay 来进行维护。</p>
+<p>左下角的这棵树就是 <code>Access(N)</code> 操作前的 Splay 森林的结构，红边是 Splay 的树边，黑边是两棵 Splay 树的连接关系。这里其实一共有 7 棵 Splay 树：ABE，D，F，CGHJ，IK，LNO，M。可以看到每一棵 Splay 实际上表示的是一条 <code>Preferred Path</code> 或者单个节点，<code>Preferred Path</code> 在原树中的深度就是对应的 Splay 中节点的索引值（！！这个对理解很重要）。</p>
+<p>然后访问 <code>Access(N)</code> 会发生什么呢？</p>
+<ol>
+<li>把 N 旋转到它的 Splay 的根，然后断开 N 和右子树的连接</li>
+<li>检查 N 的父节点 I，把 I 旋转到它的 Splay 的根，然后断开 I 和右子树的连接，把 N 接到右子树上</li>
+<li>检查 I 的父节点 H，把 H 旋转到它的 Splay 的根，然后断开 H 和右子树的连接，把 I 接到右子树上</li>
+<li>检查 H 的父节点 A，把 A 旋转到它的 Splay 的根，然后断开 A 和右子树的连接，把 H 接到右子树上</li>
+<li>检查 A 已经没有父节点了，结束</li>
+</ol>
+<p>然后我们就得到了右上角这棵 Splay 树，因为经过了 Splay 操作的维护调整，可能最终具体的形态不是这样的，但这棵树上的所有节点就是这 7 个。其他节点也还在，不过这里没画出来了。</p>
+<p>有了 <code>Access</code> 之后，接下来我们有了 3 个进一步的操作：</p>
+<ul>
+<li><code>FindRoot(N)</code>：找到 N 所在的树的根节点</li>
+</ul>
+<p>首先 <code>Access(N)</code>，根节点就是 N 所在的 <code>Preferred Path</code> 的最顶端的那个点了。把 N 旋转到它所在的 Splay 的根，然后向左走到底就是整个树的根了。</p>
+<ul>
+<li><code>Cut(N)</code>：把 N 连同它的子树从它所属的原有的树中切出来</li>
+</ul>
+<p>首先 <code>Access(N)</code>，把 N 旋转到它所在的 Splay 的根，然后断开 N 和它左子树的连接。</p>
+<ul>
+<li><code>Link(N, M)</code>：把 N 这棵树连接到 M 这个节点下（N 是树根，且 N 和 M 不在同一棵树中）</li>
+</ul>
+<p>首先 <code>Access(N)</code>，把 N 所在的 Splay 的根节点的父节点设成 M，然后再 <code>Access(N)</code>。</p>
+<hr>
+<p>然后我们来思考一下 LCT 能干嘛。其实 Splay 本身已经是一种具有切分、组合能力的动态树结构了，但是从上面这个例子的描述中，我们也能很直观地发现，Splay 只能最多处理到二叉树的动态变化，而 LCT 可以处理多叉树的动态结构。</p>
+<p>QTREE 文中最初给出的目标题目是：</p>
+<blockquote>
+<p>给一棵共有 n 个结点的树, 每条边都有一个权值, 要求维护一个数据结构, 支持如下操作:</p>
+<ol>
+<li>修改某条边的权值；</li>
+<li>询问某两个节点之间的唯一通路上的最大边权。</li>
+</ol>
+</blockquote>
+<p>第二个问题就是很直观的一个 LCA，关键在这个最大边权上。</p>
+<p>首先来看用 LCT 怎么求两个点 N 和 M 的 LCA：首先还是 <code>Access(N)</code>，然后下一次做 <code>Access(M)</code> 时，由于 <code>Access</code> 一直在反复找父节点旋转到根，当最后一步找到的最顶层的 Splay 就是 N 所在的 <code>Preferred Path</code>，所以此时 Splay 的根就是 N 和 M 的 LCA 了。</p>
+<p>边权的处理：每个节点记录到它的父节点的边的边权，同时记录以它为根的 Splay 树中所有节点的最大边权值。最大边权值是满足结合律的，在 Splay 旋转的过程中注意维护即可。</p>
+<p>然后是 LCA 的过程中，假设 N 和 M 的 LCA 是 L。<code>Access(M)</code> 的最后一步需要把 M 所在的 Splay 树接到 L 的右子树上，L 原来的右子树的最大边权值就是 N 到 L 的最大边权值，L 新接的右子树的最大边权值就是 M 到 L 的最大边权值，取这两个中的最大值即可。</p>
+<blockquote>
+<p><a href="/2015/04/25/2015-04-25-HDU-2475/">HDU 2475 BOX</a> 是一道裸的 LCT 题，把树的从属关系对应到盒子的包含关系上。<br><a href="/2015/04/27/2015-04-27-HDU-3966/">HDU 3966 Aragorn’s Story</a> 一次性修改一条路径上所有点的权值，也是与 LCA 有关。</p>
+</blockquote>
+<p>所以总结下来，LCT 可以处理<strong>多叉树的动态变化</strong>，以及与<strong>树上路径相关的一些操作</strong>（涉及到在线 LCA 的可能都能用 LCT 做吧？）。</p>
+<p>Tarjan 论文中把 LCT 应用在网络流上也是一种创新的做法了，不过奇怪的是复杂度低为什么 OI 里面几乎从来没听说过有人这么解的呢？有待以后继续挖掘思考。</p>
+<h1 id="Splay-伸展树"><a href="#Splay-伸展树" class="headerlink" title="Splay 伸展树"></a>Splay 伸展树</h1><p>【1985 - Self-Adjusting Binary Search Trees】</p>
+<p>Google 学术引用数 1375。</p>
+<p>论文首先介绍了 Tarjan 提出这种平衡树的出发点：虽然其他平衡树的实现，例如<code>height-balanced trees</code>、<code>weight-balanced trees</code>等等等最差情况下的复杂度都能有<code>O(logn)</code>，但实际使用中出现的访问不会这么均匀，而且这些实现都需要额外的信息来维持整棵树的平衡性，所以其实并不是一直这么高效（求验证）。</p>
+<p>Tarjan 认为应该关注于一堆操作序列的均摊时间，而不是关注于某个最坏情况的时间。所以 Splay 的设计有几个特点：</p>
+<ol>
+<li>均摊情况下不要太考虑平衡树的常数问题（话说 Splay 的常数还真的挺大的）</li>
+<li>节省内存，不要记录一些没用的平衡信息，这样可以节省一些操作的时间</li>
+<li>访问和更新的操作要简单，易于实现</li>
+</ol>
+<p>带来的后果就是，根据这个思想实现出来的 Splay：</p>
+<ol>
+<li>需要更多的局部调整，通常一般的平衡树只是在修改的时候需要调整结构，而 Splay 在访问的时候就要对树的结构做改动了</li>
+<li>单个操作可能会很费时（话说，最坏情况下 Splay 是会退化成<code>O(n)</code>的链的。。。）</li>
+</ol>
+<p>Splay 的核心是<code>splaying</code>操作，即把最近访问过的顶点放到树根，以此来达到访问均摊时间相对较优的效果。论文里面还提到了用 Splay 来实现<strong>字典搜索树</strong>和<strong>多维搜索树</strong>以及 <strong>LCT</strong> 的应用。</p>
+<p>Splay 的思想其实特别简单，实现方面我在以前写 Splay 题的时候基本上也是先参考的其他人的模版改的。杨哲的 QTREE 论文中提到了他对 Splay 实现方面的思考和优化，准备按照他的介绍试着改改看我以前的代码。</p>
+<p>。。。然后很尴尬的是好像失败了。光从代码结构上来看 QTREE 论文中的 Splay 代码确实要少好多行，结果按照他的伪代码改起来有点小问题，跟我原本的代码对不上，有待后续再看看，暂时情况下，我原本的 Splay 模板已经够用了。</p>
+<hr>
+<p>把被访问的顶点放到树根这件事情实现起来有很多种方式，而 Splay 中比较特别的是限定了几种特定的旋转规则（花式旋转）：</p>
+<p>p(x) 指 x 的父节点。</p>
+<ol>
+<li>zig<br>p(x) 是根节点。则直接旋转 x 和 p(x)。（一次左旋或者一次右旋）</li>
+<li>zig-zig<br>p(x) 不是根节点，同时 p(x) 是其父节点的左节点且 x 也是 p(x) 的左节点，或者 p(x) 是其父节点的右节点且 x 也是 p(x) 的右节点。则先旋转 p(x) 和 p(x) 的父节点，再旋转 x 和 p(x)。（两次左旋或者两次右旋）</li>
+<li>zig-zag<br>p(x) 不是根节点，同时 p(x) 是其父节点的左节点且 x 是 p(x) 的右节点，或者 p(x) 是其父节点的右节点且 x 是 p(x) 的左节点。则先旋转 x 和 p(x)，再继续旋转 x 和 p(p(x))。（一次右旋一次左旋或者一次左旋一次右旋）</li>
+</ol>
+<p>具体的图可以见论文。</p>
+<p>这样做的好处是，经过 Splay 操作之后，不仅仅是成功把 x 节点移到了树根，同时还把树根到 x 节点的路径降低了一半的深度（这个很关键！）。这部分的算法证明我就没看了，默默地跳过。</p>
+<p>得益于 Splay 相比常见的普通平衡树的优点，就是它的灵活性（也可能是缺点，这也导致了事实上 Splay 并不是那么…额，平衡），Splay 可以做出两个一般平衡树很难实现的操作：<code>join(t1, t2)</code> 和 <code>split(i, t)</code>。</p>
+<p><code>join(t1, t2)</code> 是把两棵 Splay 树合成一棵，当然这里需要假定 t1 中的所有元素都比 t2 中的要小。实现是访问 t1 中最大的元素，这样这个元素就到了树根并且右子树是空的，把 t2 接到右子树的位置上即可。或者访问 t2 中最小的元素，把 t1 接到左子树的位置上。</p>
+<p><code>split(i, t)</code> 把 Splay 中小于 i 的所有元素切出来。实现也很直观，找到元素 i 旋转到树根，然后把左子树切出来就好了。</p>
+<blockquote>
+<p><a href="/2015/03/12/2015-03-12-NOI-2004-yumendechunayuan/">NOI2004 郁闷的出纳员</a> 就是典型的平衡树性质加上 <code>split</code> 操作的应用。</p>
+</blockquote>
+<p>然后 Splay 的单个元素插入和删除也可以有两种实现：类似一般平衡树的做法，或者基于上面的 <code>join</code> 和 <code>split</code> 操作。</p>
+<p>嗯，我以前的写法都是按普通平衡树那样写的，据论文上的说法，特殊实现能有更好的均摊时间边界：</p>
+<p><code>insert(i, t)</code>，做一次 <code>split(i, t)</code>，然后把切出来的两棵 Splay 分别接到新节点 i 的左右子树上去。</p>
+<p><code>delete(i, t)</code>，在树 t 中访问节点 i，把它旋转到根，然后把根的左右两个子树 <code>join</code> 在一起。或者先把 i 的左右子树 <code>join</code> 在一起，再把 i 的父节点旋转到根。</p>
+<blockquote>
+<p><a href="/2015/03/13/2015-03-13-HDU-1890/">HDU 1890 Robotic Sort</a> 是删根操作加上线段树 lazy 标记方法的应用。<br><a href="/2015/03/28/2015-03-28-HDU-3487/">HDU 3487 Play with Chain</a> 是 <code>spilt</code> 和 <code>join</code> 操作的综合应用，这里还用到了不仅仅是要切出小于某个值的部分，而是要切出一个区间范围内的值，同时也涉及到了 lazy 标记的应用。算是相当综合了。</p>
+</blockquote>
+<hr>
+<p>看完 Splay 之后，再回到上面继续 LCT。</p>
+<h1 id="持久化数据结构"><a href="#持久化数据结构" class="headerlink" title="持久化数据结构"></a>持久化数据结构</h1><p>【1986 - Making Data Structures Persistent】</p>
+<p>Google 学术引用数 806。</p>
+<p>持久化数据结构的定义是：经过多次修改之后，还要能保证在任何时候都能得到到该结构的任何版本（不管是老的还是新的）。听上去很玄。。。</p>
+<p>大致的做法是在原有的数据结构上增加一些额外的信息域，然后修改内容时保留原有的不变，增加新节点等等。例如持久化的二叉树，增加节点时，保留原有的不变，把原本的节点复制一份增加新节点等等，做好标记。</p>
+<p>具体的操作、实现等等，先留待以后看了。</p>
+<p>关于持久化数据结构，CLJ 和 FHQ 两位大佬也整理过一些东西：</p>
+<ul>
+<li><a href="https://1drv.ms/b/s!AuxK9QzqA6LQj89t5kiX9qdqVIYFyw" target="_blank" rel="noopener">【范浩强-wc2012谈谈各种数据结构】</a></li>
+<li><a href="https://1drv.ms/b/s!AuxK9QzqA6LQj89s9WcOWf96DNhpTw" target="_blank" rel="noopener">【可持久化数据结构研究】</a></li>
+</ul>
+<h1 id="斐波那契堆"><a href="#斐波那契堆" class="headerlink" title="斐波那契堆"></a>斐波那契堆</h1><p>【1987 - Fibonacci heaps and their uses in improved network optimization algorithms】</p>
+<p>Google 学术引用数 2943。</p>
+<p>这个也先留着吧，可以参见《算法导论》上的章节。</p>
+<hr>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/03/12/2015-03-12-NOI-2004-yumendechunayuan/" rel="bookmark">NOI2004 郁闷的出纳员 Splay</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/03/13/2015-03-13-HDU-1890/" rel="bookmark">HDU 1890 Robotic Sort | Splay</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/03/28/2015-03-28-HDU-3487/" rel="bookmark">HDU 3487 Play with Chain | Splay</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/04/25/2015-04-25-HDU-2475/" rel="bookmark">HDU 2475 BOX 动态树 Link-Cut Tree</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/04/27/2015-04-27-HDU-3966/" rel="bookmark">HDU 3966 Aragorn's Story 动态树 树链剖分</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Splay/" rel="tag"># Splay</a>
+              <a href="/tags/%E4%BC%B8%E5%B1%95%E6%A0%91/" rel="tag"># 伸展树</a>
+              <a href="/tags/%E5%8A%A8%E6%80%81%E6%A0%91/" rel="tag"># 动态树</a>
+              <a href="/tags/LCT/" rel="tag"># LCT</a>
+              <a href="/tags/Paper/" rel="tag"># Paper</a>
+              <a href="/tags/Tarjan/" rel="tag"># Tarjan</a>
+              <a href="/tags/Algorithm/" rel="tag"># Algorithm</a>
+              <a href="/tags/LCA/" rel="tag"># LCA</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/09/18/2017-09-18-rdmalib/" rel="prev" title="写着玩之 RDMA 轮子">
+      <i class="fa fa-chevron-left"></i> 写着玩之 RDMA 轮子
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/10/28/2017-10-28-hdu3436/" rel="next" title="HDU 3436 Queue-jumpers Splay 离散化">
+      HDU 3436 Queue-jumpers Splay 离散化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Tarjan-双连通分量-amp-强连通分量"><span class="nav-text">Tarjan 双连通分量 &amp; 强连通分量</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Tarjan-离线-LCA"><span class="nav-text">Tarjan 离线 LCA</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Link-Cut-Tree-动态树"><span class="nav-text">Link&#x2F;Cut Tree 动态树</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Splay-伸展树"><span class="nav-text">Splay 伸展树</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#持久化数据结构"><span class="nav-text">持久化数据结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#斐波那契堆"><span class="nav-text">斐波那契堆</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'cdb0847bb5af5d5d29e5bf558f931b12',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

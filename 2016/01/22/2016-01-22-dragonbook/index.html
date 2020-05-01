@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="拖了快半年了，终于把《硬件&#x2F;软件接口》过完了，第一遍看的比较粗略，也深深地意识到深入学CPU的难度之大T_T，回来先把编译原理的坑给填了吧Q_Q。 课后答案：http:&#x2F;&#x2F;dragon-book.jcf94.com&#x2F;官方主页：http:&#x2F;&#x2F;dragonbook.stanford.edu&#x2F;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="编译原理 龙书">
+<meta property="og:url" content="https://jcf94.com/2016/01/22/2016-01-22-dragonbook/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="拖了快半年了，终于把《硬件&#x2F;软件接口》过完了，第一遍看的比较粗略，也深深地意识到深入学CPU的难度之大T_T，回来先把编译原理的坑给填了吧Q_Q。 课后答案：http:&#x2F;&#x2F;dragon-book.jcf94.com&#x2F;官方主页：http:&#x2F;&#x2F;dragonbook.stanford.edu&#x2F;">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2016-01-22-dragonbook-1.1.1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2016-01-22-dragonbook-3.1.1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2016-01-22-dragonbook-3.6.1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2016-01-22-dragonbook-3.6.2.jpg">
+<meta property="article:published_time" content="2016-01-22T06:18:57.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="编译原理">
+<meta property="article:tag" content="学习笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2016-01-22-dragonbook-1.1.1.jpg">
+
+<link rel="canonical" href="https://jcf94.com/2016/01/22/2016-01-22-dragonbook/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>编译原理 龙书 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2016/01/22/2016-01-22-dragonbook/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          编译原理 龙书
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-01-22 14:18:57" itemprop="dateCreated datePublished" datetime="2016-01-22T14:18:57+08:00">2016-01-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Architecture/" itemprop="url" rel="index"><span itemprop="name">Computer Architecture</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>拖了快半年了，终于把<a href="/2015/09/09/2015-09-09-cod/">《硬件/软件接口》</a>过完了，第一遍看的比较粗略，也深深地意识到深入学CPU的难度之大T_T，回来先把编译原理的坑给填了吧Q_Q。</p>
+<p>课后答案：<a href="http://dragon-book.jcf94.com/" target="_blank" rel="noopener">http://dragon-book.jcf94.com/</a><br>官方主页：<a href="http://dragonbook.stanford.edu/" target="_blank" rel="noopener">http://dragonbook.stanford.edu/</a></p>
+<a id="more"></a>
+
+<blockquote>
+<p>看了几章，感觉《龙书》里面废话很多啊，很多东西都重复讲了好多遍，而且感觉第二章很多余。</p>
+<p>不知道是不是我太肤浅了。</p>
+</blockquote>
+<h1 id="1-Introduction"><a href="#1-Introduction" class="headerlink" title="1. Introduction"></a>1. Introduction</h1><p>引论</p>
+<h2 id="1-1-language-processors"><a href="#1-1-language-processors" class="headerlink" title="1.1 language processors"></a>1.1 language processors</h2><p>语言处理器</p>
+<p>区别一下编译器（Compiler）和解释器（Interpreter）：</p>
+<p>高级语言的源程序经过<strong>编译器</strong>编译后产生目标程序，然后将数据输入目标程序得到输出结果；<strong>解释器</strong>则是同时将数据和源程序输入，利用输入的数据来执行源程序中指定的操作，得到输出。</p>
+<p>通常，一个完整的语言处理系统（高级语言编译器）由以下几部分组成：</p>
+<img data-src="http://jcf94.com/download/2016-01-22-dragonbook-1.1.1.jpg" title="语言处理系统"/>
+
+<p>高级语言通过一系列步骤，最终生成能够在机器上执行的机器码。</p>
+<h2 id="1-2-the-structure-of-a-compiler"><a href="#1-2-the-structure-of-a-compiler" class="headerlink" title="1.2 the structure of a compiler"></a>1.2 the structure of a compiler</h2><p>编译器的结构</p>
+<p>编译器整体上可以分为两个部分：<strong>分析</strong>部分（前端）和<strong>综合</strong>（后端）。</p>
+<p>分析是将源程序分解成多个组成要素，收集有关的信息放在一个符号表（Symbol Table）里，并产生一个中间表示形式。</p>
+<p>综合则是根据上一步得到的符号表和中间表示形式进一步生成机器码。</p>
+<p>常把编译的过程分成5个阶段：</p>
+<ol>
+<li>Lexical Analysis 词法分析</li>
+<li>Parsing 语法分析</li>
+<li>Semantic Analysis 语义分析</li>
+<li>Optimization 中间代码生成和优化</li>
+<li>Code Generation 代码生成</li>
+</ol>
+<h2 id="1-3-the-evolution-of-programming-languages"><a href="#1-3-the-evolution-of-programming-languages" class="headerlink" title="1.3 the evolution of programming languages"></a>1.3 the evolution of programming languages</h2><p>程序设计语言的发展历程</p>
+<h2 id="1-4-the-science-of-building-a-compiler"><a href="#1-4-the-science-of-building-a-compiler" class="headerlink" title="1.4 the science of building a compiler"></a>1.4 the science of building a compiler</h2><p>构建编译器的科学</p>
+<h2 id="1-5-applications-of-compiler-technology"><a href="#1-5-applications-of-compiler-technology" class="headerlink" title="1.5 applications of compiler technology"></a>1.5 applications of compiler technology</h2><p>编译技术的应用</p>
+<h2 id="1-6-programming-language-basics"><a href="#1-6-programming-language-basics" class="headerlink" title="1.6 programming language basics"></a>1.6 programming language basics</h2><p>程序设计语言基础</p>
+<h2 id="1-7-summary-of-chapter-1"><a href="#1-7-summary-of-chapter-1" class="headerlink" title="1.7 summary of chapter 1"></a>1.7 summary of chapter 1</h2><h2 id="1-8-references-for-chapter-1"><a href="#1-8-references-for-chapter-1" class="headerlink" title="1.8 references for chapter 1"></a>1.8 references for chapter 1</h2><hr>
+<h1 id="2-A-Simple-Syntax-directed-Translator"><a href="#2-A-Simple-Syntax-directed-Translator" class="headerlink" title="2. A Simple Syntax-directed Translator"></a>2. A Simple Syntax-directed Translator</h1><p>一个简单的语法制导翻译器</p>
+<h2 id="2-1-introduction"><a href="#2-1-introduction" class="headerlink" title="2.1 introduction"></a>2.1 introduction</h2><p>引言</p>
+<h2 id="2-2-syntax-definition"><a href="#2-2-syntax-definition" class="headerlink" title="2.2 syntax definition"></a>2.2 syntax definition</h2><p>语法定义</p>
+<p>本节定义了一种上下文无关文法（Context-free Grammar），其由四个元素组成：</p>
+<ol>
+<li>一个<strong>终结符号集合</strong>：文法中语言<strong>基本符号</strong>的集合</li>
+<li>一个<strong>非终结符号集合</strong>：每个非终结符号表示一个<strong>终结符号串</strong>的集合</li>
+<li>一个<strong>产生式集合</strong>：<br>箭头左边称为<strong>产生式头</strong>，右边称为<strong>产生式体</strong>。用于表示某个构造的某种书写形式。意为：<strong>产生式头</strong> 可以具有 <strong>产生式体</strong> 的形式</li>
+<li>指定一个非终结符号为开始符号</li>
+</ol>
+<p>有了明确的定义之后，<strong>文法推导</strong>就是：<br>从<strong>开始符号</strong>出发，不断将某个<strong>非终结符号</strong>替换为该非终结符号的某个<strong>产生式的体</strong>。<br>则可以从开始符号推导出来的所有<strong>终结符号串的集合</strong>，即称为该文法定义的<strong>语言</strong>。</p>
+<hr>
+<p><strong>语法分析</strong>（Parsing）的任务是：接受一个<strong>终结符号串</strong>作为输入，找出从文法开始符号推导出这个串的方法。</p>
+<p>如果不能推导出来，则报告该符号串中包含语法错误。</p>
+<h2 id="2-3-syntax-directed-translation"><a href="#2-3-syntax-directed-translation" class="headerlink" title="2.3 syntax-directed translation"></a>2.3 syntax-directed translation</h2><p>语法制导翻译</p>
+<h2 id="2-4-parsing"><a href="#2-4-parsing" class="headerlink" title="2.4 parsing"></a>2.4 parsing</h2><p>语法分析</p>
+<h2 id="2-5-a-translator-for-simple-expressions"><a href="#2-5-a-translator-for-simple-expressions" class="headerlink" title="2.5 a translator for simple expressions"></a>2.5 a translator for simple expressions</h2><p>简单表达式的翻译器</p>
+<p>本章是以一个简单的文法制导翻译器为例，介绍编译的过程。</p>
+<p>前几节是对中缀转后缀表达式翻译器文法、语法方面的分析。</p>
+<p>书中在这里给出了一个极其简单的中缀转后缀的表达式翻译器：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID	: Chen Fan</span></span><br><span class="line"><span class="comment">LANG	: JAVA</span></span><br><span class="line"><span class="comment">PROG	: postfix</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Parser</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">	<span class="keyword">static</span> <span class="keyword">int</span> lookahead;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">Parser</span><span class="params">()</span> <span class="keyword">throws</span> IOException</span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		lookahead = System.in.read();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">expr</span><span class="params">()</span> <span class="keyword">throws</span> IOException</span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		term();</span><br><span class="line">		<span class="keyword">while</span>(<span class="keyword">true</span>)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (lookahead == <span class="string">'+'</span>)</span><br><span class="line">			&#123;</span><br><span class="line">				match(<span class="string">'+'</span>);</span><br><span class="line">				term();</span><br><span class="line">				System.out.write(<span class="string">'+'</span>);</span><br><span class="line">			&#125; <span class="keyword">else</span></span><br><span class="line">			<span class="keyword">if</span> (lookahead == <span class="string">'-'</span>)</span><br><span class="line">			&#123;</span><br><span class="line">				match(<span class="string">'-'</span>);</span><br><span class="line">				term();</span><br><span class="line">				System.out.write(<span class="string">'-'</span>);</span><br><span class="line">			&#125; <span class="keyword">else</span> <span class="keyword">return</span> ;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">term</span><span class="params">()</span> <span class="keyword">throws</span> IOException</span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (Character.isDigit((<span class="keyword">char</span>)lookahead))</span><br><span class="line">		&#123;</span><br><span class="line">			System.out.write((<span class="keyword">char</span>)lookahead);</span><br><span class="line">			match(lookahead);</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">"Syntax error"</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">match</span><span class="params">(<span class="keyword">int</span> t)</span> <span class="keyword">throws</span> IOException</span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (lookahead == t) lookahead = System.in.read();</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">"Syntax error"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Postfix</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">    	Parser parse = <span class="keyword">new</span> Parser();</span><br><span class="line">    	parse.expr();</span><br><span class="line">    	System.out.write(<span class="string">'\n'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>平时JAVA用的比较少，正好这时候多熟悉下</p>
+</blockquote>
+<h2 id="2-6-lexical-analysis"><a href="#2-6-lexical-analysis" class="headerlink" title="2.6 lexical analysis"></a>2.6 lexical analysis</h2><p>词法分析</p>
+<p>前一节中的翻译器功能比较弱，为了在不改变语法的情况下扩充其功能，在词法分析这一步加入更多内容。</p>
+<h2 id="2-7-symbol-tables"><a href="#2-7-symbol-tables" class="headerlink" title="2.7 symbol tables"></a>2.7 symbol tables</h2><p>符号表</p>
+<p>词法分析的目的是按照文法从源程序中提取出各种词素，存在符号表中，然后将分析完的词素信息交给语法分析器。</p>
+<p>在这里还有个作用域的问题，因此符号表的整体结构是一个<strong>栈</strong>的形态，每进到一个新的代码块中，就应该多建立一个符号表，查找变量定义时，则是从内层向外层逐层查询。</p>
+<h2 id="2-8-intermediate-code-generation"><a href="#2-8-intermediate-code-generation" class="headerlink" title="2.8 intermediate code generation"></a>2.8 intermediate code generation</h2><p>生成中间代码</p>
+<h2 id="2-9-summary-of-chapter-2"><a href="#2-9-summary-of-chapter-2" class="headerlink" title="2.9 summary of chapter 2"></a>2.9 summary of chapter 2</h2><hr>
+<h1 id="3-Lexical-Analysis"><a href="#3-Lexical-Analysis" class="headerlink" title="3. Lexical Analysis"></a>3. Lexical Analysis</h1><p>词法分析</p>
+<h2 id="3-1-the-role-of-the-lexical-analyzer"><a href="#3-1-the-role-of-the-lexical-analyzer" class="headerlink" title="3.1 the role of the lexical analyzer"></a>3.1 the role of the lexical analyzer</h2><p>词法分析器的作用</p>
+<img data-src="http://jcf94.com/download/2016-01-22-dragonbook-3.1.1.jpg" title="词法分析器与语法分析器的交互"/>
+
+<h2 id="3-2-input-buffering"><a href="#3-2-input-buffering" class="headerlink" title="3.2 input buffering"></a>3.2 input buffering</h2><p>输入缓冲</p>
+<h2 id="3-3-specification-of-tokens"><a href="#3-3-specification-of-tokens" class="headerlink" title="3.3 specification of tokens"></a>3.3 specification of tokens</h2><p>词法单元的规约</p>
+<p>介绍了<strong>正则表达式</strong>的相关规则。</p>
+<h2 id="3-4-recognition-of-tokens"><a href="#3-4-recognition-of-tokens" class="headerlink" title="3.4 recognition of tokens"></a>3.4 recognition of tokens</h2><p>词法单元的识别</p>
+<p>介绍了使用<strong>状态转换图</strong>来分析词法单元的方法。</p>
+<h2 id="3-5-the-lexical-analyzer-generator-lex"><a href="#3-5-the-lexical-analyzer-generator-lex" class="headerlink" title="3.5 the lexical-analyzer generator lex"></a>3.5 the lexical-analyzer generator lex</h2><p>词法分析器生成工具Lex</p>
+<h2 id="3-6-finite-automata"><a href="#3-6-finite-automata" class="headerlink" title="3.6 finite automata"></a>3.6 finite automata</h2><p>有限自动机</p>
+<p>有限自动机是一种<strong>识别器</strong>，它们只能对每个可能的输入串回答是或者否。</p>
+<p>有限自动机可以分为两类：</p>
+<ol>
+<li>不确定的有限自动机（Nondeterministic Finite Automata）<br>对边上的标号没有限制，同一个标号可能有多条离开一个状态的边</li>
+<li>确定的有限自动机（Deterministic Finite Automata）<br>每个状态下对于每个独立的符号，只有一条边</li>
+</ol>
+<p>正则表达式 $(a|b)^*abb$ 的NFA和DFA示例：</p>
+<img data-src="http://jcf94.com/download/2016-01-22-dragonbook-3.6.1.jpg" title="NFA">
+
+<img data-src="http://jcf94.com/download/2016-01-22-dragonbook-3.6.2.jpg" title="DFA">
+
+<p>NFA抽象地表示了用来识别某个语言串的算法，DFA则是一个具体可以实现该语言串的算法。</p>
+<h2 id="3-7-from-regular-expressions-to-automata"><a href="#3-7-from-regular-expressions-to-automata" class="headerlink" title="3.7 from regular expressions to automata"></a>3.7 from regular expressions to automata</h2><p>从正则表达式到自动机</p>
+<p>通常有了正则表达式就很容易得到它的NFA，而模拟NFA对于软件来说肯定是没有模拟DFA来的方便。因此常要将NFA转化为DFA，再交给软件去模拟。（当然，有时候从NFA到DFA的转化代价可能要大于直接模拟NFA，这时候就不会考虑再转化了）</p>
+<p>书中介绍了一种<strong>广搜</strong>算法来完成NFA到DFA的转化。</p>
+<p>子集构造法</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">initially, t-closure(so) is the only state in Dstates, <span class="keyword">and</span> it is unmarked;</span><br><span class="line"><span class="keyword">while</span> ( there is an unmarked state T in Dstates )</span><br><span class="line">&#123;</span><br><span class="line">	mark T;</span><br><span class="line">	<span class="keyword">for</span> ( each input symbol a )</span><br><span class="line">	&#123;</span><br><span class="line">		U = t-closure( move(T, a) );</span><br><span class="line">		<span class="keyword">if</span> ( U is <span class="keyword">not</span> in Dstates )</span><br><span class="line">			add U as an unmarked state to Dstates;</span><br><span class="line">		Dtran[T, a] = U;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>计算t-closure(T)</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">push all states of T onto <span class="built_in">stack</span>;</span><br><span class="line">initialize t-closure(T) to T;</span><br><span class="line"><span class="keyword">while</span> ( <span class="built_in">stack</span> is <span class="keyword">not</span> empty )</span><br><span class="line">&#123;</span><br><span class="line">	pop t, the top element, off <span class="built_in">stack</span>;</span><br><span class="line">	for ( each state u 'with an edge from t to u labeled 空集)</span><br><span class="line">	<span class="keyword">if</span> ( u is <span class="keyword">not</span> in t-closure(T) )</span><br><span class="line">	&#123;</span><br><span class="line">		add u to t-closure(T);</span><br><span class="line">		push u onto <span class="built_in">stack</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-8-design-of-a-lexical-analyzer-generator"><a href="#3-8-design-of-a-lexical-analyzer-generator" class="headerlink" title="3.8 design of a lexical-analyzer generator"></a>3.8 design of a lexical-analyzer generator</h2><p>词法分析器生成工具的设计</p>
+<h2 id="3-9-optimization-of-dfa-based-pattern-matchers"><a href="#3-9-optimization-of-dfa-based-pattern-matchers" class="headerlink" title="3.9 optimization of dfa-based pattern matchers"></a>3.9 optimization of dfa-based pattern matchers</h2><p>基于DFA模式匹配器的优化</p>
+<h2 id="3-10-summary-of-chapter-3"><a href="#3-10-summary-of-chapter-3" class="headerlink" title="3.10 summary of chapter 3"></a>3.10 summary of chapter 3</h2><h2 id="3-11-references-for-chapter-3"><a href="#3-11-references-for-chapter-3" class="headerlink" title="3.11 references for chapter 3"></a>3.11 references for chapter 3</h2><hr>
+<h1 id="4-Syntax-Analysis"><a href="#4-Syntax-Analysis" class="headerlink" title="4. Syntax Analysis"></a>4. Syntax Analysis</h1><p>语法分析</p>
+<h2 id="4-1-introduction"><a href="#4-1-introduction" class="headerlink" title="4.1 introduction"></a>4.1 introduction</h2><p>引论</p>
+<h2 id="4-2-context-free-grammars"><a href="#4-2-context-free-grammars" class="headerlink" title="4.2 context-free grammars"></a>4.2 context-free grammars</h2><p>上下文无关文法</p>
+<h2 id="4-3-writing-a-grammar"><a href="#4-3-writing-a-grammar" class="headerlink" title="4.3 writing a grammar"></a>4.3 writing a grammar</h2><p>设计文法</p>
+<h2 id="4-4-top-down-parsing"><a href="#4-4-top-down-parsing" class="headerlink" title="4.4 top-down parsing"></a>4.4 top-down parsing</h2><p>自顶向下的语法分析</p>
+<h2 id="4-5-bottom-up-parsing"><a href="#4-5-bottom-up-parsing" class="headerlink" title="4.5 bottom-up parsing"></a>4.5 bottom-up parsing</h2><p>自底向上的语法分析</p>
+<h2 id="4-6-introduction-to-lr-parsing-simple-lr"><a href="#4-6-introduction-to-lr-parsing-simple-lr" class="headerlink" title="4.6 introduction to lr parsing: simple lr"></a>4.6 introduction to lr parsing: simple lr</h2><p>LR语法分析技术介绍：简单LR</p>
+<h2 id="4-7-more-powerful-lr-parsers"><a href="#4-7-more-powerful-lr-parsers" class="headerlink" title="4.7 more powerful lr parsers"></a>4.7 more powerful lr parsers</h2><p>更强大的LR语法分析器</p>
+<h2 id="4-8-using-ambiguous-grammars"><a href="#4-8-using-ambiguous-grammars" class="headerlink" title="4.8 using ambiguous grammars"></a>4.8 using ambiguous grammars</h2><p>使用二义性文法</p>
+<h2 id="4-9-parser-generators"><a href="#4-9-parser-generators" class="headerlink" title="4.9 parser generators"></a>4.9 parser generators</h2><p>语法分析器生成工具</p>
+<h2 id="4-10-summary-of-chapter-4"><a href="#4-10-summary-of-chapter-4" class="headerlink" title="4.10 summary of chapter 4"></a>4.10 summary of chapter 4</h2><h2 id="4-11-references-for-chapter-4"><a href="#4-11-references-for-chapter-4" class="headerlink" title="4.11 references for chapter 4"></a>4.11 references for chapter 4</h2><hr>
+<h1 id="5-Syntax-directed-Translation"><a href="#5-Syntax-directed-Translation" class="headerlink" title="5. Syntax-directed Translation"></a>5. Syntax-directed Translation</h1><p>语法制导的翻译</p>
+<h2 id="5-1-syntax-directed-definitions"><a href="#5-1-syntax-directed-definitions" class="headerlink" title="5.1 syntax-directed definitions"></a>5.1 syntax-directed definitions</h2><p>语法制导定义</p>
+<h2 id="5-2-evaluation-orders-for-sdd’s"><a href="#5-2-evaluation-orders-for-sdd’s" class="headerlink" title="5.2 evaluation orders for sdd’s"></a>5.2 evaluation orders for sdd’s</h2><p>SDD的求值顺序</p>
+<h2 id="5-3-applications-of-syntax-directed-translation"><a href="#5-3-applications-of-syntax-directed-translation" class="headerlink" title="5.3 applications of syntax-directed translation"></a>5.3 applications of syntax-directed translation</h2><p>语法制导翻译的应用</p>
+<h2 id="5-4-syntax-directed-translation-schemes"><a href="#5-4-syntax-directed-translation-schemes" class="headerlink" title="5.4 syntax-directed translation schemes"></a>5.4 syntax-directed translation schemes</h2><p>语法制导的翻译方案</p>
+<h2 id="5-5-hnplementing-l-attributed-sdd’s"><a href="#5-5-hnplementing-l-attributed-sdd’s" class="headerlink" title="5.5 hnplementing l-attributed sdd’s"></a>5.5 hnplementing l-attributed sdd’s</h2><p>实现L属性的SDD</p>
+<h2 id="5-6-summary-of-chapter-5"><a href="#5-6-summary-of-chapter-5" class="headerlink" title="5.6 summary of chapter 5"></a>5.6 summary of chapter 5</h2><h2 id="5-7-references-for-chapter-5"><a href="#5-7-references-for-chapter-5" class="headerlink" title="5.7 references for chapter 5"></a>5.7 references for chapter 5</h2><hr>
+<h1 id="6-Intermediate-code-Generation"><a href="#6-Intermediate-code-Generation" class="headerlink" title="6. Intermediate-code Generation"></a>6. Intermediate-code Generation</h1><p>中间代码生成</p>
+<h2 id="6-1-variants-of-syntax-trees"><a href="#6-1-variants-of-syntax-trees" class="headerlink" title="6.1 variants of syntax trees"></a>6.1 variants of syntax trees</h2><p>语法树的变体</p>
+<h2 id="6-2-three-address-code"><a href="#6-2-three-address-code" class="headerlink" title="6.2 three-address code"></a>6.2 three-address code</h2><p>三地址代码</p>
+<h2 id="6-3-types-and-declarations"><a href="#6-3-types-and-declarations" class="headerlink" title="6.3 types and declarations"></a>6.3 types and declarations</h2><p>类型和声明</p>
+<h2 id="6-4-translation-of-expressions"><a href="#6-4-translation-of-expressions" class="headerlink" title="6.4 translation of expressions"></a>6.4 translation of expressions</h2><p>表达式的翻译</p>
+<h2 id="6-5-type-checking"><a href="#6-5-type-checking" class="headerlink" title="6.5 type checking"></a>6.5 type checking</h2><p>类型检查</p>
+<h2 id="6-6-control-flow"><a href="#6-6-control-flow" class="headerlink" title="6.6 control flow"></a>6.6 control flow</h2><p>控制流</p>
+<h2 id="6-7-backpatching"><a href="#6-7-backpatching" class="headerlink" title="6.7 backpatching"></a>6.7 backpatching</h2><p>回填</p>
+<h2 id="6-8-switch-statements"><a href="#6-8-switch-statements" class="headerlink" title="6.8 switch-statements"></a>6.8 switch-statements</h2><p>switch语句</p>
+<h2 id="6-9-intermediate-code-for-procedures"><a href="#6-9-intermediate-code-for-procedures" class="headerlink" title="6.9 intermediate code for procedures"></a>6.9 intermediate code for procedures</h2><p>过程的中间代码</p>
+<h2 id="6-10-summary-of-chapter-6"><a href="#6-10-summary-of-chapter-6" class="headerlink" title="6.10 summary of chapter 6"></a>6.10 summary of chapter 6</h2><h2 id="6-11-references-for-chapter-6"><a href="#6-11-references-for-chapter-6" class="headerlink" title="6.11 references for chapter 6"></a>6.11 references for chapter 6</h2><hr>
+<h1 id="7-Run-time-Environments"><a href="#7-Run-time-Environments" class="headerlink" title="7. Run-time Environments"></a>7. Run-time Environments</h1><p>运行时环境</p>
+<h2 id="7-1-storage-organization"><a href="#7-1-storage-organization" class="headerlink" title="7.1 storage organization"></a>7.1 storage organization</h2><p>存储组织</p>
+<h2 id="7-2-stack-allocation-of-space"><a href="#7-2-stack-allocation-of-space" class="headerlink" title="7.2 stack allocation of space"></a>7.2 stack allocation of space</h2><p>空间的栈式分配</p>
+<h2 id="7-3-access-to-nonlocal-data-on-the-stack"><a href="#7-3-access-to-nonlocal-data-on-the-stack" class="headerlink" title="7.3 access to nonlocal data on the stack"></a>7.3 access to nonlocal data on the stack</h2><p>栈中非局部数据的访问</p>
+<h2 id="7-4-heap-management"><a href="#7-4-heap-management" class="headerlink" title="7.4 heap management"></a>7.4 heap management</h2><p>堆管理</p>
+<h2 id="7-5-introduction-to-garbage-collection"><a href="#7-5-introduction-to-garbage-collection" class="headerlink" title="7.5 introduction to garbage collection"></a>7.5 introduction to garbage collection</h2><p>垃圾回收概述</p>
+<h2 id="7-6-introduction-to-trace-based-collection"><a href="#7-6-introduction-to-trace-based-collection" class="headerlink" title="7.6 introduction to trace-based collection"></a>7.6 introduction to trace-based collection</h2><p>基于跟踪的回收概述</p>
+<h2 id="7-7-short-pause-garbage-collection"><a href="#7-7-short-pause-garbage-collection" class="headerlink" title="7.7 short-pause garbage collection"></a>7.7 short-pause garbage collection</h2><p>短停顿垃圾回收</p>
+<h2 id="7-8-advanced-topics-in-garbage-collection"><a href="#7-8-advanced-topics-in-garbage-collection" class="headerlink" title="7.8 advanced topics in garbage collection"></a>7.8 advanced topics in garbage collection</h2><p>垃圾回收中的高级论题</p>
+<h2 id="7-9-summary-of-chapter-7"><a href="#7-9-summary-of-chapter-7" class="headerlink" title="7.9 summary of chapter 7"></a>7.9 summary of chapter 7</h2><h2 id="7-10-references-for-chapter-7"><a href="#7-10-references-for-chapter-7" class="headerlink" title="7.10 references for chapter 7"></a>7.10 references for chapter 7</h2><hr>
+<h1 id="8-Code-Generation"><a href="#8-Code-Generation" class="headerlink" title="8. Code Generation"></a>8. Code Generation</h1><p>代码生成</p>
+<h2 id="8-1-issues-m-the-design-of-a-code-generator"><a href="#8-1-issues-m-the-design-of-a-code-generator" class="headerlink" title="8.1 issues m the design of a code generator"></a>8.1 issues m the design of a code generator</h2><p>代码生成器设计中的问题</p>
+<h2 id="8-2-the-target-language"><a href="#8-2-the-target-language" class="headerlink" title="8.2 the target language"></a>8.2 the target language</h2><p>目标语言</p>
+<h2 id="8-3-addresses-in-the-target-code"><a href="#8-3-addresses-in-the-target-code" class="headerlink" title="8.3 addresses in the target code"></a>8.3 addresses in the target code</h2><p>目标代码中的地址</p>
+<h2 id="8-4-basic-blocks-and-flow-graphs"><a href="#8-4-basic-blocks-and-flow-graphs" class="headerlink" title="8.4 basic blocks and flow graphs"></a>8.4 basic blocks and flow graphs</h2><p>基本块和流图</p>
+<h2 id="8-5-optimization-of-basic-blocks"><a href="#8-5-optimization-of-basic-blocks" class="headerlink" title="8.5 optimization of basic blocks"></a>8.5 optimization of basic blocks</h2><p>基本块的优化</p>
+<h2 id="8-6-a-simple-code-generator"><a href="#8-6-a-simple-code-generator" class="headerlink" title="8.6 a simple code generator"></a>8.6 a simple code generator</h2><p>一个简单的代码生成器</p>
+<h2 id="8-7-peephole-optimization"><a href="#8-7-peephole-optimization" class="headerlink" title="8.7 peephole optimization"></a>8.7 peephole optimization</h2><p>窥孔优化</p>
+<h2 id="8-8-register-allocation-and-assignment"><a href="#8-8-register-allocation-and-assignment" class="headerlink" title="8.8 register allocation and assignment"></a>8.8 register allocation and assignment</h2><p>寄存器分配和指派</p>
+<h2 id="8-9-instruction-selection-by-tree-rewriting"><a href="#8-9-instruction-selection-by-tree-rewriting" class="headerlink" title="8.9 instruction selection by tree rewriting"></a>8.9 instruction selection by tree rewriting</h2><p>通过树重写来选择指令</p>
+<h2 id="8-10-optimal-code-generation-for-expressions"><a href="#8-10-optimal-code-generation-for-expressions" class="headerlink" title="8.10 optimal code generation for expressions"></a>8.10 optimal code generation for expressions</h2><p>表达式的优化代码的生成</p>
+<h2 id="8-11-dynamic-programming-code-generation"><a href="#8-11-dynamic-programming-code-generation" class="headerlink" title="8.11 dynamic programming code-generation"></a>8.11 dynamic programming code-generation</h2><p>动态规划代码生成</p>
+<h2 id="8-12-summary-of-chapter-8"><a href="#8-12-summary-of-chapter-8" class="headerlink" title="8.12 summary of chapter 8"></a>8.12 summary of chapter 8</h2><h2 id="8-13-references-for-chapter-8"><a href="#8-13-references-for-chapter-8" class="headerlink" title="8.13 references for chapter 8"></a>8.13 references for chapter 8</h2><hr>
+<h1 id="9-Machine-independent-Optimizations"><a href="#9-Machine-independent-Optimizations" class="headerlink" title="9. Machine-independent Optimizations"></a>9. Machine-independent Optimizations</h1><p>机器无关优化</p>
+<h2 id="9-1-the-principal-sources-of-optimization"><a href="#9-1-the-principal-sources-of-optimization" class="headerlink" title="9.1 the principal sources of optimization"></a>9.1 the principal sources of optimization</h2><p>优化的主要来源</p>
+<h2 id="9-2-introduction-to-data-flow-analysis"><a href="#9-2-introduction-to-data-flow-analysis" class="headerlink" title="9.2 introduction to data-flow analysis"></a>9.2 introduction to data-flow analysis</h2><p>数据流分析简介</p>
+<h2 id="9-3-foundations-of-data-flow-analysis"><a href="#9-3-foundations-of-data-flow-analysis" class="headerlink" title="9.3 foundations of data-flow analysis"></a>9.3 foundations of data-flow analysis</h2><p>数据流分析基础</p>
+<h2 id="9-4-constant-propagation"><a href="#9-4-constant-propagation" class="headerlink" title="9.4 constant propagation"></a>9.4 constant propagation</h2><p>常量传播</p>
+<h2 id="9-5-partial-redundancy-elimination"><a href="#9-5-partial-redundancy-elimination" class="headerlink" title="9.5 partial-redundancy elimination"></a>9.5 partial-redundancy elimination</h2><p>部分冗余的消除</p>
+<h2 id="9-6-loops-in-flow-graphs"><a href="#9-6-loops-in-flow-graphs" class="headerlink" title="9.6 loops in flow graphs"></a>9.6 loops in flow graphs</h2><p>流图中的循环</p>
+<h2 id="9-7-region-based-analysis"><a href="#9-7-region-based-analysis" class="headerlink" title="9.7 region-based analysis"></a>9.7 region-based analysis</h2><p>基于区域的分析</p>
+<h2 id="9-8-symbolic-analysis"><a href="#9-8-symbolic-analysis" class="headerlink" title="9.8 symbolic analysis"></a>9.8 symbolic analysis</h2><p>符号分析</p>
+<h2 id="9-9-summary-of-chapter-9"><a href="#9-9-summary-of-chapter-9" class="headerlink" title="9.9 summary of chapter 9"></a>9.9 summary of chapter 9</h2><h2 id="9-10-references-for-chapter-9"><a href="#9-10-references-for-chapter-9" class="headerlink" title="9.10 references for chapter 9"></a>9.10 references for chapter 9</h2><hr>
+<h1 id="10-Instruction-level-Parallelism"><a href="#10-Instruction-level-Parallelism" class="headerlink" title="10. Instruction-level Parallelism"></a>10. Instruction-level Parallelism</h1><p>指令级并行</p>
+<h2 id="10-1-processor-architectures"><a href="#10-1-processor-architectures" class="headerlink" title="10.1 processor architectures"></a>10.1 processor architectures</h2><p>处理器体系结构</p>
+<h2 id="10-2-code-scheduling-constraints"><a href="#10-2-code-scheduling-constraints" class="headerlink" title="10.2 code-scheduling constraints"></a>10.2 code-scheduling constraints</h2><p>代码调度约束</p>
+<h2 id="10-3-basic-block-scheduling"><a href="#10-3-basic-block-scheduling" class="headerlink" title="10.3 basic-block scheduling"></a>10.3 basic-block scheduling</h2><p>基本块调度</p>
+<h2 id="10-4-global-code-scheduling"><a href="#10-4-global-code-scheduling" class="headerlink" title="10.4 global code scheduling"></a>10.4 global code scheduling</h2><p>全局代码调度</p>
+<h2 id="10-5-software-pipelining"><a href="#10-5-software-pipelining" class="headerlink" title="10.5 software pipelining"></a>10.5 software pipelining</h2><p>软件流水线化</p>
+<h2 id="10-6-summary-of-chapter-10"><a href="#10-6-summary-of-chapter-10" class="headerlink" title="10.6 summary of chapter 10"></a>10.6 summary of chapter 10</h2><h2 id="10-7-references-for-chapter-10"><a href="#10-7-references-for-chapter-10" class="headerlink" title="10.7 references for chapter 10"></a>10.7 references for chapter 10</h2><hr>
+<h1 id="11-Optimizing-for-Parallelism-and-Locality"><a href="#11-Optimizing-for-Parallelism-and-Locality" class="headerlink" title="11. Optimizing for Parallelism and Locality"></a>11. Optimizing for Parallelism and Locality</h1><p>并行性和局部性优化</p>
+<h2 id="11-1-basic-concepts"><a href="#11-1-basic-concepts" class="headerlink" title="11.1 basic concepts"></a>11.1 basic concepts</h2><p>基本概念</p>
+<h2 id="11-2-matrix-multiply-an-in-depth-example"><a href="#11-2-matrix-multiply-an-in-depth-example" class="headerlink" title="11.2 matrix multiply: an in-depth example"></a>11.2 matrix multiply: an in-depth example</h2><p>矩阵乘法：一个深入的例子</p>
+<h2 id="11-3-iteration-spaces"><a href="#11-3-iteration-spaces" class="headerlink" title="11.3 iteration spaces"></a>11.3 iteration spaces</h2><p>迭代空间</p>
+<h2 id="11-4-aftlne-array-indexes"><a href="#11-4-aftlne-array-indexes" class="headerlink" title="11.4 aftlne array indexes"></a>11.4 aftlne array indexes</h2><p>仿射的数组下标</p>
+<h2 id="11-5-data-reuse"><a href="#11-5-data-reuse" class="headerlink" title="11.5 data reuse"></a>11.5 data reuse</h2><p>数据复用</p>
+<h2 id="11-6-array-data-dependence-analysis"><a href="#11-6-array-data-dependence-analysis" class="headerlink" title="11.6 array data-dependence analysis"></a>11.6 array data-dependence analysis</h2><p>数组数据依赖关系分析</p>
+<h2 id="11-7-finding-synchronization-free-parallelism"><a href="#11-7-finding-synchronization-free-parallelism" class="headerlink" title="11.7 finding synchronization-free parallelism"></a>11.7 finding synchronization-free parallelism</h2><p>寻找无同步的并行性</p>
+<h2 id="11-8-synchronization-between-parallel-loops"><a href="#11-8-synchronization-between-parallel-loops" class="headerlink" title="11.8 synchronization between parallel loops"></a>11.8 synchronization between parallel loops</h2><p>并行循环之间的同步</p>
+<h2 id="11-9-pipelining"><a href="#11-9-pipelining" class="headerlink" title="11.9 pipelining"></a>11.9 pipelining</h2><p>流水线</p>
+<h2 id="11-10-locality-optimizations"><a href="#11-10-locality-optimizations" class="headerlink" title="11.10 locality optimizations"></a>11.10 locality optimizations</h2><p>局部性优化</p>
+<h2 id="11-11-other-uses-of-affine-transforms"><a href="#11-11-other-uses-of-affine-transforms" class="headerlink" title="11.11 other uses of affine transforms"></a>11.11 other uses of affine transforms</h2><p>仿射转换的其他用途</p>
+<h2 id="11-12-summarv-of-chapter-11"><a href="#11-12-summarv-of-chapter-11" class="headerlink" title="11.12 summarv of chapter 11"></a>11.12 summarv of chapter 11</h2><h2 id="11-13-references-for-chapter-11"><a href="#11-13-references-for-chapter-11" class="headerlink" title="11.13 references for chapter 11"></a>11.13 references for chapter 11</h2><hr>
+<h1 id="12-Interprocedural-Analysis"><a href="#12-Interprocedural-Analysis" class="headerlink" title="12. Interprocedural Analysis"></a>12. Interprocedural Analysis</h1><p>过程间分析</p>
+<h2 id="12-1-basic-concepts"><a href="#12-1-basic-concepts" class="headerlink" title="12.1 basic concepts"></a>12.1 basic concepts</h2><p>基本概念</p>
+<h2 id="12-2-why-interprocedural-analysis"><a href="#12-2-why-interprocedural-analysis" class="headerlink" title="12.2 why interprocedural analysis?"></a>12.2 why interprocedural analysis?</h2><p>为什么需要过程间分析</p>
+<h2 id="12-3-a-logical-representation-of-data-flow"><a href="#12-3-a-logical-representation-of-data-flow" class="headerlink" title="12.3 a logical representation of data flow"></a>12.3 a logical representation of data flow</h2><p>数据流的一种逻辑表示方式</p>
+<h2 id="12-4-a-simple-pointer-analysis-algorithm"><a href="#12-4-a-simple-pointer-analysis-algorithm" class="headerlink" title="12.4 a simple pointer-analysis algorithm"></a>12.4 a simple pointer-analysis algorithm</h2><p>一个简单的指针分析算法</p>
+<h2 id="12-5-context-insensitive-interprocedural-analysis"><a href="#12-5-context-insensitive-interprocedural-analysis" class="headerlink" title="12.5 context-insensitive interprocedural analysis"></a>12.5 context-insensitive interprocedural analysis</h2><p>上下文无关的过程间分析</p>
+<h2 id="12-6-context-sensitive-pointer-analysis"><a href="#12-6-context-sensitive-pointer-analysis" class="headerlink" title="12.6 context-sensitive pointer analysis"></a>12.6 context-sensitive pointer analysis</h2><p>上下文相关指针分析</p>
+<h2 id="12-7-datalog-implementation-by-bdd’s"><a href="#12-7-datalog-implementation-by-bdd’s" class="headerlink" title="12.7 datalog implementation by bdd’s"></a>12.7 datalog implementation by bdd’s</h2><p>使用BDD的Datalog实现</p>
+<h2 id="12-8-summary-of-chapter-12"><a href="#12-8-summary-of-chapter-12" class="headerlink" title="12.8 summary of chapter 12"></a>12.8 summary of chapter 12</h2><h2 id="12-9-references-for-chapter-12"><a href="#12-9-references-for-chapter-12" class="headerlink" title="12.9 references for chapter 12"></a>12.9 references for chapter 12</h2><hr>
+<h1 id="a-A-Complete-Front-End"><a href="#a-A-Complete-Front-End" class="headerlink" title="a. A Complete Front End"></a>a. A Complete Front End</h1><p>一个完整的编译器前端</p>
+<h2 id="a-1-the-source-language"><a href="#a-1-the-source-language" class="headerlink" title="a.1 the source language"></a>a.1 the source language</h2><p>源语言</p>
+<h2 id="a-2-main"><a href="#a-2-main" class="headerlink" title="a.2 main"></a>a.2 main</h2><p>Main</p>
+<h2 id="a-3-lexical-analyzer"><a href="#a-3-lexical-analyzer" class="headerlink" title="a.3 lexical analyzer"></a>a.3 lexical analyzer</h2><p>词法分析器</p>
+<h2 id="a-4-symbol-tables-and-types"><a href="#a-4-symbol-tables-and-types" class="headerlink" title="a.4 symbol tables and types"></a>a.4 symbol tables and types</h2><p>符号表和类型</p>
+<h2 id="a-5-intermediate-code-for-expressions"><a href="#a-5-intermediate-code-for-expressions" class="headerlink" title="a.5 intermediate code for expressions"></a>a.5 intermediate code for expressions</h2><p>表达式的中间代码</p>
+<h2 id="a-6-jumping-code-for-boolean-expressions"><a href="#a-6-jumping-code-for-boolean-expressions" class="headerlink" title="a.6 jumping code for boolean expressions"></a>a.6 jumping code for boolean expressions</h2><p>布尔表达式的跳转代码</p>
+<h2 id="a-7-intermediate-code-for-statements"><a href="#a-7-intermediate-code-for-statements" class="headerlink" title="a.7 intermediate code for statements"></a>a.7 intermediate code for statements</h2><p>语句的中间代码</p>
+<h2 id="a-8-parser"><a href="#a-8-parser" class="headerlink" title="a.8 parser"></a>a.8 parser</h2><p>语法分析器</p>
+<h2 id="a-9-creating-the-front-end"><a href="#a-9-creating-the-front-end" class="headerlink" title="a.9 creating the front end"></a>a.9 creating the front end</h2><p>创建前端</p>
+<hr>
+<h1 id="b-Finding-Linearly-Independent-Solutions"><a href="#b-Finding-Linearly-Independent-Solutions" class="headerlink" title="b. Finding Linearly Independent Solutions"></a>b. Finding Linearly Independent Solutions</h1><p> Index<br>寻找线性独立解</p>
+<p>待续…</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/08/16/2015-08-16-compilers/" rel="bookmark">编译原理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/02/21/2016-02-21-pl0/" rel="bookmark">编译原理课设尝试（一）——PL/0编译器分析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2016/02/22/2016-02-22-pl0change/" rel="bookmark">编译原理课设尝试（二）——PL/0编译器改写</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/09/09/2015-09-09-cod/" rel="bookmark">计算机组成与设计.硬件/软件接口 学习笔记（一）</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/10/23/2015-10-23-virtualmemory/" rel="bookmark">硬件/软件接口 Virtual Memory</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86/" rel="tag"># 编译原理</a>
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 学习笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/01/14/2016-01-14-carmack/" rel="prev" title="卡马克快速平方根倒数算法">
+      <i class="fa fa-chevron-left"></i> 卡马克快速平方根倒数算法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/02/13/2016-02-13-latex/" rel="next" title="LaTeX学习">
+      LaTeX学习 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-Introduction"><span class="nav-text">1. Introduction</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-language-processors"><span class="nav-text">1.1 language processors</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-the-structure-of-a-compiler"><span class="nav-text">1.2 the structure of a compiler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-the-evolution-of-programming-languages"><span class="nav-text">1.3 the evolution of programming languages</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-the-science-of-building-a-compiler"><span class="nav-text">1.4 the science of building a compiler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-5-applications-of-compiler-technology"><span class="nav-text">1.5 applications of compiler technology</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-6-programming-language-basics"><span class="nav-text">1.6 programming language basics</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-7-summary-of-chapter-1"><span class="nav-text">1.7 summary of chapter 1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-8-references-for-chapter-1"><span class="nav-text">1.8 references for chapter 1</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-A-Simple-Syntax-directed-Translator"><span class="nav-text">2. A Simple Syntax-directed Translator</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-introduction"><span class="nav-text">2.1 introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-syntax-definition"><span class="nav-text">2.2 syntax definition</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-syntax-directed-translation"><span class="nav-text">2.3 syntax-directed translation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-parsing"><span class="nav-text">2.4 parsing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-5-a-translator-for-simple-expressions"><span class="nav-text">2.5 a translator for simple expressions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-6-lexical-analysis"><span class="nav-text">2.6 lexical analysis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-7-symbol-tables"><span class="nav-text">2.7 symbol tables</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-8-intermediate-code-generation"><span class="nav-text">2.8 intermediate code generation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-9-summary-of-chapter-2"><span class="nav-text">2.9 summary of chapter 2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-Lexical-Analysis"><span class="nav-text">3. Lexical Analysis</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-the-role-of-the-lexical-analyzer"><span class="nav-text">3.1 the role of the lexical analyzer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-input-buffering"><span class="nav-text">3.2 input buffering</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-specification-of-tokens"><span class="nav-text">3.3 specification of tokens</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-recognition-of-tokens"><span class="nav-text">3.4 recognition of tokens</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-the-lexical-analyzer-generator-lex"><span class="nav-text">3.5 the lexical-analyzer generator lex</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-6-finite-automata"><span class="nav-text">3.6 finite automata</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-7-from-regular-expressions-to-automata"><span class="nav-text">3.7 from regular expressions to automata</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-8-design-of-a-lexical-analyzer-generator"><span class="nav-text">3.8 design of a lexical-analyzer generator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-9-optimization-of-dfa-based-pattern-matchers"><span class="nav-text">3.9 optimization of dfa-based pattern matchers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-10-summary-of-chapter-3"><span class="nav-text">3.10 summary of chapter 3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-11-references-for-chapter-3"><span class="nav-text">3.11 references for chapter 3</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-Syntax-Analysis"><span class="nav-text">4. Syntax Analysis</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-introduction"><span class="nav-text">4.1 introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-context-free-grammars"><span class="nav-text">4.2 context-free grammars</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-writing-a-grammar"><span class="nav-text">4.3 writing a grammar</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-4-top-down-parsing"><span class="nav-text">4.4 top-down parsing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-5-bottom-up-parsing"><span class="nav-text">4.5 bottom-up parsing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-6-introduction-to-lr-parsing-simple-lr"><span class="nav-text">4.6 introduction to lr parsing: simple lr</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-7-more-powerful-lr-parsers"><span class="nav-text">4.7 more powerful lr parsers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-8-using-ambiguous-grammars"><span class="nav-text">4.8 using ambiguous grammars</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-9-parser-generators"><span class="nav-text">4.9 parser generators</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-10-summary-of-chapter-4"><span class="nav-text">4.10 summary of chapter 4</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-11-references-for-chapter-4"><span class="nav-text">4.11 references for chapter 4</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-Syntax-directed-Translation"><span class="nav-text">5. Syntax-directed Translation</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-syntax-directed-definitions"><span class="nav-text">5.1 syntax-directed definitions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-evaluation-orders-for-sdd’s"><span class="nav-text">5.2 evaluation orders for sdd’s</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-3-applications-of-syntax-directed-translation"><span class="nav-text">5.3 applications of syntax-directed translation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-4-syntax-directed-translation-schemes"><span class="nav-text">5.4 syntax-directed translation schemes</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-5-hnplementing-l-attributed-sdd’s"><span class="nav-text">5.5 hnplementing l-attributed sdd’s</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-6-summary-of-chapter-5"><span class="nav-text">5.6 summary of chapter 5</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-7-references-for-chapter-5"><span class="nav-text">5.7 references for chapter 5</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6-Intermediate-code-Generation"><span class="nav-text">6. Intermediate-code Generation</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#6-1-variants-of-syntax-trees"><span class="nav-text">6.1 variants of syntax trees</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-2-three-address-code"><span class="nav-text">6.2 three-address code</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-3-types-and-declarations"><span class="nav-text">6.3 types and declarations</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-4-translation-of-expressions"><span class="nav-text">6.4 translation of expressions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-5-type-checking"><span class="nav-text">6.5 type checking</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-6-control-flow"><span class="nav-text">6.6 control flow</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-7-backpatching"><span class="nav-text">6.7 backpatching</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-8-switch-statements"><span class="nav-text">6.8 switch-statements</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-9-intermediate-code-for-procedures"><span class="nav-text">6.9 intermediate code for procedures</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-10-summary-of-chapter-6"><span class="nav-text">6.10 summary of chapter 6</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-11-references-for-chapter-6"><span class="nav-text">6.11 references for chapter 6</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#7-Run-time-Environments"><span class="nav-text">7. Run-time Environments</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#7-1-storage-organization"><span class="nav-text">7.1 storage organization</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-2-stack-allocation-of-space"><span class="nav-text">7.2 stack allocation of space</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-3-access-to-nonlocal-data-on-the-stack"><span class="nav-text">7.3 access to nonlocal data on the stack</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-4-heap-management"><span class="nav-text">7.4 heap management</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-5-introduction-to-garbage-collection"><span class="nav-text">7.5 introduction to garbage collection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-6-introduction-to-trace-based-collection"><span class="nav-text">7.6 introduction to trace-based collection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-7-short-pause-garbage-collection"><span class="nav-text">7.7 short-pause garbage collection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-8-advanced-topics-in-garbage-collection"><span class="nav-text">7.8 advanced topics in garbage collection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-9-summary-of-chapter-7"><span class="nav-text">7.9 summary of chapter 7</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-10-references-for-chapter-7"><span class="nav-text">7.10 references for chapter 7</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-Code-Generation"><span class="nav-text">8. Code Generation</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-issues-m-the-design-of-a-code-generator"><span class="nav-text">8.1 issues m the design of a code generator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-2-the-target-language"><span class="nav-text">8.2 the target language</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-3-addresses-in-the-target-code"><span class="nav-text">8.3 addresses in the target code</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-4-basic-blocks-and-flow-graphs"><span class="nav-text">8.4 basic blocks and flow graphs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-5-optimization-of-basic-blocks"><span class="nav-text">8.5 optimization of basic blocks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-6-a-simple-code-generator"><span class="nav-text">8.6 a simple code generator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-7-peephole-optimization"><span class="nav-text">8.7 peephole optimization</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-8-register-allocation-and-assignment"><span class="nav-text">8.8 register allocation and assignment</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-9-instruction-selection-by-tree-rewriting"><span class="nav-text">8.9 instruction selection by tree rewriting</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-10-optimal-code-generation-for-expressions"><span class="nav-text">8.10 optimal code generation for expressions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-11-dynamic-programming-code-generation"><span class="nav-text">8.11 dynamic programming code-generation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-12-summary-of-chapter-8"><span class="nav-text">8.12 summary of chapter 8</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-13-references-for-chapter-8"><span class="nav-text">8.13 references for chapter 8</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#9-Machine-independent-Optimizations"><span class="nav-text">9. Machine-independent Optimizations</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#9-1-the-principal-sources-of-optimization"><span class="nav-text">9.1 the principal sources of optimization</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-2-introduction-to-data-flow-analysis"><span class="nav-text">9.2 introduction to data-flow analysis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-3-foundations-of-data-flow-analysis"><span class="nav-text">9.3 foundations of data-flow analysis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-4-constant-propagation"><span class="nav-text">9.4 constant propagation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-5-partial-redundancy-elimination"><span class="nav-text">9.5 partial-redundancy elimination</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-6-loops-in-flow-graphs"><span class="nav-text">9.6 loops in flow graphs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-7-region-based-analysis"><span class="nav-text">9.7 region-based analysis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-8-symbolic-analysis"><span class="nav-text">9.8 symbolic analysis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-9-summary-of-chapter-9"><span class="nav-text">9.9 summary of chapter 9</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-10-references-for-chapter-9"><span class="nav-text">9.10 references for chapter 9</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-Instruction-level-Parallelism"><span class="nav-text">10. Instruction-level Parallelism</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#10-1-processor-architectures"><span class="nav-text">10.1 processor architectures</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-2-code-scheduling-constraints"><span class="nav-text">10.2 code-scheduling constraints</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-3-basic-block-scheduling"><span class="nav-text">10.3 basic-block scheduling</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-4-global-code-scheduling"><span class="nav-text">10.4 global code scheduling</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-5-software-pipelining"><span class="nav-text">10.5 software pipelining</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-6-summary-of-chapter-10"><span class="nav-text">10.6 summary of chapter 10</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-7-references-for-chapter-10"><span class="nav-text">10.7 references for chapter 10</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-Optimizing-for-Parallelism-and-Locality"><span class="nav-text">11. Optimizing for Parallelism and Locality</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#11-1-basic-concepts"><span class="nav-text">11.1 basic concepts</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-2-matrix-multiply-an-in-depth-example"><span class="nav-text">11.2 matrix multiply: an in-depth example</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-3-iteration-spaces"><span class="nav-text">11.3 iteration spaces</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-4-aftlne-array-indexes"><span class="nav-text">11.4 aftlne array indexes</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-5-data-reuse"><span class="nav-text">11.5 data reuse</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-6-array-data-dependence-analysis"><span class="nav-text">11.6 array data-dependence analysis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-7-finding-synchronization-free-parallelism"><span class="nav-text">11.7 finding synchronization-free parallelism</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-8-synchronization-between-parallel-loops"><span class="nav-text">11.8 synchronization between parallel loops</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-9-pipelining"><span class="nav-text">11.9 pipelining</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-10-locality-optimizations"><span class="nav-text">11.10 locality optimizations</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-11-other-uses-of-affine-transforms"><span class="nav-text">11.11 other uses of affine transforms</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-12-summarv-of-chapter-11"><span class="nav-text">11.12 summarv of chapter 11</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-13-references-for-chapter-11"><span class="nav-text">11.13 references for chapter 11</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#12-Interprocedural-Analysis"><span class="nav-text">12. Interprocedural Analysis</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#12-1-basic-concepts"><span class="nav-text">12.1 basic concepts</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-2-why-interprocedural-analysis"><span class="nav-text">12.2 why interprocedural analysis?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-3-a-logical-representation-of-data-flow"><span class="nav-text">12.3 a logical representation of data flow</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-4-a-simple-pointer-analysis-algorithm"><span class="nav-text">12.4 a simple pointer-analysis algorithm</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-5-context-insensitive-interprocedural-analysis"><span class="nav-text">12.5 context-insensitive interprocedural analysis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-6-context-sensitive-pointer-analysis"><span class="nav-text">12.6 context-sensitive pointer analysis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-7-datalog-implementation-by-bdd’s"><span class="nav-text">12.7 datalog implementation by bdd’s</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-8-summary-of-chapter-12"><span class="nav-text">12.8 summary of chapter 12</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-9-references-for-chapter-12"><span class="nav-text">12.9 references for chapter 12</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#a-A-Complete-Front-End"><span class="nav-text">a. A Complete Front End</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#a-1-the-source-language"><span class="nav-text">a.1 the source language</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#a-2-main"><span class="nav-text">a.2 main</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#a-3-lexical-analyzer"><span class="nav-text">a.3 lexical analyzer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#a-4-symbol-tables-and-types"><span class="nav-text">a.4 symbol tables and types</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#a-5-intermediate-code-for-expressions"><span class="nav-text">a.5 intermediate code for expressions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#a-6-jumping-code-for-boolean-expressions"><span class="nav-text">a.6 jumping code for boolean expressions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#a-7-intermediate-code-for-statements"><span class="nav-text">a.7 intermediate code for statements</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#a-8-parser"><span class="nav-text">a.8 parser</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#a-9-creating-the-front-end"><span class="nav-text">a.9 creating the front end</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#b-Finding-Linearly-Independent-Solutions"><span class="nav-text">b. Finding Linearly Independent Solutions</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'a04332b4bee6fbba353c55c4020d93ac',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

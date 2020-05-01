@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="接上篇：  TensorFlow 拆包（一）：Session.Run() TensorFlow 拆包（二）：TF 的数据流模型实现 TensorFlow 拆包（三）：Graph 和 Node  这篇要分析的是 TensorFlow 中跟计算设备相关的内容。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TensorFlow 拆包（四）：Device">
+<meta property="og:url" content="https://jcf94.com/2018/03/07/2018-03-07-tfunpacking4/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="接上篇：  TensorFlow 拆包（一）：Session.Run() TensorFlow 拆包（二）：TF 的数据流模型实现 TensorFlow 拆包（三）：Graph 和 Node  这篇要分析的是 TensorFlow 中跟计算设备相关的内容。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2018-03-07-tfunpacking4-total.svg">
+<meta property="article:published_time" content="2018-03-07T08:19:48.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="TensorFlow">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2018-03-07-tfunpacking4-total.svg">
+
+<link rel="canonical" href="https://jcf94.com/2018/03/07/2018-03-07-tfunpacking4/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>TensorFlow 拆包（四）：Device | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2018/03/07/2018-03-07-tfunpacking4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TensorFlow 拆包（四）：Device
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-03-07 16:19:48" itemprop="dateCreated datePublished" datetime="2018-03-07T16:19:48+08:00">2018-03-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Project/" itemprop="url" rel="index"><span itemprop="name">Project</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>接上篇：</p>
+<ul>
+<li><a href="/2018/01/13/2018-01-13-tfunpacking/">TensorFlow 拆包（一）：Session.Run()</a></li>
+<li><a href="/2018/01/23/2018-01-23-tfunpacking2/">TensorFlow 拆包（二）：TF 的数据流模型实现</a></li>
+<li><a href="/2018/02/28/2018-02-28-tfunpacking3/">TensorFlow 拆包（三）：Graph 和 Node</a></li>
+</ul>
+<p>这篇要分析的是 TensorFlow 中跟计算设备相关的内容。</p>
+<a id="more"></a>
+
+<h1 id="DeviceFactory-AddDevices"><a href="#DeviceFactory-AddDevices" class="headerlink" title="DeviceFactory::AddDevices()"></a>DeviceFactory::AddDevices()</h1><p>TensorFlow 在创建 Session 时会首先扫描当前设备中存在哪些可用的计算资源（CPU、GPU）。</p>
+<p>Python 层的 Session 构建时通过 <code>tf_session.TF_NewDeprecatedSession()</code> 这个接口调用 C 层的运行时来在 C 层新建 Session。</p>
+<p>单节点下创建 DirectSession 由 <code>DirectSessionFactory::NewSession()</code>完成，其中又通过 <code>DeviceFactory::AddDevices()</code>获取当前可用的设备信息。</p>
+<p>不同的计算设备分别注册各自的 DeviceFactory，<code>AddDevices()</code>调用不同设备的<code>CreateDevices()</code>，最终将所有的 device 信息传递回上层。</p>
+<p>这里<code>device_factories()</code>中是一个静态的 <code>std::unordered_map&lt;string, FactoryItem&gt;</code>，比较奇怪的是我找了半天没找到这个东西是在哪赋值的，gdb 调试进去，明明第一次调用的时候应该是创建一个空的新对象，结果里面居然就有内容了 ：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">unordered_map</span> with <span class="number">2</span> elements = &#123;</span><br><span class="line">    [<span class="string">"CPU"</span>] = &#123;factory = <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;tensorflow::DeviceFactory&gt; containing <span class="number">0x15fcf00</span>, priority = <span class="number">70</span>&#125;,</span><br><span class="line">    [<span class="string">"GPU"</span>] = &#123;factory = <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;tensorflow::DeviceFactory&gt; containing <span class="number">0x15f2de0</span>, priority = <span class="number">210</span>&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>GPU 版编译的 TensorFlow 中，CPU 端对应的是<code>tensorflow::GPUCompatibleCPUDeviceFactory::CreateDevices</code>，GPU 端对应的是 <code>tensorflow::GPUDeviceFactory::CreateDevices</code>。</p>
+<p>这两个 DeviceFactory 的定义在 <code>/tensorflow/core/common_runtime/gpu/gpu_device_factory.cc</code> 中，然后在这里面还比较惊喜地发现了两条与前面几篇中注册 Op 时很像的宏：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">REGISTER_LOCAL_DEVICE_FACTORY(<span class="string">"GPU"</span>, GPUDeviceFactory, <span class="number">210</span>);</span><br><span class="line">REGISTER_LOCAL_DEVICE_FACTORY(<span class="string">"CPU"</span>, GPUCompatibleCPUDeviceFactory, <span class="number">70</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这应该就是用于注册 Device 到前面的<code>std::unordered_map&lt;string, FactoryItem&gt;</code>结构中的内容了，但是关于注册这个过程是在什么时候运行的我还不是很明确，因为 gdb 在这里加了断点却没有进。</p>
+<p>在整个 TensorFlow 的源码中，除了上面的两条以外，还可以找到：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">REGISTER_LOCAL_DEVICE_FACTORY(<span class="string">"CPU"</span>, ThreadPoolDeviceFactory, <span class="number">60</span>);</span><br><span class="line">REGISTER_LOCAL_DEVICE_FACTORY(<span class="string">"SYCL"</span>, SYCLDeviceFactory, <span class="number">200</span>);</span><br></pre></td></tr></table></figure>
+
+<p>两种设备，<code>ThreadPoolDeviceFactory</code>应该是用于纯 CPU 版的 TensorFlow。事实上<code>GPUCompatibleCPUDeviceFactory</code>就是继承的<code>ThreadPoolDeviceFactory</code>，额外加了一些与 GPU 结合的选项。</p>
+<hr>
+<p>目前<code>ThreadPoolDeviceFactory</code>和<code>GPUDevice</code>最终都是用到的<code>LocalDevice</code>，配合 Eigen 使用。</p>
+<p><code>AddDevices()</code>得到的 device 列表存在 DeviceMgr 中传入 DirectSession。</p>
+<h2 id="Add-a-new-type-of-device-to-TF"><a href="#Add-a-new-type-of-device-to-TF" class="headerlink" title="Add a new type of device to TF"></a>Add a new type of device to TF</h2><p>官方在这块内容基本上没有给什么太详细的说明，不过从前面的分析也可以很容易看出来，要创建一个新类型的设备首先要继承一个新的 <code>tensorflow::Device</code>，以及其生成用的工厂模式<code>tensorflow::DeviceFactory</code>，中间涉及到一些必要的函数需要重载，然后用<code>REGISTER_LOCAL_DEVICE_FACTORY(...)</code>注册即可。</p>
+<p><a href="https://github.com/knuedge/tensorflow/blob/36e0cdf04f294bfd51931d4f78e291590ed0d3ec/tensorflow/g3doc/hardware/adding_support/fake_device.md" target="_blank" rel="noopener">这里</a>有一个用 CPU 改个名字来虚拟新硬件的测试例子。</p>
+<h1 id="Allocate-nodes-with-Devices"><a href="#Allocate-nodes-with-Devices" class="headerlink" title="Allocate nodes with Devices"></a>Allocate nodes with Devices</h1><h2 id="Placer-Run"><a href="#Placer-Run" class="headerlink" title="Placer::Run()"></a>Placer::Run()</h2><p><code>tensorflow::GraphExecutionState::Extend()</code>创建完整的运行图时，用了一个<code>tensorflow::Placer</code>结构来处理图中的运行节点与设备的关联问题。</p>
+<p>这里的分配策略非常简单，用一个<strong>并查集（！！666！！）</strong>来维护所有节点的连通性，然后把连通在一起的节点分到同样的设备上。其中有手动指定的话就按手动指定的来，没有手动指定的则按 device 优先级来，默认 GPU 最高，然后是 OpenCL 的 SYCL，最后才是分配到 CPU 上。</p>
+<p>这里有几个额外规则：</p>
+<ol>
+<li>source node 和 sink node 必须分到 CPU 上</li>
+<li>对于没有输入，有一个输出的 GeneratorNode，分配到它的目标节点所在的设备上；</li>
+<li>对于直接在原数据上进行操作（例如说 reshape）这样的 MetadataNode，分配到它的源节点所在的设备上。</li>
+</ol>
+<h2 id="tensorflow-Partition"><a href="#tensorflow-Partition" class="headerlink" title="tensorflow::Partition()"></a>tensorflow::Partition()</h2><p>上篇中，在<code>DirectSession::GetOrCreateExecutors()</code>的过程中，用<code>DirectSession::CreateGraphs()</code>根据当前的输入、输出等信息从完整图中创建出了一个当前运行所用的子图。</p>
+<p>之后需要用到<code>tensorflow::Partition()</code>来完成需要运行的子图与设备的分配关联：</p>
+<ul>
+<li>为图中的每一个节点和边创建内存和设备类型信息</li>
+<li>检查每一个节点的输入输出、以及其目标节点的输入信息等</li>
+<li>给每一个节点上添加控制边等，如果数据传输不在同一个设备上就添加一对 send/recv 的 node</li>
+</ul>
+<h1 id="Devices-amp-Compute"><a href="#Devices-amp-Compute" class="headerlink" title="Devices &amp; Compute"></a>Devices &amp; Compute</h1><p>事实上，感觉 DirectSession 中创建的很多结构都像是有一一对应关系的，比如前面<code>Partition()</code>得到的子图、子图所关联的设备、以及子图所构建的 Executor。</p>
+<p>在<code>tensorflow/core/common_runtime/device.h</code>中，可以找到 Device 类的计算函数的定义：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Performs the actual compute function.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Subclasses may override this function if they wish to perform</span></span><br><span class="line"><span class="comment">// some initialization before each compute.</span></span><br><span class="line"><span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">Compute</span><span class="params">(OpKernel* op_kernel, OpKernelContext* context)</span> </span>&#123;</span><br><span class="line">  op_kernel-&gt;Compute(context);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Asynchronous kernel's compute.</span></span><br><span class="line"><span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">ComputeAsync</span><span class="params">(AsyncOpKernel* op_kernel, OpKernelContext* context,</span></span></span><br><span class="line"><span class="function"><span class="params">                          AsyncOpKernel::DoneCallback done)</span> </span>&#123;</span><br><span class="line">  op_kernel-&gt;ComputeAsync(context, <span class="built_in">std</span>::move(done));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其实就是运行传入的 Op 所注册的 OpKernel 函数。</p>
+<p>ThreadPoolDevice 类重载了这两个函数，加上一些额外需要记录的信息，核心部分还是运行 OpKernel。</p>
+<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>这里把前面几篇中的涉及到的内容稍微做一下总结：</p>
+<p><img data-src="http://jcf94.com/download/2018-03-07-tfunpacking4-total.svg" alt=""></p>
+<hr>
+<p>后续：</p>
+<ul>
+<li><a href="/2018/03/09/2018-03-09-tfunpacking5/">TensorFlow 拆包（五）：Distributed</a> </li>
+</ul>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/02/04/2017-02-04-tensorflow/" rel="bookmark">TensorFlow</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/04/04/2017-04-04-alexnet/" rel="bookmark">AlexNet</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/13/2018-01-13-tfunpacking/" rel="bookmark">TensorFlow 拆包（一）：Session.Run()</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/23/2018-01-23-tfunpacking2/" rel="bookmark">TensorFlow 拆包（二）：TF 的数据流模型实现以及自动求导</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/03/12/2018-03-12-tfunpacking6/" rel="bookmark">TensorFlow 拆包（六）：RDMA</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/TensorFlow/" rel="tag"># TensorFlow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/02/28/2018-02-28-tfunpacking3/" rel="prev" title="TensorFlow 拆包（三）：Graph 和 Node">
+      <i class="fa fa-chevron-left"></i> TensorFlow 拆包（三）：Graph 和 Node
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/03/09/2018-03-09-tfunpacking5/" rel="next" title="TensorFlow 拆包（五）：Distributed">
+      TensorFlow 拆包（五）：Distributed <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#DeviceFactory-AddDevices"><span class="nav-text">DeviceFactory::AddDevices()</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Add-a-new-type-of-device-to-TF"><span class="nav-text">Add a new type of device to TF</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Allocate-nodes-with-Devices"><span class="nav-text">Allocate nodes with Devices</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Placer-Run"><span class="nav-text">Placer::Run()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#tensorflow-Partition"><span class="nav-text">tensorflow::Partition()</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Devices-amp-Compute"><span class="nav-text">Devices &amp; Compute</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Summary"><span class="nav-text">Summary</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'bfe6ff3d60021e3245df4db78f79018e',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

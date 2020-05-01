@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="正在努力攻克《硬件&#x2F;软件接口》一书。 笔记总帖：计算机组成与设计.硬件&#x2F;软件接口 学习笔记 读到第五章 Large and Fast: Exploiting Memory Hierarchy 5.7节Virtual Memory时遭遇了较大难度。另外花费了不少功夫来看。 这一节已经开始从CPU层涉及到操作系统的内容了，现在从总帖中另外再开出来一个单独记笔记。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="硬件&#x2F;软件接口 Virtual Memory">
+<meta property="og:url" content="https://jcf94.com/2015/10/23/2015-10-23-virtualmemory/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="正在努力攻克《硬件&#x2F;软件接口》一书。 笔记总帖：计算机组成与设计.硬件&#x2F;软件接口 学习笔记 读到第五章 Large and Fast: Exploiting Memory Hierarchy 5.7节Virtual Memory时遭遇了较大难度。另外花费了不少功夫来看。 这一节已经开始从CPU层涉及到操作系统的内容了，现在从总帖中另外再开出来一个单独记笔记。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2015-10-23-virtualmemory-5.7.1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-10-23-virtualmemory-5.7.2.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-10-23-virtualmemory-5.7.3.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-10-23-virtualmemory-5.7.4.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2015-10-23-virtualmemory-pic.jpg">
+<meta property="article:published_time" content="2015-10-23T03:07:14.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="体系结构">
+<meta property="article:tag" content="组成与设计.硬软件接口">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2015-10-23-virtualmemory-5.7.1.jpg">
+
+<link rel="canonical" href="https://jcf94.com/2015/10/23/2015-10-23-virtualmemory/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>硬件/软件接口 Virtual Memory | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2015/10/23/2015-10-23-virtualmemory/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          硬件/软件接口 Virtual Memory
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-10-23 11:07:14" itemprop="dateCreated datePublished" datetime="2015-10-23T11:07:14+08:00">2015-10-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Architecture/" itemprop="url" rel="index"><span itemprop="name">Computer Architecture</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>正在努力攻克《硬件/软件接口》一书。</p>
+<p>笔记总帖：<a href="/2015/09/09/2015-09-09-cod/">计算机组成与设计.硬件/软件接口 学习笔记</a></p>
+<p>读到第五章 <a href="/2015/09/09/2015-09-09-cod/#CHAPTER_5-_Large_and_Fast:_Exploiting_Memory_Hierarchy">Large and Fast: Exploiting Memory Hierarchy</a> 5.7节Virtual Memory时遭遇了较大难度。另外花费了不少功夫来看。</p>
+<p>这一节已经开始从CPU层涉及到操作系统的内容了，现在从总帖中另外再开出来一个单独记笔记。</p>
+<a id="more"></a>
+
+<h2 id="《计算机操作系统》中对虚拟内存的介绍"><a href="#《计算机操作系统》中对虚拟内存的介绍" class="headerlink" title="《计算机操作系统》中对虚拟内存的介绍"></a>《计算机操作系统》中对虚拟内存的介绍</h2><p>基础的存储器管理方式有一个特点，即要求将一个程序的所有内容都装入内存之后才能够运行，但是还有以下两种情况：</p>
+<ol>
+<li>有的程序很大，其要求的内存空间已经超过了物理内存的容量，以至于程序没有办法完全装入内存，以至于无法运行；</li>
+<li>有大量程序要求运行，但由于内存容量不足以容纳所有这些内容，因此只能运行一部分，而剩下的只能留在外存上等待。</li>
+</ol>
+<p>出现以上两种情况的基本原因都是因为内存容量不够大。一个显而易见的解决方法是从物理内存本身上进行提升，但是这个往往会受到机器本身的限制。另一种方式就是<strong>从逻辑上扩充内存容量</strong>，这也就是<strong>虚拟存储技术</strong>要解决的问题。</p>
+<h3 id="1-常规存储器管理方式的特征"><a href="#1-常规存储器管理方式的特征" class="headerlink" title="1.常规存储器管理方式的特征"></a>1.常规存储器管理方式的特征</h3><ol>
+<li>一次性，作业必须一次性地全部装入内存之后才能够开始运行。事实上，许多程序在运行时，并没有用到全部的数据，其实很多空间被浪费了；</li>
+<li>驻留性，当程序被装入内存之后，就会一直留在内存中，其中任何时候都不会被换出，直至完全运行结束。</li>
+</ol>
+<h3 id="2-局部性原理"><a href="#2-局部性原理" class="headerlink" title="2.局部性原理"></a>2.局部性原理</h3><p>程序运行时存在的局部性现象很早就已经被人发现了：</p>
+<ol>
+<li>程序执行时，除了少部分的转移和过程调用指令以外，大多数情况下都是顺序执行的；</li>
+<li>过程调用会把程序的执行轨迹从一部分区域转到另外一部分区域，但事实上每次调用的深度都是有限的。也就是说，程序将在一段时间之内，都局限在某个范围内运行；</li>
+<li>程序中存在许多循环结构，这些结构只有少数指令，但是会被反复多次执行；</li>
+<li>程序中还包括对很多数据结构的处理，比如说对数组的操作，这些处理也都是局限在很小的某个范围内。</li>
+</ol>
+<p>另外，局限性还表现在下面两个方面：</p>
+<ol>
+<li>时间局限性：如果程序中的某条指令被执行，则不久之后改指令可能被再次执行；如果某条数据被访问过，则不久之后该条数据可能被再次访问；</li>
+<li>空间局限性：一旦程序访问了某个存储单元，在不久之后，其附近的存储单元也将被访问，即程序在一段时间之内所访问的地址都集中在某一范围之内。</li>
+</ol>
+<h3 id="3-虚拟存储器的基本工作原理"><a href="#3-虚拟存储器的基本工作原理" class="headerlink" title="3.虚拟存储器的基本工作原理"></a>3.虚拟存储器的基本工作原理</h3><p>根据局部性原理可知，应用程序在运行之前没有必要全部装入内存，而只需要将当前就要用到的少数内容装入就可以，其余部分可以留在外存上。</p>
+<p>程序在运行的过程中如果还需要调用更多的内容，则再从外存上调入内存，继续执行下去。</p>
+<blockquote>
+<p>感觉国内的教材就是这个不好，老是总结这个性质、那个性质，除了考试的时候能够拿来背一下，没有特别实际的内容…0.0</p>
+</blockquote>
+<h2 id="回到-5-7-Virtual-Memory"><a href="#回到-5-7-Virtual-Memory" class="headerlink" title="回到 5.7. Virtual Memory"></a>回到 5.7. Virtual Memory</h2><p>构造虚拟存储器有两个主要动机：</p>
+<ol>
+<li>允许多道程序之间有效而安全地共享存储器，尤其这里需要强调云服务器中多虚拟机之间的虚拟存储；</li>
+<li>消除主存容量过小而对程序设计造成的影响。</li>
+</ol>
+<blockquote>
+<p>这里的目标与《操作系统》一书中讲的相似</p>
+</blockquote>
+<ul>
+<li>动机一：多程序运行</li>
+</ul>
+<p>为了允许多程序共享同一个主存储器，主存里面只需要存放众多程序中活跃的那部分，就像cache中只存放一个程序的活跃部分一样。这就是局部性原理。</p>
+<p>编译时，程序员事先是不知道哪些程序将和其他程序共享存储器。事实上，当程序在运行时，共享主存的情况是动态变化的，因此我们希望将每个程序都编译到它自己的地址空间——就是一连串只能由该程序访问的地址上。</p>
+<p>由虚拟存储器来完成<strong>程序地址空间</strong>到真实的<strong>物理地址</strong>之间的转换。这也是完成了数据保护。</p>
+<blockquote>
+<p>比如说：写两个程序时，两个程序都访问到了0x0001这个地址，然后同时运行；但两个又其实是独立的程序，不应该相互影响，程序的实际地址就是通过虚拟存储器来转换到主存上。</p>
+</blockquote>
+<ul>
+<li>动机二：程序要求的内容超过了主存的容量</li>
+</ul>
+<p>以前，为了解决内存超出限制的问题，程序员需要把整个程序分成很多个片段。每个片段由数据和代码共同构造成模块，运行的过程中由编程控制代码的装载和覆盖。</p>
+<p>虚拟存储器的发明可以帮助程序员摆脱这种困境，它的功能就是管理主存储器和辅助存储器之间的关系，就像Cache和主存之间的关系一样。</p>
+<table>
+<thead>
+<tr>
+<th>机制</th>
+<th>Cache-主存储器系统</th>
+<th>虚拟存储器系统</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据的最终目标</td>
+<td>CPU</td>
+<td>主存储器（虚拟存储器）</td>
+</tr>
+<tr>
+<td>第一级存储器</td>
+<td>Cache</td>
+<td>主存储器（物理存储器）</td>
+</tr>
+<tr>
+<td>第二级存储器</td>
+<td>主存储器</td>
+<td>辅助存储器（Flash/硬盘）</td>
+</tr>
+<tr>
+<td>数据单元</td>
+<td>块（Blocks）</td>
+<td>页（Page）</td>
+</tr>
+<tr>
+<td>数据缺失</td>
+<td>缺失（Miss）</td>
+<td>缺页（Page Fault）</td>
+</tr>
+</tbody></table>
+<p>虚拟地址可以被映射到主存储器上或者辅助存储器上，多个不同的虚拟地址也可以被映射到相同的物理地址上。</p>
+<hr>
+<p>虚拟存储器通过重定位技术来简化程序加载，在用地址进行访问主存储器之前，重定位将程序用到的主存虚拟地址<strong>映射</strong>到不同的主存物理地址上。虚拟存储器可以把程序加载到主存中的<strong>任何位置</strong>，这样就不一定需要用连续的块来存放程序了，只要整个主存中能够找到足够数量的页，分开映射即可。</p>
+<p>另外考虑辅助存储器的访问速度（可见5.2节Memory Technologies中的详表），无论是Flash还是更慢的硬盘，相对内存来说都会有非常长的延时，设计时需要考虑一些关键因素：</p>
+<ul>
+<li>访问时间太长，因此页应该足够大，一次获取就能得到足够多的数据，典型的页大小是4KB~16KB</li>
+<li>选用减低缺页率的组织结构，比如让页以全相联的方式放置</li>
+<li>从软件的角度，用一些更先进的算法来选择替换页</li>
+<li>采用写回机制</li>
+</ul>
+<h3 id="5-7-1-页的存放和查找"><a href="#5-7-1-页的存放和查找" class="headerlink" title="5.7.1. 页的存放和查找"></a>5.7.1. 页的存放和查找</h3><p>前文提到过，由于缺页的代价实在太高，所以采用全相联的方式来降低缺页率会比较好，但是全文进行顺序检索也是不现实的。因此有了下面这种存储方式：</p>
+<ol>
+<li>每一个程序都有自己独立的<strong>页表（Page Table）</strong>；</li>
+<li>页表放置在主存中，用<strong>虚拟地址</strong>中的<strong>页码</strong>来进行索引，找到相对应的<strong>物理地址页</strong>；</li>
+<li>为了指出页表在主存中的位置，硬件中有一个<strong>页表寄存器</strong>，寄存器指向的是每一条页表在主存中的<strong>起始位置</strong>。</li>
+</ol>
+<p>页表、PC和寄存器，这三种东西放在一起就确定了一个程序的<strong>状态（State）</strong>，通常把这种状态叫做一个<strong>进程（Process）</strong>。当一个进程占用CPU时，它就是<strong>活跃的（Active）</strong>；当另一个进程需要占用CPU时，就会保存下该进程的当前状态，把它变成<strong>非活跃的（Inactive）</strong>；等下次再切回来执行的时候，操作系统再重新加载程序的状态，把它激活，进程就会在之前保存的地方继续向下执行。</p>
+<p>每个不同的进程可能有<strong>相同的虚拟地址</strong>（因为编程的时候无需考虑这一点），但是<strong>每个进程都有自己的页表</strong>，由操作系统负责分配和更新页表（地址的映射状况），每个虚拟地址都会指向不同的物理地址，因此不会产生冲突。</p>
+<img data-src="http://jcf94.com/download/2015-10-23-virtualmemory-5.7.1.jpg" titile="页表寄存器、页表以及地址转换">
+
+<p>上图中，首先通过页表寄存器查到一个程序页表的起始位置；<br>然后用程序中的<strong>虚拟地址页号（虚拟地址高位）</strong>来作为索引，定位到虚拟存储器的条目；<br>与Cache非常类似，一条虚拟存储器记录里面有两项：有效位、内容（物理页号）；因为页表里面包含的是所有可能的虚拟页的映射情况，因此不需要Tag位；<br>如果某一条是有效的，则命中，根据记录里面的内容就能找到对应的在主存上的物理页地址；否则就发生缺页，要去硬盘中提取内容到主存中来</p>
+<p>注意上图中的设备：一个页的大小是2^12=4KB，而虚拟地址空间一共是2^32=4GB，物理地址只有2^30=1GB（可见虚拟地址系统能够让1GB的实际物理空间处理4GB内存大小的程序，还是相当强大的），然后图里面显示的一个条目宽度只有19位，事实上为了寻址方便，会加入其它保护信息把它扩到32位。</p>
+<h3 id="5-7-2-缺页"><a href="#5-7-2-缺页" class="headerlink" title="5.7.2. 缺页"></a>5.7.2. 缺页</h3><p>如果页表中的某条有效位是0，那么就发生了缺页，转由操作系统处理，操作系统需要在下一级存储层中（一般是硬盘）找到这一页，然后把它放到主存中去。</p>
+<p>因此除了用页表跟踪虚拟页在主存中的对应位置，如果缺页发生，还需要用一个另外的数据结构来快速找到<strong>虚拟页在硬盘中的位置</strong>。这个结构可以是页表的一部分（比如说用页表的1表示命中，然后条目内容是虚拟页在主存上的物理地址；用0表示缺页，但是这个时候条目内容是虚拟页在硬盘上的物理地址），或者另外维护一个，然后寻址方式跟页表一样。</p>
+<p>操作系统在创建进程的时候也会在硬盘上建好一个专门的区域叫做<strong>交换区（Swap Space）</strong>，把进程中所有页的内容都放进去，然后建好索引。</p>
+<img data-src="http://jcf94.com/download/2015-10-23-virtualmemory-5.7.2.jpg" title="用一个页表同时映射主存和硬盘">
+
+<p>然后，关于主存上的哪些页可以被替换掉，操作系统中也会有另外一个结构用来维护，当需要替换主存上的内容时，把长时间不用/近期不用的页写入交换区，要用的调出来。这个策略叫做<strong>LRU（Least Recently Used）</strong>。</p>
+<p>要完全准确地执行LRU的代价太高，所以一种简化的方式是在页表中加入一个<strong>引用位（Reference Bit）/使用位（Use Bit）</strong>。当某一页被访问过时，把它置为1，然后每过一段时间把所有引用位清零。这样就可以判定在某一段特定的时间内哪些页被访问过。</p>
+<h3 id="5-7-3-关于写"><a href="#5-7-3-关于写" class="headerlink" title="5.7.3. 关于写"></a>5.7.3. 关于写</h3><p>在虚拟存储器系统中，对于硬盘的操作耗时过大，因此不可能使用写直达方式，必须使用写回机制，对存储器中的页进行单独读写，只有在该页要被替换出存储器时再复制到硬盘中。</p>
+<p>并且在磁盘中，复制整页回去比写单个字要高效的多，尽管开销依然大。所以为了追踪读入主存中的页是否被重写过，可以在页表中添加一个<strong>重写位（Dirty Bit）</strong>。当该页中的任何一个字被修改之后就将其置位。</p>
+<p>当操作系统需要替换掉一整页的时候，如果该页需要被重写才将其整页写回硬盘；否则不需要写回。</p>
+<h3 id="5-7-4-加快地址转换：TLB"><a href="#5-7-4-加快地址转换：TLB" class="headerlink" title="5.7.4. 加快地址转换：TLB"></a>5.7.4. 加快地址转换：TLB</h3><p>页表存放在主存中，因此程序每次访存实际上需要<strong>两次</strong>对主存的访问：第一次访问主存上的页表，用虚拟地址得到转换之后的物理地址；然后检查Cache上物理地址的命中情况，如果缺失，那么要用这个物理地址再次访问主存获取数据。</p>
+<p>现代的处理器都包含一个特殊的Cache来追踪最近使用过的地址变换。这个特殊的地址变换Cache就是<strong>TLB（Translation-lookaside Buffer）</strong>。</p>
+<blockquote>
+<p>虚拟存储器这部分多次反复使用到了Cache的思想。TLB与页表的思想区别是，页表有很多个，TLB只有一个。页表是在思想上参照了Cache，TLB则完全就是Cache的翻版。</p>
+</blockquote>
+<img data-src="http://jcf94.com/download/2015-10-23-virtualmemory-5.7.3.jpg" title="TLB作为页表的Cache">
+
+<p>上图中的页表加上了前几小节中提到的<strong>引用位（Reference Bit）和重写位（Dirty Bit）</strong>。虚拟地址过来首先跟Cache一样把虚拟地址页号分成两部分，用索引地址找到对应的条目，然后对比Tag，如果命中则直接使用物理地址；否则TLB缺失，则继续看能否在主存中找到，并装载到TLB中；再否则就是发生了主存缺页，进一步跳到硬盘上调取数据。</p>
+<p>三个标志位同步更新处理即可。</p>
+<img data-src="http://jcf94.com/download/2015-10-23-virtualmemory-5.7.4.jpg" title="FastMATH中的TLB和Cache">
+
+<h3 id="5-7-5-集成虚拟存储器、TLB和Cache"><a href="#5-7-5-集成虚拟存储器、TLB和Cache" class="headerlink" title="5.7.5. 集成虚拟存储器、TLB和Cache"></a>5.7.5. 集成虚拟存储器、TLB和Cache</h3><p>虚拟存储系统和Cache可以看成是同一级的，下面来看一下TLB、页表、Cache三个缺失和命中的所有情况：</p>
+<table>
+<thead>
+<tr>
+<th>TLB</th>
+<th>页表</th>
+<th>Cache</th>
+<th>可能性</th>
+<th>发生的情况</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Hit</td>
+<td>Hit</td>
+<td>Hit</td>
+<td>可能</td>
+<td></td>
+</tr>
+<tr>
+<td>Hit</td>
+<td>Hit</td>
+<td>Miss</td>
+<td>可能</td>
+<td></td>
+</tr>
+<tr>
+<td>Miss</td>
+<td>Hit</td>
+<td>Hit</td>
+<td>可能</td>
+<td>TLB缺失，但找到页表，再找Cache</td>
+</tr>
+<tr>
+<td>Miss</td>
+<td>Hit</td>
+<td>Miss</td>
+<td>可能</td>
+<td>TLB缺失，Cache缺失，找主存</td>
+</tr>
+<tr>
+<td>Miss</td>
+<td>Miss</td>
+<td>Miss</td>
+<td>可能</td>
+<td>TLB缺失且缺页，需要找硬盘</td>
+</tr>
+<tr>
+<td>Hit</td>
+<td>Miss</td>
+<td>Miss</td>
+<td>不可能</td>
+<td>主存中没有，TLB中就不可能有</td>
+</tr>
+<tr>
+<td>Hit</td>
+<td>Miss</td>
+<td>Hit</td>
+<td>不可能</td>
+<td>主存中没有，TLB中就不可能有</td>
+</tr>
+<tr>
+<td>Miss</td>
+<td>Miss</td>
+<td>Hit</td>
+<td>不可能</td>
+<td>主存中没有，Cache中也不会有数据</td>
+</tr>
+</tbody></table>
+<p>上文的所有情况都是假定Cache是<strong>完全物理寻址</strong>的，即Cache必须要由虚拟存储器对虚拟地址转换为物理地址之后才能寻址，缺点就是，CPU直接生成的地址都是虚拟地址，所以这是个串行的过程，则访问主存的时间要包括对TLB访问和对Cache访问的时间。</p>
+<p>另外有一种方式是Cache的<strong>虚拟寻址</strong>，可以是完全的或者是部分的，通过查找和对比虚拟标签来找到目标，这样就不需要访问TLB了。当然问题就是，多个程序如果虚拟地址是相同的，那么会产生冲突，需要另外加以限制。</p>
+<p>折中解决方案是采用<strong>虚拟寻址物理标记</strong>，使用页内偏移进行寻址（页内偏移就是地址的低位，是不被转换的，因此实际上这部分虚拟地址就是物理地址），然后高位虚拟地址经过转换之后用来作为Tag。这种方式可以拥有两种方式的优点，并且是并行的（虽然转换的时候可能有更多的延迟）。上面举例的FastMATH采用的就是这种。</p>
+<h3 id="5-7-6-虚拟存储器中的保护"><a href="#5-7-6-虚拟存储器中的保护" class="headerlink" title="5.7.6. 虚拟存储器中的保护"></a>5.7.6. 虚拟存储器中的保护</h3><p>为了使得操作系统能够对虚拟存储器系统进行保护，硬件至少要提供3种基本功能：<br>1.至少支持<strong>两种模式</strong>：用户进程和操作系统进程；<br>2.提供一部分处理器的状态为<strong>用户只读</strong>。包括读取处理器状态、页表指针以及TLB等。只有操作系统可以通过特殊指令来对它们进行写操作；<br>3.提供用户态和操作系统态的相互<strong>切换机制</strong>。</p>
+<p>页表只能被操作系统修改，用户不能对其进行操作。</p>
+<p>一旦开始共享主存，每个用户态的进程只能够在自己的地址空间内进行操作，另外操作系统也通过设置页表上的选项来指定进程的读写能力。</p>
+<h3 id="5-7-7-处理TLB缺失和缺页"><a href="#5-7-7-处理TLB缺失和缺页" class="headerlink" title="5.7.7. 处理TLB缺失和缺页"></a>5.7.7. 处理TLB缺失和缺页</h3><p>TLB缺失和缺页都要通过调用系统异常（中断）来解决，主要是通过把异常发生时的状态保存在一些特定的寄存器中，如EPC等，然后调用系统异常处理程序。</p>
+<p>TLB操作与页表操作都要通过特殊的指令来完成。</p>
+<hr>
+<p>本节到此结束，真是有点累。增加了存储器部分的详细信息，尤其是支持虚拟存储器系统之后，第4章的数据通路与流水线怕是要发生很大的改动了。存储器的访问部分需要耗费的时钟周期远比原来想象的要多。</p>
+<img data-src="http://jcf94.com/download/2015-10-23-virtualmemory-pic.jpg" title="手绘一张虚拟存储器系统图" class="full-image">
+
+<hr>
+<p>资料：</p>
+<ul>
+<li><a href="https://zhuanlan.zhihu.com/p/32718446" target="_blank" rel="noopener">什么是TLB和PCID？为什么要有PCID？为什么Linux现在才开始使用它？</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/09/09/2015-09-09-cod/" rel="bookmark">计算机组成与设计.硬件/软件接口 学习笔记（一）</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/02/06/2018-02-06-cod2/" rel="bookmark">计算机组成与设计.硬件/软件接口 学习笔记（二）</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/02/12/2018-02-12-cod3/" rel="bookmark">计算机组成与设计.硬件/软件接口 学习笔记（三）</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/08/16/2015-08-16-compilers/" rel="bookmark">编译原理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/11/03/2015-11-03-mpi/" rel="bookmark">并行编程 MPI初探</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 学习笔记</a>
+              <a href="/tags/%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/" rel="tag"># 体系结构</a>
+              <a href="/tags/%E7%BB%84%E6%88%90%E4%B8%8E%E8%AE%BE%E8%AE%A1-%E7%A1%AC%E8%BD%AF%E4%BB%B6%E6%8E%A5%E5%8F%A3/" rel="tag"># 组成与设计.硬软件接口</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/10/16/2015-10-16-git/" rel="prev" title="Git使用小结">
+      <i class="fa fa-chevron-left"></i> Git使用小结
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/10/24/2015-10-24-dnsswitch/" rel="next" title="博客站双机备份切换">
+      博客站双机备份切换 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#《计算机操作系统》中对虚拟内存的介绍"><span class="nav-text">《计算机操作系统》中对虚拟内存的介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-常规存储器管理方式的特征"><span class="nav-text">1.常规存储器管理方式的特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-局部性原理"><span class="nav-text">2.局部性原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-虚拟存储器的基本工作原理"><span class="nav-text">3.虚拟存储器的基本工作原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#回到-5-7-Virtual-Memory"><span class="nav-text">回到 5.7. Virtual Memory</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-7-1-页的存放和查找"><span class="nav-text">5.7.1. 页的存放和查找</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-7-2-缺页"><span class="nav-text">5.7.2. 缺页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-7-3-关于写"><span class="nav-text">5.7.3. 关于写</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-7-4-加快地址转换：TLB"><span class="nav-text">5.7.4. 加快地址转换：TLB</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-7-5-集成虚拟存储器、TLB和Cache"><span class="nav-text">5.7.5. 集成虚拟存储器、TLB和Cache</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-7-6-虚拟存储器中的保护"><span class="nav-text">5.7.6. 虚拟存储器中的保护</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-7-7-处理TLB缺失和缺页"><span class="nav-text">5.7.7. 处理TLB缺失和缺页</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'f3cc08c1ba59cc638ab9d97b81835cad',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

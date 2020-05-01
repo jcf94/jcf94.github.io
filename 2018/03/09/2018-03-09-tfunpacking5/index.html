@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="接上篇：  TensorFlow 拆包（一）：Session.Run() TensorFlow 拆包（二）：TF 的数据流模型实现 TensorFlow 拆包（三）：Graph 和 Node TensorFlow 拆包（四）：Device  单节点的运行流程基本上已经有个大体印象了，接着就要来拆我所关注的重点所在——分布式运行时了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TensorFlow 拆包（五）：Distributed">
+<meta property="og:url" content="https://jcf94.com/2018/03/09/2018-03-09-tfunpacking5/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="接上篇：  TensorFlow 拆包（一）：Session.Run() TensorFlow 拆包（二）：TF 的数据流模型实现 TensorFlow 拆包（三）：Graph 和 Node TensorFlow 拆包（四）：Device  单节点的运行流程基本上已经有个大体印象了，接着就要来拆我所关注的重点所在——分布式运行时了。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2018-03-09-tfunpacking5-diag1.svg">
+<meta property="og:image" content="http://jcf94.com/download/2018-03-09-tfunpacking5-graph_master_cln.svg">
+<meta property="og:image" content="http://jcf94.com/download/2018-03-09-tfunpacking5-graph_split2.svg">
+<meta property="og:image" content="http://jcf94.com/download/2018-03-09-tfunpacking5-graph_send_recv.svg">
+<meta property="og:image" content="http://jcf94.com/download/2018-03-09-tfunpacking5-dist-graph.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-03-09-tfunpacking5-dist-graph2.png">
+<meta property="og:image" content="http://jcf94.com/download/2018-03-09-tfunpacking5-master_worker.svg">
+<meta property="og:image" content="http://jcf94.com/download/2018-03-09-tfunpacking5-distributedsession.jpg">
+<meta property="article:published_time" content="2018-03-09T12:40:43.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="TensorFlow">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2018-03-09-tfunpacking5-diag1.svg">
+
+<link rel="canonical" href="https://jcf94.com/2018/03/09/2018-03-09-tfunpacking5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>TensorFlow 拆包（五）：Distributed | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2018/03/09/2018-03-09-tfunpacking5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TensorFlow 拆包（五）：Distributed
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-03-09 20:40:43" itemprop="dateCreated datePublished" datetime="2018-03-09T20:40:43+08:00">2018-03-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Project/" itemprop="url" rel="index"><span itemprop="name">Project</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>接上篇：</p>
+<ul>
+<li><a href="/2018/01/13/2018-01-13-tfunpacking/">TensorFlow 拆包（一）：Session.Run()</a></li>
+<li><a href="/2018/01/23/2018-01-23-tfunpacking2/">TensorFlow 拆包（二）：TF 的数据流模型实现</a></li>
+<li><a href="/2018/02/28/2018-02-28-tfunpacking3/">TensorFlow 拆包（三）：Graph 和 Node</a></li>
+<li><a href="/2018/03/07/2018-03-07-tfunpacking4/">TensorFlow 拆包（四）：Device</a></li>
+</ul>
+<p>单节点的运行流程基本上已经有个大体印象了，接着就要来拆我所关注的重点所在——分布式运行时了。</p>
+<a id="more"></a>
+
+<h1 id="Architecture"><a href="#Architecture" class="headerlink" title="Architecture"></a>Architecture</h1><p>进入代码部分之前，首先看一下<a href="https://www.tensorflow.org/extend/architecture" target="_blank" rel="noopener">官方文档</a>中，对整个 TensorFlow 结构的介绍。以下是一个典型的分布式 TensorFlow 的架构图：</p>
+<p><img data-src="http://jcf94.com/download/2018-03-09-tfunpacking5-diag1.svg" alt=""></p>
+<p>这里的 Master 和 Worker 服务只在分布式运行时中有，可以认为单节点的 Session 是包含了这两个服务的全部内容。</p>
+<p>Client 指的是面向用户的前端编程接口，通常能用的就是 Python 和 C++ 了，client 完成运算图的构建，然后把图的定义通过 session 对象用<code>tf.GraphDef</code>这个 Protobuf 结构传给后面的 Master 服务来跑（即 Python 层定义好计算图，然后通过 Protobuf 的接口进入 C 部分的运行时）。</p>
+<blockquote>
+<p>所以源码中会有<code>/tensorflow/python/client</code>这个目录，其中的内容做的就是架构图中 client 这个概念的任务。</p>
+</blockquote>
+<p><img data-src="http://jcf94.com/download/2018-03-09-tfunpacking5-graph_master_cln.svg" alt=""></p>
+<p>分布式环境中的 Master 有以下几个任务：</p>
+<ol>
+<li>精简并且优化计算图，根据当前次 client 提交运行的输入输出目标，提取出一个子图来</li>
+<li>把子图划分到硬件上（graph -&gt; Partition -&gt; Device）</li>
+<li>缓存前面那一步的结果，以便以后的 steps 能够重用而不用再把上面两步再执行一遍</li>
+</ol>
+<p>这些事情看上去好眼熟啊…没错！这就是<a href="/2018/01/13/2018-01-13-tfunpacking/#Executor">DirectSession 中 Executor 的任务啊</a>！</p>
+<p>在 <a href="/2018/03/07/2018-03-07-tfunpacking4/#tensorflow-Partition"><code>tensorflow::Partition()</code></a>中，划分子图到硬件上，对于不在同一个设备上的边需要补充一对 send/recv 的 op 接口，例如上面那张目标图：</p>
+<p><img data-src="http://jcf94.com/download/2018-03-09-tfunpacking5-graph_split2.svg" alt=""></p>
+<p>Master 接下来再把任务分给具体的 Worker 服务来完成。每一个 Worker 服务都有自己对应的 tasks，ps 负责存储数据，worker 负责具体的计算。</p>
+<blockquote>
+<p>注意 Worker Service 和 Worker task 的区别，Worker Service 可以有 ps 和 worker 这两种 tasks。</p>
+</blockquote>
+<p><img data-src="http://jcf94.com/download/2018-03-09-tfunpacking5-graph_send_recv.svg" alt=""></p>
+<hr>
+<p>截两张实际运行中 Client、Master、Worker 的关系图。</p>
+<p><img data-src="http://jcf94.com/download/2018-03-09-tfunpacking5-dist-graph.png" alt=""></p>
+<p>上面一种做法是在 ps 和 worker1 中调用 <code>Server.join()</code>，建图等等的事情全部由 worker0 这边的一份代码完成，大概可以理解成某些代码中的 “Single Session” 的模式。</p>
+<p>更常见的写法是下面这种，在 ps 上开 <code>Server.join()</code>，然后每个 worker 分别跑一遍完整的 Python 脚本，自己构建自己本地的计算图。</p>
+<p><img data-src="http://jcf94.com/download/2018-03-09-tfunpacking5-dist-graph2.png" alt=""></p>
+<p>那我们看到 Client（Python 脚本）运行时是通过本地的 Master Service 来管理整个计算过程，Master 相当于单节点环境的 Session 的角色，由它去分配任务给本地的 worker 或者远程的 worker。</p>
+<p>Worker 服务有以下几个任务：</p>
+<ol>
+<li>处理 Master 交过来的请求</li>
+<li>拿到自己的子图之后，调度其中的 op 完成具体的计算</li>
+<li>处理与其他 task（即其他的 Worker 服务）之间的数据通信问题</li>
+</ol>
+<p>第 2 步的详细处理也是前面分析过的，即<a href="/2018/01/13/2018-01-13-tfunpacking/#RunAsync-amp-ScheduleReady">ExecutorState 的 RunAsync() 和 ScheduleReady()</a>部分处理的事情了。</p>
+<p>关于 send/recv：</p>
+<ul>
+<li>CPU 和 GPU 之间通过 <code>cudaMemcpyAsync()</code> 来 overlap 计算和数据传输</li>
+<li>两个本地 GPU 之间通过 DMA 直接传输</li>
+<li>在 task 之间（不同的 Worker 服务、不同的计算节点之间）通过 gRPC 或者后来增加的 RDMA 来传输</li>
+</ul>
+<hr>
+<p>Master 和 Worker 简单地想可以认为是把 DirectSession 中的 Executor 相关的结构功能给拆了出来。</p>
+<p>接下来看看具体的代码实现。</p>
+<h1 id="tf-train-Supervisor"><a href="#tf-train-Supervisor" class="headerlink" title="tf.train.Supervisor()"></a>tf.train.Supervisor()</h1><p>代码从单节点改造成分布式只需要替换掉几个固定的 API 即可，先从 Python 层 API 的 Supervisor 说起。</p>
+<p>Supervisor 是一个对 Coordinator、Saver、SessionManager 等结构的封装类，用于管理运行的分布式 Session，在运行中建立检查点，并处理异常情况的恢复等等。</p>
+<blockquote>
+<p>1.6.0 版用这个 API 的时候会有警告说将在未来移除，建议换成 <code>tf.train.MonitoredTrainingSession</code>，但是改用这个新 API 实测性能会下降一截，可能是配置方式需要做一下改变，暂时先放下不作研究。</p>
+</blockquote>
+<p>Supervisor 的构造函数有一堆输入参数，挑几个比较重要的记一下：</p>
+<ul>
+<li>graph：运算图，<strong>不指定则使用默认图</strong>（这个跟单机版一致）</li>
+<li>is_chief：分布式环境中可能存在多个 worker 节点，但是其中需要有一个作为 chief worker 节点。chief 需要负责初始化整个运行图，其他 worker 节点将从 chief 节点获取计算图的信息</li>
+<li>init_op：图中用于初始化所有变量的 op</li>
+<li>summary_op：用于收集整个运算过程中的有关信息的 op</li>
+<li>saver：chief 将把有关的信息写到 log 中去</li>
+<li>global_step：在分布式环境中全局共享的一个变量，标识当前跑到了第几次迭代</li>
+<li>session_manager：用于管理执行具体运行的 session，也负责异常恢复等等，<strong>如果不指定则会创建一个</strong></li>
+</ul>
+<p>创建结束时，Supervisor 所关联的计算图将会被锁定，不再允许修改，因为这个图可能会被多个线程共享。</p>
+<h1 id="Session"><a href="#Session" class="headerlink" title="Session"></a>Session</h1><p>分布式环境下的 C 运行时中存在 3 种 Session 结构，分别是 WorkerSession、MasterSession 以及 GrpcSession，基本上跟前面的 Architecture 是能对应起来的。下面从它们在代码中的调用顺序开始分析：</p>
+<h2 id="WorkerSession"><a href="#WorkerSession" class="headerlink" title="WorkerSession"></a>WorkerSession</h2><p>WorkerSession 在创建 <code>tf.train.Server()</code>时就被构造出来。</p>
+<p>C 层面的 Server 是一个用于管理当前进程中的 Master 和 Worker 服务的结构，通过<code>Start()</code>、<code>Stop()</code>、<code>Join()</code>构成了下图的状态机：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//                 Join()            Join()</span></span><br><span class="line"><span class="comment">//                  ___               ___</span></span><br><span class="line"><span class="comment">//      Start()     \ /    Stop()     \ /</span></span><br><span class="line"><span class="comment">// NEW ---------&gt; STARTED --------&gt; STOPPED</span></span><br><span class="line"><span class="comment">//   \                          /</span></span><br><span class="line"><span class="comment">//    \________________________/</span></span><br><span class="line"><span class="comment">//            Stop(), Join()</span></span><br></pre></td></tr></table></figure>
+
+<p>GrpcServer 在被初始化时：</p>
+<ul>
+<li>检查当前可用的所有计算设备，构建 device 列表（与 DirectSession 中做的 <code>AddDevices()</code>一致）</li>
+<li>创建了 RpcRendezvousMgr</li>
+<li>检查传入的 cluster 信息中，其他 tasks 的端口等等的信息</li>
+<li>注册一个 Grpc 的通信 server</li>
+<li>创建 Master 以及 GrpcMasterService</li>
+<li>创建 GrpcWorker 以及 GrpcWorkerService</li>
+<li>启动 Grpc 的通信server</li>
+<li>创建 WorkerCache</li>
+<li>创建一个 SessionMgr，并随后在这个 SessionMgr 中创建 WorkerSession</li>
+<li>这里没有马上创建 MasterSession，而是保存好创建 MasterSession 所需要的信息（大概是因为 ps 中不需要 Master？而 Worker 是所有节点都要有的）</li>
+<li>创建 LocalMaster</li>
+</ul>
+<p>Work 类用于管理 WorkerSession、处理子图、运行子图、接收 Tensor 数据。GrpcWorker 继承了 Worker 类之后重载了其中的数据传输部分，添加的是一个额外的传输方法，用于在传输大数据时不经过 Protobuf 序列化而直接传（调用 send/recv op 的接口的话，应该是默认要序列化之后再传吧）。</p>
+<p>GrpcWorkerService 重载的是 AsyncServiceInterface 这个类，AsyncServiceInterface 抽象的是一个异步等待服务，即创建一个新的线程，用 polling 循环来等待传入的 RPC 请求。</p>
+<p>GrpcWorkerService 底层关联的是 WorkerService 这个通过 Protobuf 定义用于 RPC 的结构。</p>
+<p>WorkerSession 相对而言反而是个比较简单的结构：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// WorkerSession encapsulates all of the state relating to a given session.</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">WorkerSession</span> &#123;</span></span><br><span class="line">  <span class="comment">// The name of the session.</span></span><br><span class="line">  <span class="keyword">const</span> <span class="built_in">string</span> session_name;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// The name of the worker. E.g., /job:mnist/replica:0/task:1.</span></span><br><span class="line">  <span class="keyword">const</span> <span class="built_in">string</span> worker_name;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Object from which WorkerInterface instances can be obtained.</span></span><br><span class="line">  <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;WorkerCacheInterface&gt; worker_cache;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Collection of local devices. These devices are typically RenamedDevices</span></span><br><span class="line">  <span class="comment">// in all except the SessionMgr.legacy_session_. legacy_session_.device_mgr</span></span><br><span class="line">  <span class="comment">// == worker_env_.device_mgr, which holds the true devices.</span></span><br><span class="line">  <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;DeviceMgr&gt; device_mgr;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// graph_mgr keeps track of the registered graphs of this session.</span></span><br><span class="line">  <span class="comment">//</span></span><br><span class="line">  <span class="comment">// Note: graph_mgr must be deleted before rendezvous_mgr!</span></span><br><span class="line">  <span class="comment">// Note: graph_mgr must be deleted before device_mgr!</span></span><br><span class="line">  <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;GraphMgr&gt; graph_mgr;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;ClusterFunctionLibraryRuntime&gt; cluster_flr;</span><br><span class="line"></span><br><span class="line">  WorkerSession(<span class="keyword">const</span> <span class="built_in">string</span>&amp; session_name, <span class="keyword">const</span> <span class="built_in">string</span>&amp; worker_name,</span><br><span class="line">                <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;WorkerCacheInterface&gt; worker_cache,</span><br><span class="line">                <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;DeviceMgr&gt; device_mgr,</span><br><span class="line">                <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;GraphMgr&gt; graph_mgr);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>保存了名字啊、worker_cache啊、device_mgr啊、graph_mgr啊这样的内容。</p>
+<h2 id="GrpcSession"><a href="#GrpcSession" class="headerlink" title="GrpcSession"></a>GrpcSession</h2><p>下一个断点首先是 GrpcSession 再被触发。</p>
+<p>分布式环境下对应的 Session 结构为 Supervisor 中创建的<code>managed_session()</code>，对于 chief 节点，调用自己 SessionManager 中的 <code>_restore_checkpoint()</code> 来在 C 层面创建出 GrpcSession 结构，并且负责完成图的构建等等，之后检查本次运行是否有对应的检查点，有则把检查点的信息恢复出来。而非 chief 节点调用的是<code>wait_for_session()</code> ，创建 GrpcSession 之后等待 chief 节点完成图的构建。</p>
+<p>GrpcSession 是从 Session 类继承出来的，其负责的任务跟单机版中的 DirectSession 很像，跟它是同一个层级的东西。</p>
+<blockquote>
+<p>或者说 Session 类在整个 TensorFlow 架构中更确切的应该叫它 Client Session，它们与 Python 层的 <code>sess = tf.Session()</code> 这种结构是直接对应的，是用户编程界面与 TF 运行时的入口。</p>
+</blockquote>
+<p>但 DirectSession 发挥功能的函数都是在本身中直接定义出来的，而这里的 GrpcSession 却可以说基本上是围绕 MasterService 的封装。通过 MasterInterface 来调用 MasterService 的功能来完成任务，可以说 GrpcSession 只是最上图中架构中 client 与 Master 服务之间的接口。</p>
+<p>这里的 Master 接口有两种，LocalMaster 用于进程间的直接通信，GrpcMaster 用于 Grpc 通信，GrpcSession 在创建时会根据选项选择所需的 MasterInterface。通常情况下，由于 GrpcSession 都是是直接跟本地的 Master 进行交互，所以默认添加的是 LocalMaster。</p>
+<h2 id="MasterSession"><a href="#MasterSession" class="headerlink" title="MasterSession"></a>MasterSession</h2><p>上面<code>managed_session()</code>在创建完 C 层面的 GrpcSession 返回之后，会很快执行一次 <code>sess.run()</code>，有检查点的情况是恢复检查点时的变量数据，没有检查点时是执行 init_op 来完成变量初始化。</p>
+<p>这里执行的 <code>sess.run()</code>与单节点版本的行为相同，需要首先执行<code>_extend_graph()</code>，不同的是这里执行的是<code>tensorflow::GrpcSession::Extend()</code>，最终到<code>tensorflow::LocalMaster::CreateSession()</code>、<code>tensorflow::Master::CreateSession()</code>。</p>
+<p>话说 TensorFlow 中跟 Master 这个概念相关的结构有一堆，一层套一层，而且功能上跟 Worker 又有很多区别的地方。类比起来，大概 MasterSession 也就是跟 Executor 比较像，每一次 Client Session 要 Run 一个子图时（<code>sess.run(...)</code>），启动一个 MasterSession。</p>
+<p>MasterSession 追溯到最后是由 <code>GrpcSession.Extend()</code>、<code>GrpcSession.Create()</code>在构建运行图或者修改运行图的时候创建。调用栈大概是这个样子，层次看起来还是比较乱：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tensorflow::GrpcSession::Create() -&gt;</span><br><span class="line">tensorflow::GrpcSession::CreateImpl(): master_-&gt;CreateSession() -&gt;</span><br><span class="line">tensorflow::LocalMaster::CreateSession(): master_impl_-&gt;CreateSession() -&gt;</span><br><span class="line">tensorflow::Master::CreateSession() -&gt; （在一个闭包中运行）</span><br><span class="line">tensorflow::MasterSession::Create()</span><br></pre></td></tr></table></figure>
+
+<p>注释中对 MasterSession 的介绍是：</p>
+<ol>
+<li>负责分配 node 到 device</li>
+<li>添加额外的边（例如 send/recv）</li>
+<li>发射 commands 给 worker 来运行</li>
+</ol>
+<p>具体来看，还是从<code>sess.run()</code>入手：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">tensorflow::GrpcSession::Run() -&gt;</span><br><span class="line">tensorflow::GrpcSession::RunHelper() （开始准备 req 和 resp，用于异步请求和响应的结构）-&gt;</span><br><span class="line">tensorflow::GrpcSession::RunProto(): master_-&gt;RunStep() -&gt;</span><br><span class="line">tensorflow::LocalMaster::RunStep(): master_impl_-&gt;RunStep() -&gt;</span><br><span class="line">tensorflow::Master::RunStep() -&gt; （在一个闭包中运行）</span><br><span class="line">tensorflow::MasterSession::Run() -&gt;</span><br><span class="line">tensorflow::MasterSession::DoRunWithLocalExecution() -&gt;</span><br><span class="line">tensorflow::MasterSession::ReffedClientGraph::RunPartitions()</span><br></pre></td></tr></table></figure>
+
+<p>最后的 ReffedClientGraph 是与计算图和 Worker 相关的内容了，具体的实现相当复杂，封装层次也是特别多，大致看了下<code>RunPartitions()</code>这里的注释：</p>
+<ul>
+<li>匹配 fed tensors 和它们在 req 中的 index</li>
+<li>给每个 partition 准备一个将发给 worker 的 call</li>
+<li>通过<code>tensorflow::MasterSession::ReffedClientGraph::Part::worker</code>（这是一个 WorkerInterface）的<code>RunGraphAsync()</code>方法，把运行的 call 提交给 worker 跑</li>
+<li>等待 RunGraph 的 calls 返回结果</li>
+<li>最后处理收到的运行结果</li>
+</ul>
+<hr>
+<p>画张图稍微理一下上面这些结构的关系：</p>
+<p><img data-src="http://jcf94.com/download/2018-03-09-tfunpacking5-master_worker.svg" alt=""></p>
+<p>然后还有来自这里的一张图：</p>
+<ul>
+<li><a href="https://zhuanlan.zhihu.com/p/26031658" target="_blank" rel="noopener">『深度长文』Tensorflow代码解析（五）</a></li>
+</ul>
+<p><img data-src="http://jcf94.com/download/2018-03-09-tfunpacking5-distributedsession.jpg" alt=""></p>
+<h1 id="WorkerInterface"><a href="#WorkerInterface" class="headerlink" title="WorkerInterface"></a>WorkerInterface</h1><p>这两个类是作为 TensorFlow 运行时调用 gRPC 的接口基类。</p>
+<p>从源码中可以看到，WorkerInterface 类定义了一堆诸如<code>GetStatusAsync()</code>、<code>CreateWorkerSessionAsync()</code>、<code>DeleteWorkerSessionAsync()</code>等等这样的虚函数接口，可以认为是跟 GrpcWorkerService 支持的 GrpcWorkerMethod 是一一对应的：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Names of worker methods.</span></span><br><span class="line"><span class="keyword">enum</span> <span class="class"><span class="keyword">class</span> <span class="title">GrpcWorkerMethod</span> &#123;</span></span><br><span class="line">  kGetStatus,</span><br><span class="line">  kCreateWorkerSession,</span><br><span class="line">  kDeleteWorkerSession,</span><br><span class="line">  kRegisterGraph,</span><br><span class="line">  kDeregisterGraph,</span><br><span class="line">  kRunGraph,</span><br><span class="line">  kCleanupGraph,</span><br><span class="line">  kCleanupAll,</span><br><span class="line">  kRecvTensor,</span><br><span class="line">  kLogging,</span><br><span class="line">  kTracing,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>当然这个同时也是要跟 Protobuf 的配置要一一对应。</p>
+<p>具体的实现在它的两个继承类 Worker 和 GrpcRemoteWorker 里面。</p>
+<p>从代码上来看，GrpcRemoteWorker 类中的每一个函数都是调用 <code>IssueRequest()</code> 发起一个异步的 gRPC 调用，远程的 GrpcWorkerService 作为守护进程处理传入的 gRPC 请求。</p>
+<p>Worker 类中的对应实现则都是直接在本地做。</p>
+<h2 id="Work-Flow"><a href="#Work-Flow" class="headerlink" title="Work Flow"></a>Work Flow</h2><p>最后回到前面的运行部分。</p>
+<p>在<code>tensorflow::MasterSession::ReffedClientGraph::RunPartitions()</code>中，MasterSession 运行每一个已经划分好的 partitions 用的是 <code>part.worker-&gt;RunGraphAsync()</code> 调用。</p>
+<p>part.worker 是每个 partitions 对应的 WorkerInterface 对象，很容易猜想到如果分配在远程对应的应该是 GrpcRemoteWorker 实例，否则对应的应该是 Worker 实例。</p>
+<p>那再看数据收发部分的<code>send/recv</code>，之前已经知道了数据传输由<code>recv</code>部分发起，最终调的是<code>RpcRemoteRendezvous::RecvFromRemoteAsync()</code>：</p>
+<p>继续往下看，检查各项参数，准备 RpcRecvTensorCall，之后启动 <code>call-&gt;Start()</code>，<code>Start()</code>里面调的是<code>StartRTCall()</code>：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">StartRTCall</span><span class="params">(<span class="built_in">std</span>::function&lt;<span class="keyword">void</span>()&gt; recv_done)</span> </span>&#123;</span><br><span class="line">  resp_.InitAlloc(dst_device_, alloc_attrs_);</span><br><span class="line">  <span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>::placeholders;</span><br><span class="line">  StatusCallback cb = <span class="built_in">std</span>::bind(</span><br><span class="line">      [<span class="keyword">this</span>](<span class="built_in">std</span>::function&lt;<span class="keyword">void</span>()&gt; recv_done,</span><br><span class="line">             <span class="comment">// Begin unbound arguments.</span></span><br><span class="line">             <span class="keyword">const</span> Status&amp; s) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!s.ok()) &#123;</span><br><span class="line">          mutex_lock l(mu_);</span><br><span class="line">          status_.Update(s);</span><br><span class="line">        &#125;</span><br><span class="line">        recv_done();</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="built_in">std</span>::move(recv_done), _1);</span><br><span class="line">  wi_-&gt;RecvTensorAsync(&amp;opts_, &amp;req_, &amp;resp_, <span class="built_in">std</span>::move(cb));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>wi_ 同样是一个 WorkerInterface 的结构。</p>
+<p>这样就很清晰了，无论是 Master、Worker 相互之间的控制还是<code>send/recv</code>的数据传输都是通过 WorkerInterface 的派生类作为接口完成的，接口的另一头是底层的 gRPC 通信库。</p>
+<p>那么再看到响应 gRPC 调用的那一边，在 GrpcWorkerService 创建时，守护进程<code>HandleRPCsLoop()</code>就启动了：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">HandleRPCsLoop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">// TODO(ncteisen): This may require performance engineering. We can</span></span><br><span class="line">  <span class="comment">// change the number of threads, the number of handlers per thread,</span></span><br><span class="line">  <span class="comment">// or even decide to specialize certain threads to certain methods.</span></span><br><span class="line">  ENQUEUE_REQUEST(GetStatus, <span class="literal">false</span>);</span><br><span class="line">  ENQUEUE_REQUEST(CreateWorkerSession, <span class="literal">false</span>);</span><br><span class="line">  ENQUEUE_REQUEST(DeleteWorkerSession, <span class="literal">false</span>);</span><br><span class="line">  ENQUEUE_REQUEST(CleanupAll, <span class="literal">false</span>);</span><br><span class="line">  ENQUEUE_REQUEST(RegisterGraph, <span class="literal">false</span>);</span><br><span class="line">  ENQUEUE_REQUEST(DeregisterGraph, <span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// TODO(ncteisen): Determine a better policy for enqueuing the</span></span><br><span class="line">  <span class="comment">// appropriate number of each request type.</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1000</span>; ++i) &#123;</span><br><span class="line">    EnqueueRecvTensorRequestRaw();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; ++i) &#123;</span><br><span class="line">    ENQUEUE_REQUEST(RunGraph, <span class="literal">true</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; ++i) &#123;</span><br><span class="line">    ENQUEUE_REQUEST(CleanupGraph, <span class="literal">false</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ENQUEUE_REQUEST(Logging, <span class="literal">false</span>);</span><br><span class="line">  ENQUEUE_REQUEST(Tracing, <span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">void</span>* tag;</span><br><span class="line">  <span class="keyword">bool</span> ok;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> (cq_-&gt;Next(&amp;tag, &amp;ok)) &#123;</span><br><span class="line">    UntypedCall&lt;GrpcWorkerServiceThread&gt;::Tag* callback_tag =</span><br><span class="line">        <span class="keyword">static_cast</span>&lt;UntypedCall&lt;GrpcWorkerServiceThread&gt;::Tag*&gt;(tag);</span><br><span class="line">    CHECK(callback_tag);</span><br><span class="line">    callback_tag-&gt;OnCompleted(<span class="keyword">this</span>, ok);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先准备好一系列 gRPC 调用的等待队列，11 种调用请求与前面的 GrpcWorkerMethod 一一对应，插入完成之后就是 gRPC 部分的任务了。每个方法对应的处理过程的代码也都列在后面，随便挑一个举例：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">GetStatusHandler</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">    WorkerCall&lt;GetStatusRequest, GetStatusResponse&gt;* call)</span> </span>&#123;</span><br><span class="line">  Schedule([<span class="keyword">this</span>, call]() &#123;</span><br><span class="line">    Status s = worker_-&gt;GetStatus(&amp;call-&gt;request, &amp;call-&gt;response);</span><br><span class="line">    call-&gt;SendResponse(ToGrpcStatus(s));</span><br><span class="line">  &#125;);</span><br><span class="line">  ENQUEUE_REQUEST(GetStatus, <span class="literal">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>响应 gRPC 请求时这里把要做的任务都封装到线程池里面去执行，然后向队列中重新补充一个相同的等待调用。具体执行的是 worker_（其实是一个 GrpcWorker），完成后向调用方返回一个 gRPC 的 Response。</p>
+<p>最后的一个 while 循环是读取 gRPC 完成队列中的内容，处理 gRPC 调用完成之后的收尾工作，<code>RequestReceived</code>、<code>ResponseSent</code>、<code>Cancelled</code>这三种状态。</p>
+<blockquote>
+<p>话说这种完成队列的方式跟 RDMA 的还是挺像的。</p>
+</blockquote>
+<h1 id="MasterInterface"><a href="#MasterInterface" class="headerlink" title="MasterInterface"></a>MasterInterface</h1><p>MasterInterface 的结构跟 WorkerInterface 基本类似，不过话说从代码上能看出来不像是一拨人做的啊（命名风格等等），很奇怪。</p>
+<p>支持的一些调用：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">char</span>* grpcMasterService_method_names[] = &#123;</span><br><span class="line">    <span class="string">"/tensorflow.MasterService/CreateSession"</span>,</span><br><span class="line">    <span class="string">"/tensorflow.MasterService/ExtendSession"</span>,</span><br><span class="line">    <span class="string">"/tensorflow.MasterService/PartialRunSetup"</span>,</span><br><span class="line">    <span class="string">"/tensorflow.MasterService/RunStep"</span>,</span><br><span class="line">    <span class="string">"/tensorflow.MasterService/CloseSession"</span>,</span><br><span class="line">    <span class="string">"/tensorflow.MasterService/ListDevices"</span>,</span><br><span class="line">    <span class="string">"/tensorflow.MasterService/Reset"</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>它所派生出来的两个类 GrpcRemoteMaster 和 LocalMaster 从名字上就能够看出来是分别针对远程和本地的调用接口。</p>
+<blockquote>
+<p>乍一看 GrpcRemoteWorker 和 GrpcRemoteMaster 实现远程调用的写法居然完全不一样，很尴尬。仔细往下分析会发现 GrpcRemoteWorker 的 IssueRequest 里面封装的 RPCState 里面的内容跟 GrpcRemoteMaster 的 Call 中的内容很类似。所以为什么不用统一的写法呢。。。</p>
+<p>然后 LocalMaster 这个类竟然只是个壳你敢信？。。。里面真正实现本地功能的是 Master 类。</p>
+<p>话说前面 Worker 这个类实现的是本地功能，但是 Worker 类是直接继承的 WorkerInterface，到了这里 Master 类跟 MasterInterface 类没有关系，继承 MasterInterface 的是 LocalMaster 类，但是你又发现这个 LocalMaster 类居然是 Master 类的壳。。。相当于跟 Worker 差不多的结构，但是中间多包了一层。</p>
+</blockquote>
+<p>再来看到 GrpcMasterService 的守护进程：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">HandleRPCsLoop</span><span class="params">()</span> override </span>&#123;</span><br><span class="line">  ENQUEUE_REQUEST(CreateSession, <span class="literal">true</span>);</span><br><span class="line">  ENQUEUE_REQUEST(ExtendSession, <span class="literal">false</span>);</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; ++i) &#123;</span><br><span class="line">    ENQUEUE_REQUEST(PartialRunSetup, <span class="literal">false</span>);</span><br><span class="line">    ENQUEUE_REQUEST(RunStep, <span class="literal">true</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  ENQUEUE_REQUEST(CloseSession, <span class="literal">false</span>);</span><br><span class="line">  ENQUEUE_REQUEST(ListDevices, <span class="literal">false</span>);</span><br><span class="line">  ENQUEUE_REQUEST(Reset, <span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">void</span>* tag;</span><br><span class="line">  <span class="keyword">bool</span> ok;</span><br><span class="line">  <span class="keyword">while</span> (cq_-&gt;Next(&amp;tag, &amp;ok)) &#123;</span><br><span class="line">    UntypedCall&lt;GrpcMasterService&gt;::Tag* callback_tag =</span><br><span class="line">        <span class="keyword">static_cast</span>&lt;UntypedCall&lt;GrpcMasterService&gt;::Tag*&gt;(tag);</span><br><span class="line">    <span class="keyword">if</span> (callback_tag) &#123;</span><br><span class="line">      callback_tag-&gt;OnCompleted(<span class="keyword">this</span>, ok);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// NOTE(mrry): A null `callback_tag` indicates that this is</span></span><br><span class="line">      <span class="comment">// the shutdown alarm.</span></span><br><span class="line">      cq_-&gt;Shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>基本的结构跟前面 Worker 是一致的。</p>
+<hr>
+<p>Worker 的远程调用实际发生在：</p>
+<ul>
+<li>本地 Master 处理好计算图的 partition 情况</li>
+<li>根据 partition 是在本地还是远端，分别请求本地 Worker 或者 GrpcRemoteWorker 来执行</li>
+<li>远程的 GrpcWorkerService 守护进程收到请求之后，调用自己本地的 Worker 进行处理，完成后将结果返回</li>
+</ul>
+<p>话说 GrpcRemoteMaster 我还没找到到底是在什么情况下用到的。</p>
+<hr>
+<p>后续：</p>
+<ul>
+<li><a href="/2018/03/12/2018-03-12-tfunpacking6">TensorFlow 拆包（六）：RDMA</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/02/04/2017-02-04-tensorflow/" rel="bookmark">TensorFlow</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/04/04/2017-04-04-alexnet/" rel="bookmark">AlexNet</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/13/2018-01-13-tfunpacking/" rel="bookmark">TensorFlow 拆包（一）：Session.Run()</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/23/2018-01-23-tfunpacking2/" rel="bookmark">TensorFlow 拆包（二）：TF 的数据流模型实现以及自动求导</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/03/07/2018-03-07-tfunpacking4/" rel="bookmark">TensorFlow 拆包（四）：Device</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/TensorFlow/" rel="tag"># TensorFlow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/03/07/2018-03-07-tfunpacking4/" rel="prev" title="TensorFlow 拆包（四）：Device">
+      <i class="fa fa-chevron-left"></i> TensorFlow 拆包（四）：Device
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/03/12/2018-03-12-tfunpacking6/" rel="next" title="TensorFlow 拆包（六）：RDMA">
+      TensorFlow 拆包（六）：RDMA <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Architecture"><span class="nav-text">Architecture</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#tf-train-Supervisor"><span class="nav-text">tf.train.Supervisor()</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Session"><span class="nav-text">Session</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#WorkerSession"><span class="nav-text">WorkerSession</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GrpcSession"><span class="nav-text">GrpcSession</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MasterSession"><span class="nav-text">MasterSession</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#WorkerInterface"><span class="nav-text">WorkerInterface</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Work-Flow"><span class="nav-text">Work Flow</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MasterInterface"><span class="nav-text">MasterInterface</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '4719c484991a9c0a1c4669cb4377aa41',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

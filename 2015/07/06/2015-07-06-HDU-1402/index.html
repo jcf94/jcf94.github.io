@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="A * B Problem PlusTime Limit: 2000&#x2F;1000 MS (Java&#x2F;Others)    Memory Limit: 65536&#x2F;32768 K (Java&#x2F;Others) Problem DescriptionCalculate A * B. InputEach line will contain two integers A and B. Process to e">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HDU 1402 A * B Problem Plus 快速高精度乘法（FFT）">
+<meta property="og:url" content="https://jcf94.com/2015/07/06/2015-07-06-HDU-1402/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="A * B Problem PlusTime Limit: 2000&#x2F;1000 MS (Java&#x2F;Others)    Memory Limit: 65536&#x2F;32768 K (Java&#x2F;Others) Problem DescriptionCalculate A * B. InputEach line will contain two integers A and B. Process to e">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-07-06T02:50:03.000Z">
+<meta property="article:modified_time" content="2018-03-07T06:59:07.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="FFT">
+<meta property="article:tag" content="高精度算法">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2015/07/06/2015-07-06-HDU-1402/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>HDU 1402 A * B Problem Plus 快速高精度乘法（FFT） | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2015/07/06/2015-07-06-HDU-1402/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          HDU 1402 A * B Problem Plus 快速高精度乘法（FFT）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-07-06 10:50:03" itemprop="dateCreated datePublished" datetime="2015-07-06T10:50:03+08:00">2015-07-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-03-07 14:59:07" itemprop="dateModified" datetime="2018-03-07T14:59:07+08:00">2018-03-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ACM-%E8%AE%AD%E7%BB%83/" itemprop="url" rel="index"><span itemprop="name">ACM-训练</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="A-B-Problem-Plus"><a href="#A-B-Problem-Plus" class="headerlink" title="A * B Problem Plus"></a>A * B Problem Plus</h1><p>Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)</p>
+<h2 id="Problem-Description"><a href="#Problem-Description" class="headerlink" title="Problem Description"></a>Problem Description</h2><p>Calculate A * B.</p>
+<h2 id="Input"><a href="#Input" class="headerlink" title="Input"></a>Input</h2><p>Each line will contain two integers A and B. Process to end of file.</p>
+<p>Note: the length of each integer will not exceed 50000.</p>
+<a id="more"></a>
+
+<h2 id="Output"><a href="#Output" class="headerlink" title="Output"></a>Output</h2><p>For each case, output A * B in one line.</p>
+<h2 id="Sample-Input"><a href="#Sample-Input" class="headerlink" title="Sample Input"></a>Sample Input</h2><blockquote>
+<p>1<br>2<br>1000<br>2</p>
+</blockquote>
+<h2 id="Sample-Output"><a href="#Sample-Output" class="headerlink" title="Sample Output"></a>Sample Output</h2><blockquote>
+<p>2<br>2000</p>
+</blockquote>
+<h2 id="题意"><a href="#题意" class="headerlink" title="题意"></a>题意</h2><p>做两个超大数的乘法，每个数极限是50000位，略大，一般普通的模拟高精会超时</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>普通的模拟高精是$O(n^2)$的复杂度，对于这种特殊的50000长的数据自然是会超了的</p>
+<p>故本题的解法就是借用FFT加速的高精度乘法，复杂度在$O(nlogn)$</p>
+<p>FFT的详细分析在上一篇中已经讲清楚了，本题即作为模板题</p>
+<p>我的模板是在原来自己搞的高精的基础上改的，最初的高精用了4位押位，然而套上这个之后，发现FFT中间的结果大小跟位数也有关，当位数大到一定程度的时候，4位押位在int下会爆。。。然后50000位的极限数据在3位押位下都会爆int。。。好可怕</p>
+<p>最后改到2位押位。</p>
+<p>大概是我原本的输入输出部分模板写的不好，网上找的参考代码能在100ms以内过，我的这个需要花700ms左右。。。（捂脸）</p>
+<blockquote>
+<p>下次用的时候考虑是不是需要套原本的高精模板，还有要注意押位的位数问题</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;* ***********************************************</span><br><span class="line">MYID	: Chen Fan</span><br><span class="line">LANG	: G++</span><br><span class="line">PROG	: FFT_HDU_1402</span><br><span class="line">************************************************ *&#x2F;</span><br><span class="line"></span><br><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line">#include &lt;cmath&gt;</span><br><span class="line"></span><br><span class="line">#define nn 70000</span><br><span class="line">#define snn 60000</span><br><span class="line"></span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">struct gjtype</span><br><span class="line">&#123;</span><br><span class="line">    int a[nn];</span><br><span class="line">    void clean()</span><br><span class="line">    &#123;</span><br><span class="line">        memset(a,0,sizeof(a));</span><br><span class="line">    &#125;</span><br><span class="line">    void ntog(long long s)</span><br><span class="line">    &#123;</span><br><span class="line">        clean();</span><br><span class="line">        int i&#x3D;0;</span><br><span class="line">        while (s&gt;0)</span><br><span class="line">        &#123;</span><br><span class="line">            i++;</span><br><span class="line">            a[i]&#x3D;s%100;</span><br><span class="line">            s&#x3D;s&#x2F;100;</span><br><span class="line">        &#125;</span><br><span class="line">        a[0]&#x3D;i;</span><br><span class="line">    &#125;</span><br><span class="line">    void stog(char s1[])</span><br><span class="line">    &#123;</span><br><span class="line">        clean();</span><br><span class="line">        char ss[snn],s[snn];</span><br><span class="line">        bool pos&#x3D;true;</span><br><span class="line">        if (s1[0]&#x3D;&#x3D;&#39;-&#39;) </span><br><span class="line">        &#123;</span><br><span class="line">            strcpy(s,s1+1);</span><br><span class="line">            pos&#x3D;false;</span><br><span class="line">        &#125; else strcpy(s,s1);</span><br><span class="line">        int i&#x3D;0;</span><br><span class="line">        while (strlen(s)&gt;&#x3D;2)</span><br><span class="line">        &#123;</span><br><span class="line">            i++;</span><br><span class="line">            for (int j&#x3D;strlen(s)-2;j&lt;strlen(s);j++)</span><br><span class="line">            ss[j-strlen(s)+2]&#x3D;s[j];</span><br><span class="line">            s[strlen(s)-2]&#x3D;&#39;\0&#39;;</span><br><span class="line">            a[i]&#x3D;atoi(ss);</span><br><span class="line">        &#125;</span><br><span class="line">        if (strlen(s)&gt;0)</span><br><span class="line">        &#123;</span><br><span class="line">            i++;</span><br><span class="line">            a[i]&#x3D;atoi(s);</span><br><span class="line">        &#125;</span><br><span class="line">        a[0]&#x3D;i;</span><br><span class="line">        if (!pos) a[a[0]]&#x3D;-a[a[0]];</span><br><span class="line">    &#125;</span><br><span class="line">    void out()</span><br><span class="line">    &#123;</span><br><span class="line">        printf(&quot;%d&quot;,a[a[0]]);</span><br><span class="line">        for (int i&#x3D;a[0]-1;i&gt;&#x3D;1;i--)</span><br><span class="line">        printf(&quot;%02d&quot;,a[i]);</span><br><span class="line">        putchar(&#39;\n&#39;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">gjtype a,b,c;</span><br><span class="line"></span><br><span class="line">const double PI &#x3D; acos(-1.0);</span><br><span class="line"></span><br><span class="line">struct fstype</span><br><span class="line">&#123;	</span><br><span class="line">    double x,y;</span><br><span class="line">    fstype(double real &#x3D; 0.0,double imag &#x3D; 0.0)</span><br><span class="line">    &#123;</span><br><span class="line">        x &#x3D; real;</span><br><span class="line">        y &#x3D; imag;</span><br><span class="line">    &#125;</span><br><span class="line">    fstype operator -(const fstype &amp;b)const</span><br><span class="line">    &#123;</span><br><span class="line">        return fstype(x-b.x,y-b.y);</span><br><span class="line">    &#125;</span><br><span class="line">    fstype operator +(const fstype &amp;b)const</span><br><span class="line">    &#123;</span><br><span class="line">        return fstype(x+b.x,y+b.y);</span><br><span class="line">    &#125;</span><br><span class="line">    fstype operator *(const fstype &amp;b)const</span><br><span class="line">    &#123;</span><br><span class="line">        return fstype(x*b.x-y*b.y,x*b.y+y*b.x);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">void fft(fstype y[],int len,int on)</span><br><span class="line">&#123;</span><br><span class="line">    int i,j,k;</span><br><span class="line">    for(i &#x3D; 1, j &#x3D; len&#x2F;2;i &lt;len-1;i++)</span><br><span class="line">    &#123;</span><br><span class="line">        if (i &lt; j) swap(y[i],y[j]);</span><br><span class="line"></span><br><span class="line">        k &#x3D; len&#x2F;2;</span><br><span class="line">        while(j &gt;&#x3D; k)</span><br><span class="line">        &#123;</span><br><span class="line">            j -&#x3D; k;</span><br><span class="line">            k &#x2F;&#x3D; 2;</span><br><span class="line">        &#125;</span><br><span class="line">        if(j &lt; k) j +&#x3D; k;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    for(int h &#x3D; 2; h &lt;&#x3D; len; h &lt;&lt;&#x3D; 1)</span><br><span class="line">    &#123;</span><br><span class="line">        fstype wn(cos(-on*2*PI&#x2F;h),sin(-on*2*PI&#x2F;h));</span><br><span class="line">        for(int j &#x3D; 0;j &lt; len;j+&#x3D;h)</span><br><span class="line">        &#123;</span><br><span class="line">            fstype w(1,0);</span><br><span class="line">            for(int k &#x3D; j;k &lt; j+h&#x2F;2;k++)</span><br><span class="line">            &#123;</span><br><span class="line">                fstype u &#x3D; y[k];</span><br><span class="line">                fstype t &#x3D; w*y[k+h&#x2F;2];</span><br><span class="line">                y[k] &#x3D; u+t;</span><br><span class="line">                y[k+h&#x2F;2] &#x3D; u-t;</span><br><span class="line">                w &#x3D; w*wn;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if(on &#x3D;&#x3D; -1)</span><br><span class="line">    for(int i &#x3D; 0;i &lt; len;i++)</span><br><span class="line">    y[i].x &#x2F;&#x3D; len;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">fstype x1[nn],x2[nn];</span><br><span class="line">gjtype cc;</span><br><span class="line"></span><br><span class="line">gjtype fftcheng(gjtype aa,gjtype bb)</span><br><span class="line">&#123;</span><br><span class="line">    int len1&#x3D;aa.a[0],len2&#x3D;bb.a[0],len&#x3D;1;</span><br><span class="line"></span><br><span class="line">    while (len&lt;len1*2||len&lt;len2*2) len&lt;&lt;&#x3D;1;</span><br><span class="line"></span><br><span class="line">    for (int i&#x3D;1;i&lt;&#x3D;len1;i++) x1[i-1]&#x3D;fstype(aa.a[i],0);</span><br><span class="line">    for (int i&#x3D;len1;i&lt;len;i++) x1[i]&#x3D;fstype(0,0);</span><br><span class="line"></span><br><span class="line">    for (int i&#x3D;1;i&lt;&#x3D;len2;i++) x2[i-1]&#x3D;fstype(bb.a[i],0);</span><br><span class="line">    for (int i&#x3D;len2;i&lt;len;i++) x2[i]&#x3D;fstype(0,0);</span><br><span class="line"></span><br><span class="line">    fft(x1,len,1);</span><br><span class="line">    fft(x2,len,1);</span><br><span class="line"></span><br><span class="line">    for (int i&#x3D;0;i&lt;len;i++) x1[i]&#x3D;x1[i]*x2[i];</span><br><span class="line"></span><br><span class="line">    fft(x1,len,-1);</span><br><span class="line"></span><br><span class="line">    cc.clean();</span><br><span class="line"></span><br><span class="line">    for (int i&#x3D;0;i&lt;len;i++) cc.a[i+1]&#x3D;(int)(x1[i].x+0.5);</span><br><span class="line">    for (int i&#x3D;1;i&lt;&#x3D;len;i++)</span><br><span class="line">    &#123;</span><br><span class="line">        cc.a[i+1]+&#x3D;cc.a[i]&#x2F;100;</span><br><span class="line">        cc.a[i]%&#x3D;100;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    while(cc.a[len] &#x3D;&#x3D; 0 &amp;&amp; len &gt; 1)len--;</span><br><span class="line"></span><br><span class="line">    cc.a[0]&#x3D;len;</span><br><span class="line"></span><br><span class="line">    return cc;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    &#x2F;&#x2F;freopen(&quot;1.txt&quot;,&quot;r&quot;,stdin);</span><br><span class="line">    &#x2F;&#x2F;freopen(&quot;1.out&quot;,&quot;w&quot;,stdout);</span><br><span class="line"></span><br><span class="line">    gjtype a,b,c;</span><br><span class="line"></span><br><span class="line">    char s1[snn],s2[snn];</span><br><span class="line"></span><br><span class="line">    while (scanf(&quot;%s%s&quot;,s1,s2)!&#x3D;EOF)</span><br><span class="line">    &#123;</span><br><span class="line">        a.stog(s1);</span><br><span class="line">        b.stog(s2);</span><br><span class="line"></span><br><span class="line">        c&#x3D;fftcheng(a,b);</span><br><span class="line">        c.out();</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F;c&#x3D;cheng(a,b);</span><br><span class="line">        &#x2F;&#x2F;c.out();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/07/05/2015-07-05-fft/" rel="bookmark">快速傅里叶变换FFT算法的用途</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/FFT/" rel="tag"># FFT</a>
+              <a href="/tags/%E9%AB%98%E7%B2%BE%E5%BA%A6%E7%AE%97%E6%B3%95/" rel="tag"># 高精度算法</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/07/05/2015-07-05-fft/" rel="prev" title="快速傅里叶变换FFT算法的用途">
+      <i class="fa fa-chevron-left"></i> 快速傅里叶变换FFT算法的用途
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/07/09/2015-07-09-qiyue/" rel="next" title="我的七月">
+      我的七月 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#A-B-Problem-Plus"><span class="nav-text">A * B Problem Plus</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Problem-Description"><span class="nav-text">Problem Description</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Input"><span class="nav-text">Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output"><span class="nav-text">Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Input"><span class="nav-text">Sample Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Output"><span class="nav-text">Sample Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#题意"><span class="nav-text">题意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析"><span class="nav-text">分析</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'b98ae67c3c330252307b8466de7c1cce',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

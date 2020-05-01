@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="事情的起源是这样的：  想把笔记本上的 1060 用起来，但是 Windows 下 Cuda 的 nvcc 只跟 VS 的编译器绑定，没法换成 Mingw，这就很不开心了。虽然实在为了在 Windows 下跑程序方便，还是把 VS 2015 装上了（吃了我整整几十个 G 的空间，心疼），但是用起来仍然是非常不爽。虽说以前也经常折腾 Win + Linux 的双系统，这次换完笔记本之后觉得破坏原本的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="UEFI -- 又被坑了一次">
+<meta property="og:url" content="https://jcf94.com/2017/08/06/2017-08-06-efi/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="事情的起源是这样的：  想把笔记本上的 1060 用起来，但是 Windows 下 Cuda 的 nvcc 只跟 VS 的编译器绑定，没法换成 Mingw，这就很不开心了。虽然实在为了在 Windows 下跑程序方便，还是把 VS 2015 装上了（吃了我整整几十个 G 的空间，心疼），但是用起来仍然是非常不爽。虽说以前也经常折腾 Win + Linux 的双系统，这次换完笔记本之后觉得破坏原本的">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2017-08-05T16:54:37.000Z">
+<meta property="article:modified_time" content="2017-08-06T11:24:39.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="efi">
+<meta property="article:tag" content="bios">
+<meta property="article:tag" content="gpt">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2017/08/06/2017-08-06-efi/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>UEFI -- 又被坑了一次 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2017/08/06/2017-08-06-efi/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          UEFI -- 又被坑了一次
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2017-08-06 00:54:37 / Modified: 19:24:39" itemprop="dateCreated datePublished" datetime="2017-08-06T00:54:37+08:00">2017-08-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Architecture/" itemprop="url" rel="index"><span itemprop="name">Computer Architecture</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>事情的起源是这样的：</p>
+<blockquote>
+<p>想把笔记本上的 1060 用起来，但是 Windows 下 Cuda 的 nvcc 只跟 VS 的编译器绑定，没法换成 Mingw，这就很不开心了。虽然实在为了在 Windows 下跑程序方便，还是把 VS 2015 装上了（吃了我整整几十个 G 的空间，心疼），但是用起来仍然是非常不爽。<br>虽说以前也经常折腾 Win + Linux 的双系统，这次换完笔记本之后觉得破坏原本的分区引导什么的贼不清真 ╮(╯_╰)╭ 然后并不想装。<br>…<br>那最后还是要用啊，怎么办，好烦。<br>…<br>后来终于有了个（自己觉得）特别 6 的想法。我搞个 U 盘装上就好了哇！用 Linux 的时候插上，不用拔了，特别清真！</p>
+</blockquote>
+<p>然后。。。晚上下了个单，第二天 U 盘就到啦。。。（还特意买个新 U 盘。。。主要是老 U 盘容量都太小）。</p>
+<p>然后。。。就没有然后了，中间一直坑。</p>
+<a id="more"></a>
+
+<hr>
+<p>感觉主要原因还是自己对 EFI 的了解没有原来想象中的那么清楚，一知半解下瞎搞，出问题自然怪不了别人。</p>
+<p>前面写过一篇测试：</p>
+<ul>
+<li><a href="/2015/08/19/2015-08-19-biosinit/">BIOS内核载入的方式（引导实验）</a></li>
+</ul>
+<p>主要是针对 BIOS 的引导和 MBR 分区格式的简单分析。</p>
+<h1 id="BIOS-MBR-vs-UEFI-GPT"><a href="#BIOS-MBR-vs-UEFI-GPT" class="headerlink" title="BIOS+MBR vs UEFI+GPT"></a>BIOS+MBR vs UEFI+GPT</h1><p>老一代的系统用的是 MBR 分区表加主板上的 BIOS 引导方式。</p>
+<p>MBR 看上去就像个单链表的形式，简单地说就是在每个磁盘分区的开头会固定有一块区域（512B）用于标记整个分区的信息，包括分区大小、是否有引导等等，然后一个分区的标记结束之后再根据偏移就能找到下一个分区。整块硬盘的第一个扇区还标记了整个盘上的引导情况。</p>
+<p>BIOS 要做的就是直接读硬盘开头的 512B 的内容就好了，特别简单粗暴。当然相对而言，当时如果系统引导坏了，修起来也比较麻烦，要用专门的工具软件。</p>
+<hr>
+<p>后来由于 MBR 分区的缺陷，比如长度有限，所以主分区最多只能有 4 个，硬盘总大小不能超过 2T 等等，当年还是妥妥的够的，不过随着科技的不断发展，SSD 都有好多 T 的了，老的标准已经不再适用，后来就出现了 GPT 分区格式。</p>
+<p>GPT 其实我仍然没有详细了解，直观上感觉就是 MBR 的升级版，相比 MBR 更长，因而能表达更多的信息，支持更多的分区和容量，还有备份，所以不容易坏，等等等等，还有很多很厉害的特性。</p>
+<p><a href="https://www.wikiwand.com/zh-sg/%E7%B5%B1%E4%B8%80%E5%8F%AF%E5%BB%B6%E4%BC%B8%E9%9F%8C%E9%AB%94%E4%BB%8B%E9%9D%A2" target="_blank" rel="noopener">UEFI（Unified Extensible Firmware Interface）</a> 是一种用来替代 BIOS 的标准，话说它一开始叫 EFI，后来统一之后改叫 UEFI，不明真相的我之前一直以为这个 U 是 “Un” 的前缀，就是非 EFI 的意思…太天真。</p>
+<p>相对 BIOS 来说，UEFI 的固件也是固化在主板上的，大致的功能都是类似的，也是由它来读取硬盘上的引导信息，然后加载。</p>
+<p>UEFI 一般来说都是跟 GPT 搭配的，当然据说 BIOS+GPT 和 UEFI+MBR 也有，不过会出各种问题，这就在本篇讨论的范围之外了。</p>
+<p>既然 GPT 的分区信息不再限制在扇区开头的 512B 范围内了，相对应的 UEFI 检索引导信息的时候也会更加灵活。它会扫描整块硬盘上所有的分区，找到 EFI 分区读取里面的 <code>.efi</code> 文件就可以直接引导了。</p>
+<p>所谓 EFI 分区就是个 FAT32 的分区，只是额外带有一个 EFI 标记。所以 EFI 分区不再限制必须要放在开头的第一个分区里面，它可以在整块硬盘的任意一个分区位置。当然，读还是从前向后读的，所以默认情况下是最先找到的 EFI 分区中的 <code>.efi</code> 文件会被加载。</p>
+<p>好了，上面是我以前的了解。当时并没有了解清楚里面的细节，然后就坑了。</p>
+<h1 id="What’s-Wrong"><a href="#What’s-Wrong" class="headerlink" title="What’s Wrong?"></a>What’s Wrong?</h1><p>装 U 盘我是直接在 VMware 里面完成的，把 U 盘做成 GPT 分区，UEFI 装机模式。</p>
+<p>一开始我往 U 盘里面装的是 Manjaro，这是个基于 Arch 的发行版，然后发现在虚拟机里面能引导起来，关机重启之后无效。不明觉厉，当时觉得可能是这玩意太新了，蜜汁 Bug。</p>
+<p>然后退而换 Fedora。</p>
+<p>Fedora 的装机过程很顺利，装好之后 U 盘都不用拔，直接重启笔记本就很顺利地引导进去了。然后开始装 Nvidia 的显卡驱动等等等等。</p>
+<p>过程也挺顺利的，关键是最后发现我用 DP 口输出出来的第二块屏幕无效，这强迫症就很不爽了。原因大概是我笔记本上自带的屏幕直连的是集显，但是 DP 口是连在独显上的，Intel 的驱动和 Nvidia 的驱动在这块上需要额外配置一下才能正常使用。</p>
+<p>然后就一顿操作，然后就失败了。网上也搜不到很好的解决方案。</p>
+<p>最后看到有人说目前已知的笔记本双显卡的 Linux 解决方案里面最简单的就是直接用 Ubuntu 了，这里面官方自己配过，装显卡驱动也只要在设置里面点一下就好。</p>
+<p>自己手动配置实在太麻烦，我妥协了。</p>
+<p>然后又格了 U 盘开始装 Ubuntu。</p>
+<hr>
+<p>重点来了。</p>
+<p>装 Ubuntu 的时候发现这玩意做 EFI 分区的行为跟 Fedora 不太一样。</p>
+<p>我原本虚拟机里面是有个 UEFI 的系统的（Win10）。Fedora 的做法是我指定了装在 U 盘这块驱动器上，它就不会动其他的部分，EFI 分区什么的都只会在 U 盘上进行操作。</p>
+<p>装 Ubuntu 时，虽然我已经指定了目标位置是 U 盘，装完之后 U 盘上会建立一个 EFI 分区，但是里面是空的，它在安装时扫描到虚拟机硬盘里面的 EFI 分区之后，直接把它给改了！！！</p>
+<p>这就是为什么装双系统的时候，你会发现原本的 Windows boot loader 会被干掉。而如果你从 Ubuntu 做的 Grub 里面选择 Windows 来启动，下次 Windows 又会把 Grub 干掉。网上能找到大量的这种求助帖。</p>
+<p>原因就是它们用的是同一个 EFI 分区。</p>
+<p>于是我把虚拟机里面那块硬盘给删了，又重新插 U 盘装了一遍。这次 EFI 分区里面有内容了。</p>
+<p>遂重启。</p>
+<p>然而失败了。笔记本上的 EFI 固件死活读不到 Ubuntu 这个启动项。我以为是 EFI 里面的内容在装机时出错了，重新在虚拟机里测试的时候却是正常的。</p>
+<p>又重新装了几次 Ubuntu 和 Fedora，我才发现 Ubuntu 生成的 EFI 分区跟 Fedora 生成的有区别。Fedora 装完生成的分区目录是这样的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">/EFI</span><br><span class="line">--/BOOT</span><br><span class="line">  --/BOOTx64.efi</span><br><span class="line">--/fedora</span><br><span class="line">  --/xxx.efi</span><br><span class="line">  --/xxx.efi</span><br><span class="line">  -- ...</span><br></pre></td></tr></table></figure>
+
+<p>而 Ubuntu 生成的 EFI 分区中少了 <code>/BOOT</code> 这个目录！！</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/EFI</span><br><span class="line">--/ubuntu</span><br><span class="line">  --/xxx.efi</span><br><span class="line">  --/xxx.efi</span><br><span class="line">  -- ...</span><br></pre></td></tr></table></figure>
+
+<p>。。。那么看来问题就出在这里了。</p>
+<h1 id="BOOTx64-efi"><a href="#BOOTx64-efi" class="headerlink" title="BOOTx64.efi"></a>BOOTx64.efi</h1><p>在网上找到一份这样的资料：</p>
+<ul>
+<li><a href="http://bbs.wuyou.net/forum.php?mod=viewthread&tid=303679" target="_blank" rel="noopener"> 关于Windows Boot Manager、Bootmgfw.efi、Bootx64.efi、bcdboot.exe 的详解</a></li>
+</ul>
+<p>里面大致把 UEFI 的引导问题都讲的比较清楚了。</p>
+<p>所以这下真相大白了。虽然 UEFI 固件会自动识别出来 EFI 分区并且去读里面的 <code>.efi</code> 文件，但是一般的 UEFI 固件读取的只会是 <code>EFI/BOOT/BOOTx64.efi</code> 这个文件。一些设置项更多的 UEFI 固件可能能支持让你手动选择 <code>.efi</code> 文件，例如 VMware 里面那个固件就是。</p>
+<p>这就是为什么我用 U 盘做好的 Ubuntu 能在虚拟机里正常引导，但是没办法在笔记本上启动。</p>
+<p>那么问题就解决了。</p>
+<p>打开 EFI 分区，新建一个名字叫 <code>BOOT</code> 的文件夹，把 <code>ubuntu/shimx64.efi</code> 和 <code>ubuntu/grubx64.efi</code> 拷过去。然后把 <code>shimx64.efi</code> 改名为 <code>BOOTx64.efi</code>。</p>
+<p>重启，Enjoy。</p>
+
+    </div>
+
+    
+    
+    
+      
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/efi/" rel="tag"># efi</a>
+              <a href="/tags/bios/" rel="tag"># bios</a>
+              <a href="/tags/gpt/" rel="tag"># gpt</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/07/10/2017-07-10-libuv/" rel="prev" title="向 Node.js 的底层再走一步">
+      <i class="fa fa-chevron-left"></i> 向 Node.js 的底层再走一步
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/08/18/2017-08-18-paper/" rel="next" title="整理一下看过的论文">
+      整理一下看过的论文 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#BIOS-MBR-vs-UEFI-GPT"><span class="nav-text">BIOS+MBR vs UEFI+GPT</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#What’s-Wrong"><span class="nav-text">What’s Wrong?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BOOTx64-efi"><span class="nav-text">BOOTx64.efi</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '1d605df3ea1b00c6397916598af55b3c',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

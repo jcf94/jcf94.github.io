@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="昨天刚开了大三大四的专业班会，本来是几个大四的讲解保研、考研、工作经验的，最后系主任吴老大站起来总结陈词。。。  不愧是吴老大啊！一下就抓住了问题的关键，连着又把我们教育了一通。。。  起因是：保研的学姐说她面试的时候被人老师问到个整流电路，答不上来，问到个采样定理，答不上来。找工作的学长说他面试的时候被人总监让写个C语言程序，写不出来。 然后吴老大果断抓住重点，开始批评教育！！！  隐忧啊什么的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="专业知识整理">
+<meta property="og:url" content="https://jcf94.com/2015/06/19/2015-06-19-zhuanye/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="昨天刚开了大三大四的专业班会，本来是几个大四的讲解保研、考研、工作经验的，最后系主任吴老大站起来总结陈词。。。  不愧是吴老大啊！一下就抓住了问题的关键，连着又把我们教育了一通。。。  起因是：保研的学姐说她面试的时候被人老师问到个整流电路，答不上来，问到个采样定理，答不上来。找工作的学长说他面试的时候被人总监让写个C语言程序，写不出来。 然后吴老大果断抓住重点，开始批评教育！！！  隐忧啊什么的">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-06-19T02:15:23.000Z">
+<meta property="article:modified_time" content="2016-03-06T01:35:54.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="随笔">
+<meta property="article:tag" content="复习笔记">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2015/06/19/2015-06-19-zhuanye/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>专业知识整理 | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2015/06/19/2015-06-19-zhuanye/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          专业知识整理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-06-19 10:15:23" itemprop="dateCreated datePublished" datetime="2015-06-19T10:15:23+08:00">2015-06-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2016-03-06 09:35:54" itemprop="dateModified" datetime="2016-03-06T09:35:54+08:00">2016-03-06</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Bachelor-of-Engineering/" itemprop="url" rel="index"><span itemprop="name">Bachelor-of-Engineering</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>昨天刚开了大三大四的专业班会，本来是几个大四的讲解保研、考研、工作经验的，最后系主任吴老大站起来总结陈词。。。</p>
+<blockquote>
+<p>不愧是吴老大啊！一下就抓住了问题的关键，连着又把我们教育了一通。。。</p>
+</blockquote>
+<p>起因是：保研的学姐说她面试的时候被人老师问到个整流电路，答不上来，问到个采样定理，答不上来。找工作的学长说他面试的时候被人总监让写个C语言程序，写不出来。</p>
+<p>然后吴老大果断抓住重点，开始批评教育！！！</p>
+<blockquote>
+<p>隐忧啊什么的<br><strong>要重基础！要重基础！要重基础！</strong>重要的事情要说好多遍！</p>
+</blockquote>
+<p>好吧，好像确实很有道理的样子。正好接下来也要准备夏令营面试。打算慢慢开始重新整理下大一到现在学过的专业课。</p>
+<p>先占个坑。</p>
+<a id="more"></a>
+
+<p>嗯！首先理下之前学过的课,</p>
+<h1 id="前三年学过的课程"><a href="#前三年学过的课程" class="headerlink" title="前三年学过的课程"></a>前三年学过的课程</h1><hr>
+<p>2012-2013学年<br>秋<br><del>[24050010]计算机应用基础</del><br><del>[12070060]机械制图</del><br><del>[14030010]体育（1）</del><br><del>[64050010]军事理论</del><br><del>[11070010]思想道德修养与法律基础</del><br><del>[13030011]大学英语（1）</del><br>[12031011]高等数学(1)<br><del>[24040010]通信技术导论</del><br><del>[2404001S]入学教育与毕业教育</del><br><del>[6405001S]军训</del><br>春<br><del>[12040011]大学物理（1）</del><br><del>[14030020]体育（2）</del><br><del>[11160010]中国近现代史纲要</del><br><del>[13030012]大学英语（2）</del><br>[12031012]高等数学(2)<br>[24050030]C语言程序设计<br><del>[33<strong>**</strong>]公共艺术类课</del><br>[24040020]数据库原理及应用<br><del>[24040030]计算机软件技术基础</del></p>
+<p>2013-2014学年<br>秋<br><del>[11050010]马克思主义基本原理概论</del><br><del>[13030013]大学英语（3）</del><br>[12031030]线性代数<br><del>[12040012]大学物理（2）</del><br><del>[14030030]体育（3）</del><br>[12031110]复变函数与积分变换<br><del>[12040110]物理实验</del><br><del>[11080440]文献检索</del><br>[32051010]电路分析基础<br>[24040040]电磁场与电磁波<br>[24040050]信号与系统<br><del>[2404031S]公益劳动</del><br>春<br><del>[11060010]毛泽东思想和中国特色社会主义理论体系概论</del><br><del>[13030014]大学英语（4）</del><br>[12031040]概率论与数理统计<br><del>[14030040]体育（4）</del><br>[32053010]模拟电子技术基础<br>[24040060]数字信号处理<br>[24040070]自动控制概论<br>[24040080]传感器基础<br><del>[11<strong>**</strong>]思想政治理论课实践</del><br><del>[2404006S]数字信号处理课程设计</del></p>
+<p>2014-2015学年<br>秋<br>[24040090]微机原理与接口技术<br>[24040100]高频电子线路<br>[24040110]通信系统原理<br>[32054010]数字电子技术基础<br>[24040130]信息论与编码技术<br><del>[24040120]专业英语</del><br>[24040150]数字图像处理<br><del>[2404009S]微机原理与接口技术课程设计</del><br><del>[3205702S]电子技术基础课程设计</del><br><del>[2404010S]高频电子线路课程设计</del><br>春<br>[24040160]数字光纤通信<br>[24040170]微波技术与天线<br>[24040180]现代交换技术<br>[24040190]移动通信<br>[24040230]数据通信与计算机网络<br>[24040210]单片机原理<br>[24040220]VHDL语言与数字EDA设计<br>[24040200]数字视频技术<br><del>[2404032S]电装实习</del><br><del>[2404022S]EDA课程设计</del></p>
+<hr>
+<h1 id="数学相关"><a href="#数学相关" class="headerlink" title="数学相关"></a>数学相关</h1><h2 id="高等数学"><a href="#高等数学" class="headerlink" title="高等数学"></a>高等数学</h2><h2 id="线性代数"><a href="#线性代数" class="headerlink" title="线性代数"></a>线性代数</h2><h2 id="复变函数与积分变换"><a href="#复变函数与积分变换" class="headerlink" title="复变函数与积分变换"></a>复变函数与积分变换</h2><p>作为信号系列的数学基础课，向上支撑信号系统、数字信号处理之类的课。</p>
+<p>详见 <a href="/2015/07/01/2015-07-01-xinhaoxiangguan/">信号相关专业复习</a></p>
+<h2 id="概率论与数理统计"><a href="#概率论与数理统计" class="headerlink" title="概率论与数理统计"></a>概率论与数理统计</h2><hr>
+<h1 id="专业课"><a href="#专业课" class="headerlink" title="专业课"></a>专业课</h1><hr>
+<h2 id="电学-无线电"><a href="#电学-无线电" class="headerlink" title="电学/无线电"></a>电学/无线电</h2><h3 id="电路分析基础"><a href="#电路分析基础" class="headerlink" title="电路分析基础"></a>电路分析基础</h3><h3 id="模拟电子技术基础"><a href="#模拟电子技术基础" class="headerlink" title="模拟电子技术基础"></a>模拟电子技术基础</h3><h3 id="数字电子技术基础"><a href="#数字电子技术基础" class="headerlink" title="数字电子技术基础"></a>数字电子技术基础</h3><h3 id="高频电子线路"><a href="#高频电子线路" class="headerlink" title="高频电子线路"></a>高频电子线路</h3><h3 id="电磁场与电磁波"><a href="#电磁场与电磁波" class="headerlink" title="电磁场与电磁波"></a>电磁场与电磁波</h3><h3 id="微波技术与天线"><a href="#微波技术与天线" class="headerlink" title="微波技术与天线"></a>微波技术与天线</h3><p>主要内容是研究由电磁场与电磁波衍生出来的无线电技术，微波、天线与电波传播</p>
+<p>详见 <a href="/2015/06/27/2015-06-27-weibojishuyutianxian/">微波技术与天线 复习笔记</a></p>
+<hr>
+<h2 id="信号-通信"><a href="#信号-通信" class="headerlink" title="信号/通信"></a>信号/通信</h2><h3 id="信号与系统"><a href="#信号与系统" class="headerlink" title="信号与系统"></a>信号与系统</h3><h3 id="数字信号处理"><a href="#数字信号处理" class="headerlink" title="数字信号处理"></a>数字信号处理</h3><h3 id="信息论与编码技术"><a href="#信息论与编码技术" class="headerlink" title="信息论与编码技术"></a>信息论与编码技术</h3><h3 id="通信系统原理"><a href="#通信系统原理" class="headerlink" title="通信系统原理"></a>通信系统原理</h3><p>详见 <a href="/2015/07/01/2015-07-01-xinhaoxiangguan/">信号相关专业复习</a></p>
+<h3 id="数字光纤通信"><a href="#数字光纤通信" class="headerlink" title="数字光纤通信"></a>数字光纤通信</h3><h3 id="现代交换技术"><a href="#现代交换技术" class="headerlink" title="现代交换技术"></a>现代交换技术</h3><p>介绍一些交换网中使用的技术，程控交换机等。</p>
+<p>详见 <a href="/2015/05/28/2015-05-28-xiandaijiaohuan/">现代交换原理 复习笔记 部分</a></p>
+<h3 id="移动通信"><a href="#移动通信" class="headerlink" title="移动通信"></a>移动通信</h3><hr>
+<h2 id="计算机应用-硬件"><a href="#计算机应用-硬件" class="headerlink" title="计算机应用/硬件"></a>计算机应用/硬件</h2><h3 id="C语言程序设计"><a href="#C语言程序设计" class="headerlink" title="C语言程序设计"></a>C语言程序设计</h3><h3 id="数据库原理及应用"><a href="#数据库原理及应用" class="headerlink" title="数据库原理及应用"></a>数据库原理及应用</h3><h3 id="微机原理与接口技术"><a href="#微机原理与接口技术" class="headerlink" title="微机原理与接口技术"></a>微机原理与接口技术</h3><h3 id="数据通信与计算机网络"><a href="#数据通信与计算机网络" class="headerlink" title="数据通信与计算机网络"></a>数据通信与计算机网络</h3><h3 id="单片机原理"><a href="#单片机原理" class="headerlink" title="单片机原理"></a>单片机原理</h3><h3 id="VHDL语言与数字EDA设计"><a href="#VHDL语言与数字EDA设计" class="headerlink" title="VHDL语言与数字EDA设计"></a>VHDL语言与数字EDA设计</h3><hr>
+<h2 id="自动化"><a href="#自动化" class="headerlink" title="自动化"></a>自动化</h2><h3 id="自动控制概论"><a href="#自动控制概论" class="headerlink" title="自动控制概论"></a>自动控制概论</h3><h3 id="传感器基础"><a href="#传感器基础" class="headerlink" title="传感器基础"></a>传感器基础</h3><hr>
+<h2 id="图像处理"><a href="#图像处理" class="headerlink" title="图像处理"></a>图像处理</h2><h3 id="数字图像处理"><a href="#数字图像处理" class="headerlink" title="数字图像处理"></a>数字图像处理</h3><h3 id="数字视频技术"><a href="#数字视频技术" class="headerlink" title="数字视频技术"></a>数字视频技术</h3><p>介绍数字视频处理技术。</p>
+<p>详见 <a href="/2015/05/30/2015-05-30-shuzishipin/">数字视频 复习笔记</a></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/08/13/2014-08-13-xueshu/" rel="bookmark">浅谈我院学术氛围之我见</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/05/26/2015-05-26-start/" rel="bookmark">开始使用Github</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/05/28/2015-05-28-diary/" rel="bookmark">通宵那些事</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/06/02/2015-06-02-birthday/" rel="bookmark">生日 记</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/06/13/2015-06-13-tuiyi/" rel="bookmark">退役帖</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%9A%8F%E7%AC%94/" rel="tag"># 随笔</a>
+              <a href="/tags/%E5%A4%8D%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 复习笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/06/13/2015-06-13-tuiyi/" rel="prev" title="退役帖">
+      <i class="fa fa-chevron-left"></i> 退役帖
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/06/19/2015-06-19-sbt/" rel="next" title="Size Balanced Tree">
+      Size Balanced Tree <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前三年学过的课程"><span class="nav-text">前三年学过的课程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数学相关"><span class="nav-text">数学相关</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#高等数学"><span class="nav-text">高等数学</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线性代数"><span class="nav-text">线性代数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复变函数与积分变换"><span class="nav-text">复变函数与积分变换</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#概率论与数理统计"><span class="nav-text">概率论与数理统计</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#专业课"><span class="nav-text">专业课</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#电学-无线电"><span class="nav-text">电学&#x2F;无线电</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#电路分析基础"><span class="nav-text">电路分析基础</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#模拟电子技术基础"><span class="nav-text">模拟电子技术基础</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数字电子技术基础"><span class="nav-text">数字电子技术基础</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#高频电子线路"><span class="nav-text">高频电子线路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#电磁场与电磁波"><span class="nav-text">电磁场与电磁波</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#微波技术与天线"><span class="nav-text">微波技术与天线</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#信号-通信"><span class="nav-text">信号&#x2F;通信</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#信号与系统"><span class="nav-text">信号与系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数字信号处理"><span class="nav-text">数字信号处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#信息论与编码技术"><span class="nav-text">信息论与编码技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通信系统原理"><span class="nav-text">通信系统原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数字光纤通信"><span class="nav-text">数字光纤通信</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#现代交换技术"><span class="nav-text">现代交换技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#移动通信"><span class="nav-text">移动通信</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#计算机应用-硬件"><span class="nav-text">计算机应用&#x2F;硬件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#C语言程序设计"><span class="nav-text">C语言程序设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据库原理及应用"><span class="nav-text">数据库原理及应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#微机原理与接口技术"><span class="nav-text">微机原理与接口技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据通信与计算机网络"><span class="nav-text">数据通信与计算机网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#单片机原理"><span class="nav-text">单片机原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VHDL语言与数字EDA设计"><span class="nav-text">VHDL语言与数字EDA设计</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自动化"><span class="nav-text">自动化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#自动控制概论"><span class="nav-text">自动控制概论</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#传感器基础"><span class="nav-text">传感器基础</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图像处理"><span class="nav-text">图像处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#数字图像处理"><span class="nav-text">数字图像处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数字视频技术"><span class="nav-text">数字视频技术</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'afd9989ead0c22110395b3cd8da39d11',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

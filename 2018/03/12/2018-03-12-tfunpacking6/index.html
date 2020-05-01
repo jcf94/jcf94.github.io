@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="接上篇：  TensorFlow 拆包（一）：Session.Run() TensorFlow 拆包（二）：TF 的数据流模型实现 TensorFlow 拆包（三）：Graph 和 Node TensorFlow 拆包（四）：Device TensorFlow 拆包（五）：Distributed  本篇分析 TensorFlow 1.6.0 中的 RDMA 以及其他的传输优化的实现。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TensorFlow 拆包（六）：RDMA">
+<meta property="og:url" content="https://jcf94.com/2018/03/12/2018-03-12-tfunpacking6/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="接上篇：  TensorFlow 拆包（一）：Session.Run() TensorFlow 拆包（二）：TF 的数据流模型实现 TensorFlow 拆包（三）：Graph 和 Node TensorFlow 拆包（四）：Device TensorFlow 拆包（五）：Distributed  本篇分析 TensorFlow 1.6.0 中的 RDMA 以及其他的传输优化的实现。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2018-03-12-tfunpacking6-verbs_with_0_copies.png">
+<meta property="article:published_time" content="2018-03-12T01:21:50.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="TensorFlow">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2018-03-12-tfunpacking6-verbs_with_0_copies.png">
+
+<link rel="canonical" href="https://jcf94.com/2018/03/12/2018-03-12-tfunpacking6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>TensorFlow 拆包（六）：RDMA | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2018/03/12/2018-03-12-tfunpacking6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TensorFlow 拆包（六）：RDMA
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-03-12 09:21:50" itemprop="dateCreated datePublished" datetime="2018-03-12T09:21:50+08:00">2018-03-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Project/" itemprop="url" rel="index"><span itemprop="name">Project</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>接上篇：</p>
+<ul>
+<li><a href="/2018/01/13/2018-01-13-tfunpacking/">TensorFlow 拆包（一）：Session.Run()</a></li>
+<li><a href="/2018/01/23/2018-01-23-tfunpacking2/">TensorFlow 拆包（二）：TF 的数据流模型实现</a></li>
+<li><a href="/2018/02/28/2018-02-28-tfunpacking3/">TensorFlow 拆包（三）：Graph 和 Node</a></li>
+<li><a href="/2018/03/07/2018-03-07-tfunpacking4/">TensorFlow 拆包（四）：Device</a></li>
+<li><a href="/2018/03/09/2018-03-09-tfunpacking5/">TensorFlow 拆包（五）：Distributed</a></li>
+</ul>
+<p>本篇分析 TensorFlow 1.6.0 中的 RDMA 以及其他的传输优化的实现。</p>
+<a id="more"></a>
+
+<p>虽然我前面一篇论文做的工作也是这个，在当时 Yahoo 实现的 RDMA 版还没有收录进官方 Repo 的时候稍微做过一下对比，现在来看看收进官方库之后的具体实现是什么样的。</p>
+<hr>
+<p>之前对 GPU Direct 的 API 不是很了解，后来才发现这里的 RDMA 实现其实也是直接支持 GPU Direct 的。</p>
+<h1 id="VerbsServer"><a href="#VerbsServer" class="headerlink" title="VerbsServer"></a>VerbsServer</h1><p>TensorFlow 分布式环境中的 Server 结构通过 ServerFactory 构建，这个工厂模式会根据传入的 protocol 选项创建不同的 Server。</p>
+<p>当选择 <code>protocol = grpc+verbs</code> 时，<code>tf.train.Server()</code>创建 VerbsServer。</p>
+<blockquote>
+<p>在代码里面搜 <code>public ServerFactory</code> 可以找到 4 个继承类，除了 verbs 之外，其他分别是：</p>
+<p><code>protocol = grpc</code> 对应 <code>GrpcServer</code>，即原本默认的 gRPC 通信方式</p>
+<p><code>protocol = grpc+mpi</code> 对应 <code>MPIServer</code>，用 MPI 来完成通信</p>
+<p><code>protocol = grpc+gdr</code> 对应 <code>GdrServer</code>，即 GPU Direct 支持</p>
+</blockquote>
+<p>从 protocol 的名字上也可以看出来，这几个新增的通信方式实现都还需要依赖 gRPC，例如 RDMA 一开始的 IB 卡配置、连接建立什么的都还需要先用 gRPC 来完成。</p>
+<p><code>VerbsServer()</code>在构造时直接初始化了一个<code>GrpcServer()</code>，之后的<code>Init()</code>、<code>Start()</code>也都是先启动 GrpcServer 中对应的方法。同时创建一个 VerbsService（重载的 ServerCompletionQueue 类）。</p>
+<p>然后创建一个 <code>RdmaMgr()</code> 用于管理 RDMA 底层的连接，<code>RdmaRendezvousMgr()</code>用于管理数据存储。</p>
+<h1 id="RdmaMgr"><a href="#RdmaMgr" class="headerlink" title="RdmaMgr"></a>RdmaMgr</h1><p>RdmaMgr 中维护了 RdmaAdapter 和 RdmaChannel 这两个结构，RdmaAdapter 负责维护 RDMA 通信需要的底层结构（rdma device context、protection domain、事件 channel、完成队列等等），RdmaChannel 则是代表每一个独立的 RDMA 连接。</p>
+<p>RdmaMgr 初始化时对所有不在本地的 worker 创建一个 RdmaChannel（创建和设置 queue pair，初始化 buffer），插入到 channel_table_ 中，。</p>
+<p>VerbsServer 启动时，首先启动 GrpcServer（<code>GrpcServer::Start()</code>），再通过 RdmaMgr 来建立 rdma 通道之间的链接（<code>rdma_mgr_-&gt;SetupChannels()</code>），之后在<code>rdma_mgr_-&gt;ConnectivityCheck()</code>中，分别测试各个 rdma 链接的连通性，然后用<code>rdma_adapter_-&gt;StartPolling()</code>启动 RdmaAdapter 中的守护进程，等待后续 RDMA 传输信息，后面 Grpc 的传输通道应该就不需要再用了。</p>
+<h1 id="RdmaRendezvousMgr"><a href="#RdmaRendezvousMgr" class="headerlink" title="RdmaRendezvousMgr"></a>RdmaRendezvousMgr</h1><p>RdmaRendezvousMgr 继承于 BaseRendezvousMgr，具体的实例类是从 BaseRemoteRendezvous 继承过来的 RdmaRemoteRendezvous，整个 RDMA 的传输过程由 <code>RdmaRemoteRendezvous::RecvFromRemoteAsync()</code> 开始。</p>
+<p>基本上做 RDMA 优化的想法都是一致的，跟我们之前的实现很类似，其他的详见官方文档：</p>
+<ul>
+<li><a href="https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/verbs/README.md" target="_blank" rel="noopener">How to compile, use and configure RDMA-enabled TensorFlow</a></li>
+</ul>
+<h1 id="Memory-Management"><a href="#Memory-Management" class="headerlink" title="Memory Management"></a>Memory Management</h1><p>说起来，事实上 RDMA 的移植过程中的最大问题还是内存，因为要用 RDMA 就需要事先把内存注册到 IB 卡上，这样 IB 卡才能够有权限直接读写内存并且保证这块被注册过的内存不会被换页换出去。</p>
+<p>所以对于他们的 RDMA 实现来说，我最关心的还是这个部分。</p>
+<p>TensorFlow 原本的实现就是在传输的时候动态给 send 操作分配内存。</p>
+<p>通常的思路有三种：</p>
+<ol>
+<li>数据传输的时候现场把需要被传输的 Tensor 内存注册到 IB 卡上，用过以后再释放掉。这样很明显会有很大的 overhead。</li>
+<li>提前注册一块固定的内存，传输的时候把需要发送的数据 copy 进去，然后在那块预注册的内存上进行 RDMA 操作。Overhead 会小一点，但是中间需要的 <code>memcpy</code> 操作还是有点浪费。</li>
+<li>内存池！！手动维护一个内存池，实现就把内存池注册到 IB 卡上，然后传输过程中，动态申请内存、用后动态释放内存都从内存池里面走。</li>
+</ol>
+<p>想想都知道第三种方案是最好的，然而我们当时实现时没有成功把内存池写出来（后来，这事就成了挖好了但是一直没填上的大坑了<a href="/2017/04/19/2017-04-19-memorypool/">【写着玩之 内存池】</a>、<a href="/2017/09/18/2017-09-18-rdmalib/">【写着玩之 RDMA 轮子】</a>。。。。。。很难受），所以其实采取的是 1、2 混合的方案。</p>
+<p>当要发送的数据比较少的时候，memcpy 速度快，所以拷过去再发效果好点，发送的数据大的时候，就现场注册。然后我们还分别试了用了 RDMA_WRITE 和 RDMA_READ 这两种方式，想办法把注册内存的时间跟计算、通信这些 overlap 开（虽然效果很有限，但是能做一点是一点咯）。</p>
+<p>官方库里目前的实现用上了内存池：</p>
+<ol>
+<li>对于 DMAable Tensor（注册在支持 RDMA 的 CPU 上或者注册在支持 GPU Direct 的 GPU 上的 Tensor），都采用<strong>直接从源 Tensor 写到目标 Tensor 中</strong>的方案，完全避免了内存注册和内存拷贝。（66666666）</li>
+<li>非 DMAable 的 Tensor，用 Protobuf 序列化之后通过预注册的内存传输（方案 2）。</li>
+<li>不支持 GPU Direct 的 GPU 数据，虽然还是要拷回 CPU 端，但是 CPU 到 CPU 的传输用的还是 RDMA。</li>
+</ol>
+<h2 id="Memory-Pool"><a href="#Memory-Pool" class="headerlink" title="Memory Pool"></a>Memory Pool</h2><p>那么就来详细看一下这里的内存池实现，这里实际上是借用了 TensorFlow 本身自带的内存池（。。。嗯，我前面挖了很长时间的内存池坑到时候就扒这个来填吧）。TensorFlow 本身的内存分配就是通过自己维护的内存池来完成的。</p>
+<p>关于 TensorFlow 的内存管理实现，可以参照<a href="http://blog.csdn.net/qq_33096883/article/details/77479647" target="_blank" rel="noopener">这里</a>的说明，主要采用的还是比较简单的 BFC 算法。</p>
+<p><code>tensorflow/core/framework/allocator.[ch]</code> 是内存分配器的主要入口，具体的分配器实现在 <code>tensorflow/core/common_runtime/</code> 中的 <code>xxx_allocator.[ch]</code> 中。</p>
+<p>RDMA 部分的内存管理由一个单例模式的 RdmaMemoryMgr 结构来完成。</p>
+<p>在 <code>VerbsServer::Start()</code> 中有这么一步 <code>rdma_mgr_-&gt;InitAllocators()</code>：</p>
+<ul>
+<li>首先获取到本地所有的 Allocator，CPU 分配器以及可能的 GPU 分配器。</li>
+<li>把 RdmaMemory 中插入/删除 Memory Region 的操作（主要是处理内存到卡上注册的这一步）包装成 Visitor 的接口函数。这里的 Memory Region 跟 TensorFlow 自己内存池里面的不是一个概念（指的目标倒可能是一致的），而是指的一整块独立内存（一次性用 ibv_reg_mr 把一整块内存注册好，一块内存对应一个 mr）。</li>
+<li>后面再检查当前环境是否支持 GPU Direct，是则同样把 GPU 的 Visitor 也加上。</li>
+</ul>
+<p>之后需要用 RDMA 进行传输的时候，就可以从已有的 Memory Region 表中找出某块内存所对应的 mr、rkey 等等，而无需再注册了。</p>
+<h1 id="Transport-protocol"><a href="#Transport-protocol" class="headerlink" title="Transport protocol"></a>Transport protocol</h1><p>TensorFlow 中的传输设计是<strong>异步发送，阻塞接收</strong>，这个设计也很容易理解，没有收到数据之前，当前节点之后的肯定执行不了，而发送者将内容提交之后数据流图到这里为止就结束了，可以把计算资源用于其他地方。</p>
+<p>这张图来源于代码中的文档部分。</p>
+<p><img data-src="http://jcf94.com/download/2018-03-12-tfunpacking6-verbs_with_0_copies.png" alt=""></p>
+<h2 id="RecvFromRemoteAsync"><a href="#RecvFromRemoteAsync" class="headerlink" title="RecvFromRemoteAsync"></a>RecvFromRemoteAsync</h2><p>一次完整的传输过程从 <code>RdmaRemoteRendezvous::RecvFromRemoteAsync()</code> 开始：</p>
+<ul>
+<li>解析某条需要传输的 Tensor 的源地址和目标地址，确认目标地址是本机。</li>
+<li>从 rdma_mgr_ 记录的 channel 中找出源地址对应的传输通道。</li>
+<li>向传输通道中发送一条 Tensor 请求（构造一个新的 RdmaTensorRequest 并插入到 channel 的 request_table_ 中，启动 <code>RdmaTensorRequest-&gt;Start()</code>）。</li>
+</ul>
+<blockquote>
+<p>接收端这边的所有操作都封装在 RdmaTensorRequest 结构中，相对的，发送端这边用来响应请求的所有操作都封装在 RdmaTensorResponse 结构中。</p>
+</blockquote>
+<p><code>Start()</code> 首先在 RdmaMemoryMgr 中检查本次需要接收的 Tensor 的Meta Data 是否存在（用 Rendezvous 的 key 作为关键字）。Meta Data 记录的是所传输的 Tensor 的详细信息：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TensorMetaData</span> &#123;</span></span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  TensorShape tensor_shape_;</span><br><span class="line">  DataType data_type_;</span><br><span class="line">  <span class="keyword">size_t</span> proto_size_;</span><br><span class="line">  <span class="keyword">bool</span> is_dead_;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最主要的内容是形状（TensorShape）和数据类型（DataType）。如果 Meta Data 记录存在，则可以直接新建一个 Tensor（构建 Tensor 需要传入的参数是 <strong>Allocator</strong>、<strong>数据类型</strong>以及<strong>形状</strong>）。从 RdmaMemoryMgr 的 Memory Region 表中直接可以查到所分配的内存的 mr 信息。如果本机不支持 GPU Direct，则把目标改成本地 CPU 端的内存接收；如果当前传输的 Tensor 的数据类型甚至都不支持 memcpy，则把它先序列化成 Protobuf 再传输。</p>
+<blockquote>
+<p>话说这里序列化是现场 malloc 内存，现场 ibv_reg_mr，为什么不直接从 CPU 的 Allocator 里面分配呢？</p>
+</blockquote>
+<p>之后发送 RDMA_MESSAGE_TENSOR_REQUEST 消息。消息中包含的内容除了 key 之外，最重要的就是前面准备好的 Tensor 地址和 rkey 了，这个标识了远程的发送端等一下要把数据写到什么地方去。</p>
+<h2 id="Sender-Side-Recv-Message"><a href="#Sender-Side-Recv-Message" class="headerlink" title="Sender Side Recv Message"></a>Sender Side Recv Message</h2><p>守护进程 <code>RdmaAdapter::Process_CQ</code> 处理所有传入的 RDMA 消息，接收到 RDMA_MESSAGE_TENSOR_REQUEST 时，解析出收到的数据，构造一个新的 RdmaTensorResponse 并插入到 channel 的 responses_table_ 中，启动 <code>RdmaTensorResponse-&gt;Start()</code>）。</p>
+<p>这一步调用 <code>RecvLocalAsync()</code> 从本地的 Rendezvous 中异步获取接收端所请求的 Tensor 数据，成功完成本地数据提取之后用 <code>RdmaTensorResponse::RecvHandler()</code> 开始准备数据的回传：</p>
+<ul>
+<li>对比本地提取的 Tensor 数据与接收端需要的 Meta Data 的各项是否一致（话说为什么会有不一致的情况呢？）</li>
+<li>GPU：<ol>
+<li>数据一致且支持 GPU Direct：同步一次 GPU 流，完成后直接用 <code>RdmaTensorResponse::SendContent()</code> 发出去；</li>
+<li>数据一致但不支持 GPU Direct：把 Tensor 从 GPU 上拷到 CPU 上，发出去；</li>
+<li>数据不一致：需要重新请求同步 Meta Data，但是这条 Tensor 在数据流图中可能还会被其他节点的运算改变，因此需要先把 Tensor 从 GPU 上拷出来，然后发送更新后的 Meta Data 信息给接收端；</li>
+<li>数据不支持 memcpy：把 GPU 数据序列化之后发送出去。</li>
+</ol>
+</li>
+<li>CPU：<ol>
+<li>数据一致：直接发送；</li>
+<li>数据不一致：发送更新后的 Meta Data；</li>
+<li>数据不支持 memcpy：序列化之后发送。</li>
+</ol>
+</li>
+</ul>
+<blockquote>
+<p>这个 Meta Data 重新请求的部分可以改成接收端直接用 RDMA READ 来抓取。</p>
+</blockquote>
+<p>发送完成之后回收用过的资源，然后把当前 RdmaTensorResponse 从 responses_table_ 中删掉。</p>
+<h2 id="RecvTensorContent"><a href="#RecvTensorContent" class="headerlink" title="RecvTensorContent"></a>RecvTensorContent</h2><p>接收端收到传入的 Tensor 数据之后，根据是否需要从 CPU 拷回 GPU 或者是否需要反序列化等等，做出对应的操作，调用 RdmaTensorRequest 创建时上层传入的 <code>done()</code> 回调函数，最后回收资源，把当前 RdmaTensorRequest 从 request_table_ 中删掉。</p>
+<hr>
+<p>看到这里思路可以说是很清晰了，感觉上这里的 RDMA 实现也已经相当完善了（比我们当时做的好多了），细节上可能还能再抠一抠，不过再往上应该不会再能有什么大的性能提升了。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/02/04/2017-02-04-tensorflow/" rel="bookmark">TensorFlow</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/04/04/2017-04-04-alexnet/" rel="bookmark">AlexNet</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/13/2018-01-13-tfunpacking/" rel="bookmark">TensorFlow 拆包（一）：Session.Run()</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/23/2018-01-23-tfunpacking2/" rel="bookmark">TensorFlow 拆包（二）：TF 的数据流模型实现以及自动求导</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/03/07/2018-03-07-tfunpacking4/" rel="bookmark">TensorFlow 拆包（四）：Device</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/TensorFlow/" rel="tag"># TensorFlow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/03/09/2018-03-09-tfunpacking5/" rel="prev" title="TensorFlow 拆包（五）：Distributed">
+      <i class="fa fa-chevron-left"></i> TensorFlow 拆包（五）：Distributed
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/04/10/2018-04-10-tfunpacking7/" rel="next" title="TensorFlow 拆包（七）：Profiling 踩坑 & Benchmark">
+      TensorFlow 拆包（七）：Profiling 踩坑 & Benchmark <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#VerbsServer"><span class="nav-text">VerbsServer</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RdmaMgr"><span class="nav-text">RdmaMgr</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RdmaRendezvousMgr"><span class="nav-text">RdmaRendezvousMgr</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Memory-Management"><span class="nav-text">Memory Management</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Memory-Pool"><span class="nav-text">Memory Pool</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Transport-protocol"><span class="nav-text">Transport protocol</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#RecvFromRemoteAsync"><span class="nav-text">RecvFromRemoteAsync</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sender-Side-Recv-Message"><span class="nav-text">Sender Side Recv Message</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RecvTensorContent"><span class="nav-text">RecvTensorContent</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'e39277c7ca3f7fd3acc8774429ee0c2e',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

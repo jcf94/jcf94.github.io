@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="继续复盘之前的Regional……出题者说这一套题太简单，对当时没有AK很不满……真是醉了，弱校没法活了 【A】签到题 【B】树结构，树的中心 【C】-_-&#x2F;&#x2F;&#x2F; 【D】概率DP 【E】-_-&#x2F;&#x2F;&#x2F; 【F】树结构填数 【G】-_-&#x2F;&#x2F;&#x2F; 【H】模拟 【I】签到题 【J】-_-&#x2F;&#x2F;&#x2F; 【K】贪心，构造后缀表达式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The 2014 ACM-ICPC Asia Mudanjiang Regional">
+<meta property="og:url" content="https://jcf94.com/2014/10/30/2014-10-30-The-2014-ACM-ICPC-Asia-Mudanjiang-Regional/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="继续复盘之前的Regional……出题者说这一套题太简单，对当时没有AK很不满……真是醉了，弱校没法活了 【A】签到题 【B】树结构，树的中心 【C】-_-&#x2F;&#x2F;&#x2F; 【D】概率DP 【E】-_-&#x2F;&#x2F;&#x2F; 【F】树结构填数 【G】-_-&#x2F;&#x2F;&#x2F; 【H】模拟 【I】签到题 【J】-_-&#x2F;&#x2F;&#x2F; 【K】贪心，构造后缀表达式">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2014-10-30T09:05:42.000Z">
+<meta property="article:modified_time" content="2016-01-11T09:46:01.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="ACM-ICPC">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2014/10/30/2014-10-30-The-2014-ACM-ICPC-Asia-Mudanjiang-Regional/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>The 2014 ACM-ICPC Asia Mudanjiang Regional | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2014/10/30/2014-10-30-The-2014-ACM-ICPC-Asia-Mudanjiang-Regional/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          The 2014 ACM-ICPC Asia Mudanjiang Regional
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2014-10-30 17:05:42" itemprop="dateCreated datePublished" datetime="2014-10-30T17:05:42+08:00">2014-10-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2016-01-11 17:46:01" itemprop="dateModified" datetime="2016-01-11T17:46:01+08:00">2016-01-11</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ACM-%E6%AF%94%E8%B5%9B/" itemprop="url" rel="index"><span itemprop="name">ACM-比赛</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>继续复盘之前的Regional……出题者说这一套题太简单，对当时没有AK很不满……真是醉了，弱校没法活了</p>
+<p><del>【A】签到题</del></p>
+<p><del>【B】树结构，树的中心</del></p>
+<p>【C】-_-///</p>
+<p><del>【D】概率DP</del></p>
+<p>【E】-_-///</p>
+<p>【F】树结构填数</p>
+<p>【G】-_-///</p>
+<p>【H】模拟</p>
+<p><del>【I】签到题</del></p>
+<p>【J】-_-///</p>
+<p>【K】贪心，构造后缀表达式</p>
+<a id="more"></a>
+
+<hr>
+<h1 id="A、ZOJ-3819-Average-Score"><a href="#A、ZOJ-3819-Average-Score" class="headerlink" title="A、ZOJ 3819 Average Score"></a>A、ZOJ 3819 Average Score</h1><p>Time Limit:  2 Seconds<br>Memory Limit:  65536 KB</p>
+<h2 id="Description"><a href="#Description" class="headerlink" title="Description"></a>Description</h2><p>Bob is a freshman in Marjar University. He is clever and diligent. However, he is not good at math, especially in Mathematical Analysis.</p>
+<p>After a mid-term exam, Bob was anxious about his grade. He went to the professor asking about the result of the exam. The professor said:</p>
+<blockquote>
+<p>“Too bad! You made me so disappointed.”<br>“Hummm… I am giving lessons to two classes. If you were in the other class, the average scores of both classes will increase.”</p>
+</blockquote>
+<p>Now, you are given the scores of all students in the two classes, except for the Bob’s. Please calculate the possible range of Bob’s score. All scores shall be integers within [0, 100].</p>
+<h2 id="Input"><a href="#Input" class="headerlink" title="Input"></a>Input</h2><p>There are multiple test cases. The first line of input contains an integer T indicating the number of test cases. For each test case:</p>
+<p>The first line contains two integers N (2 &lt;= N &lt;= 50) and M (1 &lt;= M &lt;= 50) indicating the number of students in Bob’s class and the number of students in the other class respectively.</p>
+<p>The next line contains N - 1 integers A1, A2, .., AN-1 representing the scores of other students in Bob’s class.</p>
+<p>The last line contains M integers B1, B2, .., BM representing the scores of students in the other class.</p>
+<h2 id="Output"><a href="#Output" class="headerlink" title="Output"></a>Output</h2><p>For each test case, output two integers representing the minimal possible score and the maximal possible score of Bob.</p>
+<p>It is guaranteed that the solution always exists.</p>
+<h2 id="Sample-Input"><a href="#Sample-Input" class="headerlink" title="Sample Input"></a>Sample Input</h2><blockquote>
+<p>2<br>4 3<br>5 5 5<br>4 4 3<br>6 5<br>5 5 4 5 3<br>1 3 2 2 1</p>
+</blockquote>
+<h2 id="Sample-Output"><a href="#Sample-Output" class="headerlink" title="Sample Output"></a>Sample Output</h2><blockquote>
+<p>4 4<br>2 4</p>
+</blockquote>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>签到，写个方程稍微推一下即可得到区间</p>
+<hr>
+<h1 id="B、ZOJ-3820-Building-Fire-Stations"><a href="#B、ZOJ-3820-Building-Fire-Stations" class="headerlink" title="B、ZOJ 3820 Building Fire Stations"></a>B、ZOJ 3820 Building Fire Stations</h1><p>Time Limit:  5 Seconds<br>Memory Limit:  131072 KB<br>Special Judge</p>
+<h2 id="Description-1"><a href="#Description-1" class="headerlink" title="Description"></a>Description</h2><p>Marjar University is a beautiful and peaceful place. There are N buildings and N - 1 bidirectional roads in the campus. These buildings are connected by roads in such a way that there is exactly one path between any two buildings. By coincidence, the length of each road is 1 unit.</p>
+<p>To ensure the campus security, Edward, the headmaster of Marjar University, plans to setup two fire stations in two different buildings so that firefighters are able to arrive at the scene of the fire as soon as possible whenever fires occur. That means the longest distance between a building and its nearest fire station should be as short as possible.</p>
+<p>As a clever and diligent student in Marjar University, you are asked to write a program to complete the plan. Please find out two proper buildings to setup the fire stations.</p>
+<h2 id="Input-1"><a href="#Input-1" class="headerlink" title="Input"></a>Input</h2><p>There are multiple test cases. The first line of input contains an integer T indicating the number of test cases. For each test case:</p>
+<p>The first line contains an integer N (2 &lt;= N &lt;= 200000).</p>
+<p>For the next N - 1 lines, each line contains two integers Xi and Yi. That means there is a road connecting building Xi and building Yi (indexes are 1-based).</p>
+<h2 id="Output-1"><a href="#Output-1" class="headerlink" title="Output"></a>Output</h2><p>For each test case, output three integers. The first one is the minimal longest distance between a building and its nearest fire station. The next two integers are the indexes of the two buildings selected to build the fire stations.</p>
+<p>If there are multiple solutions, any one will be acceptable.</p>
+<h2 id="Sample-Input-1"><a href="#Sample-Input-1" class="headerlink" title="Sample Input"></a>Sample Input</h2><blockquote>
+<p>2<br>4<br>1 2<br>1 3<br>1 4<br>5<br>1 2<br>2 3<br>3 4<br>4 5</p>
+</blockquote>
+<h2 id="Sample-Output-1"><a href="#Sample-Output-1" class="headerlink" title="Sample Output"></a>Sample Output</h2><blockquote>
+<p>1 1 2<br>1 2 4</p>
+</blockquote>
+<h2 id="题意"><a href="#题意" class="headerlink" title="题意"></a>题意</h2><p>题目给出一棵树作为一个城镇的地图，现在要在地图中设置两个救火点，使得最后任意一点发生火灾，救火都能及时到达，即使得救火点到达每个城镇的最大距离最小。</p>
+<h2 id="分析-1"><a href="#分析-1" class="headerlink" title="分析"></a>分析</h2><p>首先比较明显的能想到基于树的直径做一些文章。</p>
+<p>浙大的出题者在他的人人日志中给出了本题结论的证明：</p>
+<p><a href="http://blog.renren.com/blog/240107793/937020122?bfrom=01020100200" target="_blank" rel="noopener">http://blog.renren.com/blog/240107793/937020122?bfrom=01020100200</a></p>
+<p>最终得出的结论是，两个点a、b必然都在树的直径上。（结论1）</p>
+<p>之后的思路有两种：</p>
+<ol>
+<li><p>作者的正解是扫出直径之后对每一个点向外扩展一次，得到每个点外延的最大距离，然后将其转化为一个一维的RMQ问题，二分一下区间即可。</p>
+</li>
+<li><p>第一次得到树的直径之后，从直径的中点切开，对两侧的两棵子树分别再做一次树的直径，找到的两个直径的中点就是最终的a和b。</p>
+</li>
+</ol>
+<p>关于思路2的证明：</p>
+<p>1）子树的直径的中点距离这棵子树剩余的点一定是最远的，则这个点满足作为a、b点的条件。</p>
+<p>2）然后简单推测一下，子树的直径中点一定在原树的直径上。这一点与结论1相吻合。</p>
+<p>这个简单地举几个例子试一下就好，跟上面那个结论一样，能简单地想到大概是这样，但是原谅我数学不好……写不出证明。</p>
+<p>3）上面两个结论组合一下，最后的交点就是a、b的最终位置了。</p>
+<p>然后需要注意的是根据树的直径的结点个数，要分奇数和偶数分别讨论。偶数个结点只要从中间一条边切开即可，但是奇数个结点的情况就要继续分成两种情况，考虑中点分别切给左边那个子树和切给右边那棵子树的结果，取距离最小的那一个。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID    : Chen Fan</span></span><br><span class="line"><span class="comment">LANG    : G++</span></span><br><span class="line"><span class="comment">PROG    : ZOJ 3820</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;queue&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;bitset&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">nod</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">int</span> a,b;</span><br><span class="line">&#125; node;</span><br><span class="line"></span><br><span class="line">node edge[<span class="number">400010</span>];</span><br><span class="line"><span class="keyword">int</span> start[<span class="number">200010</span>],num[<span class="number">200010</span>],front[<span class="number">200010</span>],<span class="built_in">list</span>[<span class="number">200010</span>];</span><br><span class="line"><span class="keyword">int</span> listn;</span><br><span class="line"></span><br><span class="line"><span class="built_in">bitset</span>&lt;200010&gt; flag;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">op</span><span class="params">(node a,node b)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (a.a==b.a) <span class="keyword">return</span> a.b&lt;b.b;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">return</span> a.a&lt;b.a;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">bfs</span><span class="params">(<span class="keyword">int</span> s)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">queue</span>&lt;<span class="keyword">int</span>&gt; q;</span><br><span class="line">    <span class="keyword">while</span> (!q.empty()) q.pop();</span><br><span class="line">    <span class="keyword">int</span> dist[<span class="number">200010</span>];</span><br><span class="line"></span><br><span class="line">    <span class="built_in">memset</span>(dist,<span class="number">0</span>,<span class="keyword">sizeof</span>(dist));</span><br><span class="line">    flag[s]=<span class="number">1</span>;</span><br><span class="line">    q.push(s);</span><br><span class="line">    <span class="keyword">int</span> ma=<span class="number">0</span>,out=s;</span><br><span class="line">    <span class="keyword">while</span> (!q.empty())</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> now=q.front();</span><br><span class="line">        q.pop();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;num[now];i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> next=edge[start[now]+i].b;</span><br><span class="line">            <span class="keyword">if</span> (!flag[next])</span><br><span class="line">            &#123;</span><br><span class="line">                flag[next]=<span class="number">1</span>;</span><br><span class="line">                front[next]=now;</span><br><span class="line">                q.push(next);</span><br><span class="line">                dist[next]=dist[now]+<span class="number">1</span>;</span><br><span class="line">                <span class="keyword">if</span> (ma&lt;dist[next])</span><br><span class="line">                &#123;</span><br><span class="line">                    ma=dist[next];</span><br><span class="line">                    out=next;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> out;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">getlist</span><span class="params">(<span class="keyword">int</span> s)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!front[s])</span><br><span class="line">    &#123;</span><br><span class="line">        listn=<span class="number">1</span>;</span><br><span class="line">        <span class="built_in">list</span>[<span class="number">1</span>]=s;</span><br><span class="line">        <span class="keyword">return</span> ;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">while</span> (front[s]!=<span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        listn++;</span><br><span class="line">        <span class="built_in">list</span>[listn]=s;</span><br><span class="line">        s=front[s];</span><br><span class="line">    &#125;</span><br><span class="line">    listn++;</span><br><span class="line">    <span class="built_in">list</span>[listn]=s;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    freopen(<span class="string">"3820.txt"</span>,<span class="string">"r"</span>,<span class="built_in">stdin</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> t;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;t);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> tt=<span class="number">1</span>;tt&lt;=t;tt++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> n;</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;n);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;n;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">"%d%d"</span>,&amp;edge[i*<span class="number">2</span>].a,&amp;edge[i*<span class="number">2</span>].b);</span><br><span class="line">            edge[i*<span class="number">2</span><span class="number">-1</span>].a=edge[i*<span class="number">2</span>].b;</span><br><span class="line">            edge[i*<span class="number">2</span><span class="number">-1</span>].b=edge[i*<span class="number">2</span>].a;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> m=n*<span class="number">2</span><span class="number">-2</span>;</span><br><span class="line">        sort(&amp;edge[<span class="number">1</span>],&amp;edge[m+<span class="number">1</span>],op);</span><br><span class="line">        <span class="keyword">int</span> o=<span class="number">0</span>;</span><br><span class="line">        <span class="built_in">memset</span>(num,<span class="number">0</span>,<span class="keyword">sizeof</span>(num));</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=m;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (o!=edge[i].a)</span><br><span class="line">            &#123;</span><br><span class="line">                o=edge[i].a;</span><br><span class="line">                start[o]=i;</span><br><span class="line">            &#125;</span><br><span class="line">            num[o]++;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        flag.reset();</span><br><span class="line">        <span class="keyword">int</span> p1=bfs(<span class="number">1</span>);</span><br><span class="line">        flag.reset();</span><br><span class="line">        <span class="built_in">memset</span>(front,<span class="number">0</span>,<span class="keyword">sizeof</span>(front));</span><br><span class="line">        <span class="keyword">int</span> p2=bfs(p1);</span><br><span class="line"></span><br><span class="line">        listn=<span class="number">0</span>;</span><br><span class="line">        <span class="built_in">memset</span>(<span class="built_in">list</span>,<span class="number">0</span>,<span class="keyword">sizeof</span>(<span class="built_in">list</span>));</span><br><span class="line">        getlist(p2);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (listn&amp;<span class="number">1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> a=<span class="built_in">list</span>[listn/<span class="number">2</span>],b=<span class="built_in">list</span>[listn/<span class="number">2</span>+<span class="number">1</span>],c=<span class="built_in">list</span>[listn/<span class="number">2</span>+<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">            flag.reset();</span><br><span class="line">            flag[b]=<span class="number">1</span>;</span><br><span class="line">            p1=bfs(a);</span><br><span class="line">            flag.reset();</span><br><span class="line">            flag[b]=<span class="number">1</span>;</span><br><span class="line">            <span class="built_in">memset</span>(front,<span class="number">0</span>,<span class="keyword">sizeof</span>(front));</span><br><span class="line">            p2=bfs(p1);</span><br><span class="line"></span><br><span class="line">            listn=<span class="number">0</span>;</span><br><span class="line">            <span class="built_in">memset</span>(<span class="built_in">list</span>,<span class="number">0</span>,<span class="keyword">sizeof</span>(<span class="built_in">list</span>));</span><br><span class="line">            getlist(p2);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">int</span> ans1=listn/<span class="number">2</span>;</span><br><span class="line">            <span class="keyword">int</span> ansa1=<span class="built_in">list</span>[listn/<span class="number">2</span>+<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">            flag.reset();</span><br><span class="line">            flag[a]=<span class="number">1</span>;</span><br><span class="line">            p1=bfs(b);</span><br><span class="line">            flag.reset();</span><br><span class="line">            flag[a]=<span class="number">1</span>;</span><br><span class="line">            <span class="built_in">memset</span>(front,<span class="number">0</span>,<span class="keyword">sizeof</span>(front));</span><br><span class="line">            p2=bfs(p1);</span><br><span class="line"></span><br><span class="line">            listn=<span class="number">0</span>;</span><br><span class="line">            <span class="built_in">memset</span>(<span class="built_in">list</span>,<span class="number">0</span>,<span class="keyword">sizeof</span>(<span class="built_in">list</span>));</span><br><span class="line">            getlist(p2);</span><br><span class="line"></span><br><span class="line">            ans1=max(ans1,listn/<span class="number">2</span>);</span><br><span class="line">            <span class="keyword">int</span> ansb1=<span class="built_in">list</span>[listn/<span class="number">2</span>+<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">            flag.reset();</span><br><span class="line">            flag[b]=<span class="number">1</span>;</span><br><span class="line">            p1=bfs(c);</span><br><span class="line">            flag.reset();</span><br><span class="line">            flag[b]=<span class="number">1</span>;</span><br><span class="line">            <span class="built_in">memset</span>(front,<span class="number">0</span>,<span class="keyword">sizeof</span>(front));</span><br><span class="line">            p2=bfs(p1);</span><br><span class="line"></span><br><span class="line">            listn=<span class="number">0</span>;</span><br><span class="line">            <span class="built_in">memset</span>(<span class="built_in">list</span>,<span class="number">0</span>,<span class="keyword">sizeof</span>(<span class="built_in">list</span>));</span><br><span class="line">            getlist(p2);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">int</span> ans2=listn/<span class="number">2</span>;</span><br><span class="line">            <span class="keyword">int</span> ansa2=<span class="built_in">list</span>[listn/<span class="number">2</span>+<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">            flag.reset();</span><br><span class="line">            flag[c]=<span class="number">1</span>;</span><br><span class="line">            p1=bfs(b);</span><br><span class="line">            flag.reset();</span><br><span class="line">            flag[c]=<span class="number">1</span>;</span><br><span class="line">            <span class="built_in">memset</span>(front,<span class="number">0</span>,<span class="keyword">sizeof</span>(front));</span><br><span class="line">            p2=bfs(p1);</span><br><span class="line"></span><br><span class="line">            listn=<span class="number">0</span>;</span><br><span class="line">            <span class="built_in">memset</span>(<span class="built_in">list</span>,<span class="number">0</span>,<span class="keyword">sizeof</span>(<span class="built_in">list</span>));</span><br><span class="line">            getlist(p2);</span><br><span class="line"></span><br><span class="line">            ans2=max(ans2,listn/<span class="number">2</span>);</span><br><span class="line">            <span class="keyword">int</span> ansb2=<span class="built_in">list</span>[listn/<span class="number">2</span>+<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (ans1&lt;ans2) <span class="built_in">printf</span>(<span class="string">"%d %d %d\n"</span>,ans1,ansa1,ansb1);</span><br><span class="line">            <span class="keyword">else</span> <span class="built_in">printf</span>(<span class="string">"%d %d %d\n"</span>,ans2,ansa2,ansb2);</span><br><span class="line">        &#125; <span class="keyword">else</span> </span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> a=<span class="built_in">list</span>[listn/<span class="number">2</span>],b=<span class="built_in">list</span>[listn/<span class="number">2</span>+<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">            flag.reset();</span><br><span class="line">            flag[b]=<span class="number">1</span>;</span><br><span class="line">            p1=bfs(a);</span><br><span class="line">            flag.reset();</span><br><span class="line">            flag[b]=<span class="number">1</span>;</span><br><span class="line">            <span class="built_in">memset</span>(front,<span class="number">0</span>,<span class="keyword">sizeof</span>(front));</span><br><span class="line">            p2=bfs(p1);</span><br><span class="line"></span><br><span class="line">            listn=<span class="number">0</span>;</span><br><span class="line">            <span class="built_in">memset</span>(<span class="built_in">list</span>,<span class="number">0</span>,<span class="keyword">sizeof</span>(<span class="built_in">list</span>));</span><br><span class="line">            getlist(p2);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">int</span> ans1=listn/<span class="number">2</span>;</span><br><span class="line">            <span class="keyword">int</span> ansa1=<span class="built_in">list</span>[listn/<span class="number">2</span>+<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">            flag.reset();</span><br><span class="line">            flag[a]=<span class="number">1</span>;</span><br><span class="line">            p1=bfs(b);</span><br><span class="line">            flag.reset();</span><br><span class="line">            flag[a]=<span class="number">1</span>;</span><br><span class="line">            <span class="built_in">memset</span>(front,<span class="number">0</span>,<span class="keyword">sizeof</span>(front));</span><br><span class="line">            p2=bfs(p1);</span><br><span class="line"></span><br><span class="line">            listn=<span class="number">0</span>;</span><br><span class="line">            <span class="built_in">memset</span>(<span class="built_in">list</span>,<span class="number">0</span>,<span class="keyword">sizeof</span>(<span class="built_in">list</span>));</span><br><span class="line">            getlist(p2);</span><br><span class="line"></span><br><span class="line">            ans1=max(ans1,listn/<span class="number">2</span>);</span><br><span class="line">            <span class="keyword">int</span> ansb1=<span class="built_in">list</span>[listn/<span class="number">2</span>+<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"%d %d %d\n"</span>,ans1,ansa1,ansb1);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="D、ZOJ-3822-Domination"><a href="#D、ZOJ-3822-Domination" class="headerlink" title="D、ZOJ 3822 Domination"></a>D、ZOJ 3822 Domination</h1><p>Time Limit:  8 Seconds<br>Memory Limit:  131072 KB<br>Special Judge</p>
+<h2 id="Description-2"><a href="#Description-2" class="headerlink" title="Description"></a>Description</h2><p>Edward is the headmaster of Marjar University. He is enthusiastic about chess and often plays chess with his friends. What’s more, he bought a large decorative chessboard with N rows and M columns.</p>
+<p>Every day after work, Edward will place a chess piece on a random empty cell. A few days later, he found the chessboard was dominated by the chess pieces. That means there is at least one chess piece in every row. Also, there is at least one chess piece in every column.</p>
+<p>“That’s interesting!” Edward said. He wants to know the expectation number of days to make an empty chessboard of N × M dominated. Please write a program to help him.</p>
+<h2 id="Input-2"><a href="#Input-2" class="headerlink" title="Input"></a>Input</h2><p>There are multiple test cases. The first line of input contains an integer T indicating the number of test cases. For each test case:</p>
+<p>There are only two integers N and M (1 &lt;= N, M &lt;= 50).</p>
+<h2 id="Output-2"><a href="#Output-2" class="headerlink" title="Output"></a>Output</h2><p>For each test case, output the expectation number of days.</p>
+<p>Any solution with a relative or absolute error of at most 10-8 will be accepted.</p>
+<h2 id="Sample-Input-2"><a href="#Sample-Input-2" class="headerlink" title="Sample Input"></a>Sample Input</h2><blockquote>
+<p>2<br>1 3<br>2 2</p>
+</blockquote>
+<h2 id="Sample-Output-2"><a href="#Sample-Output-2" class="headerlink" title="Sample Output"></a>Sample Output</h2><blockquote>
+<p>3.000000000000<br>2.666666666667</p>
+</blockquote>
+<h2 id="题意-1"><a href="#题意-1" class="headerlink" title="题意"></a>题意</h2><p>有一个棋盘，目标是在棋盘中摆放棋子，使得最终每一个格子都能够被控制，这里控制的意思是满足这个格子的同行和同列上都有棋子存在。最终需要求出的是达成这种条件的期望。</p>
+<h2 id="分析-2"><a href="#分析-2" class="headerlink" title="分析"></a>分析</h2><p>比较裸的概率DP…原谅我看到的第一眼居然没想到…还是做题太少啊</p>
+<p>f(i,j,k)表示使用k个棋子，控制完n行中的任意i行，m列中的任意j列所需要的概率。则最后的期望就是求一个f(n,m,k)*k的总和即可。</p>
+<p>简单的方程如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">f(i,j,k) &#x3D; Sum</span><br><span class="line">&#123;</span><br><span class="line">    f(i,j,k+1)*(i*j-k)&#x2F;(n*m-k),</span><br><span class="line">    f(i+1,j,k+1)*(n-i)*j&#x2F;(n*m-k),</span><br><span class="line">    f(i,j+1,k+1)*i*(m-j)&#x2F;(n*m-k),</span><br><span class="line">    f(i+1,j+1,k+1)*(n-i)*(m-j)&#x2F;(n*m-k)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>方程中需要尤其注意的是当达成n行m列全部被控制之后，就可以结束了，即转移中f(n,m,k)-&gt;f(n,m,k+1)是不存在的！！！！因为这个原因悲剧了好久，后来对比其他人的代码才发现这个重大的问题。。。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">MYID    : Chen Fan</span></span><br><span class="line"><span class="comment">LANG    : G++</span></span><br><span class="line"><span class="comment">PROG    : ZOJ 3822</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"><span class="comment">/* ***********************************************</span></span><br><span class="line"><span class="comment">f(i,j,k) = Sum</span></span><br><span class="line"><span class="comment">&#123;</span></span><br><span class="line"><span class="comment">    f(i,j,k+1)*(i*j-k)/(n*m-k),</span></span><br><span class="line"><span class="comment">    f(i+1,j,k+1)*(n-i)*j/(n*m-k),</span></span><br><span class="line"><span class="comment">    f(i,j+1,k+1)*i*(m-j)/(n*m-k),</span></span><br><span class="line"><span class="comment">    f(i+1,j+1,k+1)*(n-i)*(m-j)/(n*m-k)</span></span><br><span class="line"><span class="comment">&#125;</span></span><br><span class="line"><span class="comment">************************************************ */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">double</span> f[<span class="number">60</span>][<span class="number">60</span>][<span class="number">4000</span>];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> t;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;t);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> tt=<span class="number">1</span>;tt&lt;=t;tt++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> n,m;</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%d%d"</span>,&amp;n,&amp;m);</span><br><span class="line">        <span class="built_in">memset</span>(f,<span class="number">0</span>,<span class="keyword">sizeof</span>(f));</span><br><span class="line">        </span><br><span class="line">        f[<span class="number">1</span>][<span class="number">1</span>][<span class="number">1</span>]=<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> k=<span class="number">1</span>;k&lt;=m*n;k++)</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=n;i++)</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j=<span class="number">1</span>;j&lt;=m;j++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (k&lt;max(i,j)) <span class="keyword">continue</span>;</span><br><span class="line">            <span class="keyword">if</span> (k+<span class="number">1</span>&lt;=i*j&amp;&amp;i!=n||j!=m)</span><br><span class="line">            f[i][j][k+<span class="number">1</span>]+=f[i][j][k]*(i*j-k)/(n*m-k);</span><br><span class="line">            <span class="keyword">if</span> (k+<span class="number">1</span>&lt;=(i+<span class="number">1</span>)*j)</span><br><span class="line">            f[i+<span class="number">1</span>][j][k+<span class="number">1</span>]+=f[i][j][k]*(n-i)*j/(n*m-k);</span><br><span class="line">            <span class="keyword">if</span> (k+<span class="number">1</span>&lt;=i*(j+<span class="number">1</span>))</span><br><span class="line">            f[i][j+<span class="number">1</span>][k+<span class="number">1</span>]+=f[i][j][k]*i*(m-j)/(n*m-k);</span><br><span class="line">            <span class="keyword">if</span> (k+<span class="number">1</span>&lt;=(i+<span class="number">1</span>)*(j+<span class="number">1</span>))</span><br><span class="line">            f[i+<span class="number">1</span>][j+<span class="number">1</span>][k+<span class="number">1</span>]+=f[i][j][k]*(n-i)*(m-j)/(n*m-k);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">double</span> ans=<span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=max(n,m);i&lt;=m*n;i++) ans+=f[n][m][i]*i;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"%.10f\n"</span>,ans);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="I、ZOJ-3827-Information-Entropy"><a href="#I、ZOJ-3827-Information-Entropy" class="headerlink" title="I、ZOJ 3827 Information Entropy"></a>I、ZOJ 3827 Information Entropy</h1><p>Time Limit:  2 Seconds<br>Memory Limit:  65536 KB<br>Special Judge</p>
+<h2 id="Description-3"><a href="#Description-3" class="headerlink" title="Description"></a>Description</h2><p>Information Theory is one of the most popular courses in Marjar University. In this course, there is an important chapter about information entropy.</p>
+<p>Entropy is the average amount of information contained in each message received. Here, a message stands for an event, or a sample or a character drawn from a distribution or a data stream. Entropy thus characterizes our uncertainty about our source of information. The source is also characterized by the probability distribution of the samples drawn from it. The idea here is that the less likely an event is, the more information it provides when it occurs.</p>
+<p>Generally, “entropy” stands for “disorder” or uncertainty. The entropy we talk about here was introduced by Claude E. Shannon in his 1948 paper “A Mathematical Theory of Communication”. We also call it Shannon entropy or information entropy to distinguish from other occurrences of the term, which appears in various parts of physics in different forms.</p>
+<p>Named after Boltzmann’s H-theorem, Shannon defined the entropy Η (Greek letter Η, η) of a discrete random variable X with possible values {x1, x2, …, xn} and probability mass function P(X) as:</p>
+<p>H(X)=E(−ln(P(x)))</p>
+<p>Here E is the expected value operator. When taken from a finite sample, the entropy can explicitly be written as</p>
+<p>H(X)=−∑i=1nP(xi)log b(P(xi))</p>
+<p>Where b is the base of the logarithm used. Common values of b are 2, Euler’s number e, and 10. The unit of entropy is bit for b = 2, nat for b = e, and dit (or digit) for b = 10 respectively.</p>
+<p>In the case of P(xi) = 0 for some i, the value of the corresponding summand 0 logb(0) is taken to be a well-known limit:</p>
+<p>0log b(0)=limp→0+plog b(p)</p>
+<p>Your task is to calculate the entropy of a finite sample with N values.</p>
+<p>Input</p>
+<p>There are multiple test cases. The first line of input contains an integer T indicating the number of test cases. For each test case:</p>
+<p>The first line contains an integer N (1 &lt;= N &lt;= 100) and a string S. The string S is one of “bit”, “nat” or “dit”, indicating the unit of entropy.</p>
+<p>In the next line, there are N non-negative integers P1, P2, .., PN. Pi means the probability of the i-th value in percentage and the sum of Pi will be 100.</p>
+<h2 id="Output-3"><a href="#Output-3" class="headerlink" title="Output"></a>Output</h2><p>For each test case, output the entropy in the corresponding unit.</p>
+<p>Any solution with a relative or absolute error of at most 10-8 will be accepted.</p>
+<h2 id="Sample-Input-3"><a href="#Sample-Input-3" class="headerlink" title="Sample Input"></a>Sample Input</h2><blockquote>
+<p>3<br>3 bit<br>25 25 50<br>7 nat<br>1 2 4 8 16 32 37<br>10 dit<br>10 10 10 10 10 10 10 10 10 10</p>
+</blockquote>
+<h2 id="Sample-Output-3"><a href="#Sample-Output-3" class="headerlink" title="Sample Output"></a>Sample Output</h2><blockquote>
+<p>1.500000000000<br>1.480810832465<br>1.000000000000</p>
+</blockquote>
+<h2 id="分析-3"><a href="#分析-3" class="headerlink" title="分析"></a>分析</h2><p>签到题，难点可能是在题面上，学过信息论的话看到样例就能直接打代码了。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/09/08/2014-09-08-The-2014-ACM-ICPC-Asia-Mudanjiang-Regional-First-Round/" rel="bookmark">The 2014 ACM-ICPC Asia Mudanjiang Regional First Round</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/09/15/2014-09-15-The-2014-ACMICPC-Asia-Regional-Xian-Online/" rel="bookmark">The 2014 ACMICPC Asia Regional Xian Online</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/09/13/2014-09-13-The-2014-ACM-ICPC-Asia-Regional-Anshan-Online/" rel="bookmark">The 2014 ACM-ICPC Asia Regional Anshan Online</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/09/23/2014-09-23-The-2014-ACMICPC-Asia-Regional-Guangzhou-Online/" rel="bookmark">The 2014 ACMICPC Asia Regional Guangzhou Online</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/09/23/2014-09-23-The-2014-ACMICPC-Asia-Regional-Beijing-Online/" rel="bookmark">The 2014 ACMICPC Asia Regional Beijing Online</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ACM-ICPC/" rel="tag"># ACM-ICPC</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2014/10/27/2014-10-27-The-2013-ACMICPC-Asia-Regional-Chengdu/" rel="prev" title="The 2013 ACMICPC Asia Regional Chengdu">
+      <i class="fa fa-chevron-left"></i> The 2013 ACMICPC Asia Regional Chengdu
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2014/10/31/2014-10-31-The-2014-ACM-ICPC-Asia-Regional-Anshan/" rel="next" title="The 2014 ACM-ICPC Asia Regional Anshan">
+      The 2014 ACM-ICPC Asia Regional Anshan <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#A、ZOJ-3819-Average-Score"><span class="nav-text">A、ZOJ 3819 Average Score</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Description"><span class="nav-text">Description</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Input"><span class="nav-text">Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output"><span class="nav-text">Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Input"><span class="nav-text">Sample Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Output"><span class="nav-text">Sample Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析"><span class="nav-text">分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#B、ZOJ-3820-Building-Fire-Stations"><span class="nav-text">B、ZOJ 3820 Building Fire Stations</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Description-1"><span class="nav-text">Description</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Input-1"><span class="nav-text">Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output-1"><span class="nav-text">Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Input-1"><span class="nav-text">Sample Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Output-1"><span class="nav-text">Sample Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#题意"><span class="nav-text">题意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析-1"><span class="nav-text">分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#D、ZOJ-3822-Domination"><span class="nav-text">D、ZOJ 3822 Domination</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Description-2"><span class="nav-text">Description</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Input-2"><span class="nav-text">Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output-2"><span class="nav-text">Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Input-2"><span class="nav-text">Sample Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Output-2"><span class="nav-text">Sample Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#题意-1"><span class="nav-text">题意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析-2"><span class="nav-text">分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#I、ZOJ-3827-Information-Entropy"><span class="nav-text">I、ZOJ 3827 Information Entropy</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Description-3"><span class="nav-text">Description</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output-3"><span class="nav-text">Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Input-3"><span class="nav-text">Sample Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample-Output-3"><span class="nav-text">Sample Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析-3"><span class="nav-text">分析</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : 'ce5bd5a592d656e3c2e2eb6e5dbaca37',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

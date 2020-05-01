@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="开学已一月有余，距离在科大开始正式的学习生活也有近三个月了。可能还是没把握好研究生新生活的节奏，感觉这一个月以来活得赶了点。 虽然以前写过的代码量不算少了，但相对来说我的工程项目经验还是少的可怜，如此完整地阅读一个比较大的开源案例还是第一次。也幸而还有以前的写代码经验在，让我能磕磕绊绊把任务做下去。 搞 RDMA 期间有很多东西是现查现学现用的，当时也来不及额外花太多时间去好好研究，然后这三个月的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="October">
+<meta property="og:url" content="https://jcf94.com/2016/10/16/2016-10-16-october/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="开学已一月有余，距离在科大开始正式的学习生活也有近三个月了。可能还是没把握好研究生新生活的节奏，感觉这一个月以来活得赶了点。 虽然以前写过的代码量不算少了，但相对来说我的工程项目经验还是少的可怜，如此完整地阅读一个比较大的开源案例还是第一次。也幸而还有以前的写代码经验在，让我能磕磕绊绊把任务做下去。 搞 RDMA 期间有很多东西是现查现学现用的，当时也来不及额外花太多时间去好好研究，然后这三个月的">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2016-10-16-october-night1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2016-10-16-october-night2.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2016-10-16-october-night3.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2016-10-16-october-ccpc1.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2016-10-16-october-ccpc2.jpg">
+<meta property="og:image" content="http://jcf94.com/download/2016-10-16-october-smile.jpg">
+<meta property="article:published_time" content="2016-10-16T01:52:24.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="随笔">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2016-10-16-october-night1.jpg">
+
+<link rel="canonical" href="https://jcf94.com/2016/10/16/2016-10-16-october/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>October | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2016/10/16/2016-10-16-october/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          October
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-10-16 09:52:24" itemprop="dateCreated datePublished" datetime="2016-10-16T09:52:24+08:00">2016-10-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%97%A5%E5%B8%B8/" itemprop="url" rel="index"><span itemprop="name">日常</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>开学已一月有余，距离在科大开始正式的学习生活也有近三个月了。可能还是没把握好研究生新生活的节奏，感觉这一个月以来活得赶了点。</p>
+<p>虽然以前写过的代码量不算少了，但相对来说我的工程项目经验还是少的可怜，如此完整地阅读一个比较大的开源案例还是第一次。也幸而还有以前的写代码经验在，让我能磕磕绊绊把任务做下去。</p>
+<p>搞 RDMA 期间有很多东西是<strong>现查现学现用</strong>的，当时也来不及额外花太多时间去好好研究，然后这三个月的博客也是——一直在挖坑。。。</p>
+<p>后面会稍微多花点时间把这些东西都好好消化一下，也把前面的坑都填一填。</p>
+<a id="more"></a>
+
+<h1 id="Something-New-amp-Left"><a href="#Something-New-amp-Left" class="headerlink" title="Something New &amp; Left"></a>Something New &amp; Left</h1><p><strong>继续挖坑</strong>以及<strong>列一下还有啥坑要填</strong></p>
+<ul>
+<li><a href="/2016/08/30/2016-08-30-iptables/">Iptables</a></li>
+</ul>
+<p>前面留下来的坑了… Linux 里面的防火墙，花时间搞搞清楚。</p>
+<p>（另外…再花时间研究一下 firewalld 和 SELinux ？）</p>
+<blockquote>
+<p>填坑先从这里开始。</p>
+</blockquote>
+<ul>
+<li><a href="/2016/07/20/2016-07-20-grpc/">gRPC</a> &amp; <a href="/2016/07/10/2016-07-10-tensorflow/">TensorFlow</a></li>
+</ul>
+<p>好歹花了3个月时间在这俩上面，稍微总结一下，搞完就再也不想再看到这两个了。</p>
+<ul>
+<li><a href="/tags/RDMA/">RDMA</a></li>
+</ul>
+<p>前面留过两篇：<a href="/2016/06/27/2016-06-27-rdma/">【RDMA Warming Up】</a>、<a href="/2016/09/07/2016-09-07-rdmaibv/">【Simple usage of RDMA ibv】</a>，简单地记了下 RDMA 的架构和 IB Verbs 的用法，后面可以看看再补充一下。</p>
+<ul>
+<li>File Descriptor</li>
+</ul>
+<p>Linux 中的文件描述符这个东西以前就见过，一直没花时间好好弄明白过。</p>
+<p>幸好百度出来的 Pipe fd 和 FIFO fd 直接改进代码里面去没出问题…</p>
+<ul>
+<li>poll()/epoll()/…</li>
+</ul>
+<p>用于轮询文件描述符事件的几个 Linux 系统函数，配合文件描述符使用。</p>
+<blockquote>
+<p>到这里又让我想起来当年多次想啃掉结果总是中途放下的《Linux 内核完全剖析》…我发现内核的东西确实是有点意思的</p>
+</blockquote>
+<ul>
+<li>pthread</li>
+</ul>
+<p>多线程编程，这玩意也是之前没研究过的，强行百度了一波直接上马。</p>
+<ul>
+<li>函数指针</li>
+</ul>
+<p>由于函数指针的存在，读 gRPC 代码的过程中经历了生死般的折磨（后来想想可能跟我 gdb 没用好也有关系）。</p>
+<p>虽然总说<code>指针是C的灵魂</code>，但平时总是极力避免使用，原因也是灵魂很难驾驭啊。</p>
+<p>函数指针这个东西虽然难搞，但不得不说很好用，尤其是在一些比较大的项目中需要保证代码灵活性的时候。</p>
+<ul>
+<li>gdb</li>
+</ul>
+<p>非常有用的工具，大项目调试时也是，以前在比赛时见过边上各种神校的巨巨 vim+gdb 调得飞起，值得好好整理一波。</p>
+<p>例如 <code>dir</code> 导入源码目录等等用法，挺多可以整理的。</p>
+<ul>
+<li>gprof</li>
+</ul>
+<p>这次是没用到这玩意啦…当时曾经想过用 gprof 跑个函数调用图出来，最后还是 gdb 查调用栈然后手写整理了。</p>
+<hr>
+<p>先补这么多，加上前面已经挖好的几个坑，后面已经是一大堆需要整理的东西了，感觉可以写个“填坑系列”出来。</p>
+<hr>
+<h1 id="Something-to-be-written-down"><a href="#Something-to-be-written-down" class="headerlink" title="Something to be written down"></a>Something to be written down</h1><blockquote class="blockquote-center">
+有人问我：技术博客不是应该只留技术的东西在里面吗？
+这里还有这么多其他的...
+</blockquote>
+
+<p>其实还是挺庆幸自己能把这个博客一直坚持写下来的，曾经好多次想要不要把之前瞎写的随笔啥的都给删了，最后还是没舍得，不想让这个小站太冷得像机械。有时候往回翻翻以前写的东西，或是嘲笑/反思那时候为什么会有这样的想法，或是怀念那段精彩的/艰难的/开心的/难过的人生经历。</p>
+<p>其实这些东西也不在乎有没有人看，主要还是写给自己看的，看过我写过的心情，走过我去过的地方的人，有一两个就够了。</p>
+<blockquote>
+<p>刚刚看了看，这个域名我居然直接买到了 2018 年… 0.0 …看来当时拿了不少优惠券啊</p>
+<p>刚搭起来的时候还想着跟着原 po 一起改改博客主题或者干脆自己写一个，博客存放的地方也是，从 Github 到 Gitcafe 到自己的 VPS 最后又回到 Github，现在大概是过了那段瞎折腾的劲了，只想着干净清爽能写东西就好</p>
+</blockquote>
+<hr>
+<p>回到科大生活的话题，有时候想想我原来理想中的研究生生活到底应该是什么样的？</p>
+<p>并不是怕在电脑前一坐一天（毕竟以前刷题的时候这种日子早就习惯了），就是觉得这样的日子太过无趣。大概是之前自己被 Deadline 压得太厉害，原来想好的好多事情都没有机会去做，现在稍微从这样的 push 中解放出来一些了，也就心有余悸想着不要再回到这样的恶性循环里了。</p>
+<blockquote class="blockquote-center">
+有时候还是应该浪费点时间到实验室以外的生活中去的。
+</blockquote>
+
+<hr>
+<p>15号这天晚上刚洗完澡就跟着舍友一起出去浪了…</p>
+<img data-src="http://jcf94.com/download/2016-10-16-october-night1.jpg" class="full-image"/>
+
+<p>酒吧的名字叫 <code>驴圈慢生活</code>，一家很有悠闲氛围的清吧。除了驻唱唱歌以外还算清净，适合悠闲下来慢慢坐着谈天说地。</p>
+<img data-src="http://jcf94.com/download/2016-10-16-october-night2.jpg" class="full-image"/>
+
+<p>键盘+吉他以及驻唱。</p>
+<p>哦，还有惊喜地发现他们用的播放器是 网易云音乐 …我现在对用 网易云 的都很有好感</p>
+<img data-src="http://jcf94.com/download/2016-10-16-october-night3.jpg" class="full-image"/>
+
+<p>你敢信我们四个人逛在酒吧街上聊的居然是<strong>数据挖掘</strong>和<strong>机器学习</strong>…（捂脸，已沉迷学术无法自拔）…然后聊到人生，聊到社会发展…</p>
+<p>都是一群热爱学术并且很有生活的人啊~</p>
+<hr>
+<p>然后去了这个曾战斗过好多年的战场~</p>
+<img data-src="http://jcf94.com/download/2016-10-16-october-ccpc1.jpg" class="full-image"/>
+
+<p>到今天为止 参赛队员、裁判、教练 我算是都经历过了哈哈，说实话坐在观众席上看他们打比赛甚至有点比自己在赛场上还要紧张的感觉。</p>
+<img data-src="http://jcf94.com/download/2016-10-16-october-ccpc2.jpg" class="full-image"/>
+
+<hr>
+<h1 id="Life-Continues"><a href="#Life-Continues" class="headerlink" title="Life Continues"></a>Life Continues</h1><img data-src="http://jcf94.com/download/2016-10-16-october-smile.jpg" class="full-image"/>
+
+<p>生活仍要继续，不管面对什么，总要微笑地继续走下去。</p>
+<hr>
+<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="http://music.163.com/outchain/player?type=2&id=857896&auto=1&height=66"></iframe>
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2014/08/13/2014-08-13-xueshu/" rel="bookmark">浅谈我院学术氛围之我见</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/05/26/2015-05-26-start/" rel="bookmark">开始使用Github</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/05/28/2015-05-28-diary/" rel="bookmark">通宵那些事</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/06/02/2015-06-02-birthday/" rel="bookmark">生日 记</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2015/06/13/2015-06-13-tuiyi/" rel="bookmark">退役帖</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%9A%8F%E7%AC%94/" rel="tag"># 随笔</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/09/07/2016-09-07-rdmaibv/" rel="prev" title="Simple usage of RDMA ibv">
+      <i class="fa fa-chevron-left"></i> Simple usage of RDMA ibv
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/01/24/2017-01-24-lost/" rel="next" title="在冷风中凌乱着">
+      在冷风中凌乱着 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Something-New-amp-Left"><span class="nav-text">Something New &amp; Left</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Something-to-be-written-down"><span class="nav-text">Something to be written down</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Life-Continues"><span class="nav-text">Life Continues</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '0facab9f404b9ba915342c3e08e70c0d',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

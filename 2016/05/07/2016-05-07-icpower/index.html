@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="在知乎上看到一篇文章，讲CPU功耗的，感觉这样的干货还是很不错的。 以下是文章内容：  首先需要澄清的是，这篇文章的作者其实是IC之神-rabaey。rabaey之名无需赘述，上过微电子课程的童鞋想必都被这本《数字集成电路——电路、系统与设计》折磨过，你们的苦难就是拜他所赐。 大神写了新书《low power design essentials》（也不算新，09年的），讲低功耗设计的，今天讲的内容">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【转】功耗对处理器的限制究竟有多大？">
+<meta property="og:url" content="https://jcf94.com/2016/05/07/2016-05-07-icpower/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="在知乎上看到一篇文章，讲CPU功耗的，感觉这样的干货还是很不错的。 以下是文章内容：  首先需要澄清的是，这篇文章的作者其实是IC之神-rabaey。rabaey之名无需赘述，上过微电子课程的童鞋想必都被这本《数字集成电路——电路、系统与设计》折磨过，你们的苦难就是拜他所赐。 大神写了新书《low power design essentials》（也不算新，09年的），讲低功耗设计的，今天讲的内容">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2016-05-07-icpower-1.png">
+<meta property="og:image" content="http://jcf94.com/download/2016-05-07-icpower-2.png">
+<meta property="og:image" content="http://jcf94.com/download/2016-05-07-icpower-3.png">
+<meta property="og:image" content="http://jcf94.com/download/2016-05-07-icpower-4.png">
+<meta property="og:image" content="http://jcf94.com/download/2016-05-07-icpower-5.png">
+<meta property="og:image" content="http://jcf94.com/download/2016-05-07-icpower-6.png">
+<meta property="og:image" content="http://jcf94.com/download/2016-05-07-icpower-7.png">
+<meta property="og:image" content="http://jcf94.com/download/2016-05-07-icpower-ic.png">
+<meta property="article:published_time" content="2016-05-07T03:52:38.000Z">
+<meta property="article:modified_time" content="2018-09-23T10:58:49.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="转载">
+<meta property="article:tag" content="IC免费课">
+<meta property="article:tag" content="CPU">
+<meta property="article:tag" content="功耗">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2016-05-07-icpower-1.png">
+
+<link rel="canonical" href="https://jcf94.com/2016/05/07/2016-05-07-icpower/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>【转】功耗对处理器的限制究竟有多大？ | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2016/05/07/2016-05-07-icpower/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【转】功耗对处理器的限制究竟有多大？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-05-07 11:52:38" itemprop="dateCreated datePublished" datetime="2016-05-07T11:52:38+08:00">2016-05-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-09-23 18:58:49" itemprop="dateModified" datetime="2018-09-23T18:58:49+08:00">2018-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Architecture/" itemprop="url" rel="index"><span itemprop="name">Computer Architecture</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在知乎上看到一篇文章，讲CPU功耗的，感觉这样的干货还是很不错的。</p>
+<p>以下是文章内容：</p>
+<hr>
+<p>首先需要澄清的是，这篇文章的作者其实是IC之神-rabaey。rabaey之名无需赘述，上过微电子课程的童鞋想必都被这本《数字集成电路——电路、系统与设计》折磨过，你们的苦难就是拜他所赐。</p>
+<p>大神写了新书《low power design essentials》（也不算新，09年的），讲低功耗设计的，今天讲的内容出自该书第一章。</p>
+<p>之所以讲第一章，是因为后面的内容没人看得懂。</p>
+<a id="more"></a>
+
+<p>我们都知道，低功耗设计很重要，尤其是对于移动端处理器以及嵌入式系统。但是功耗对设计究竟影响到了什么程度，相信很多人并没有明确的定量的概念。而rabeay在第一章用一系列数据告诉了我们Power是怎么影响芯片设计的。</p>
+<p><img data-src="http://jcf94.com/download/2016-05-07-icpower-1.png" alt=""></p>
+<p>上图是统计了近年来主流微处理器（MPU）和DSP的平均功耗。可以看到95年之前，每3年功耗增加4倍；95年之后，每3年增加1.4倍。同时95年前后，移动端应用的快速发展，出现了低功耗处理器的新分支（向下的灰箭头）。</p>
+<p>为什么在95年会有功耗增长率减半这个突然变化？因为95年开始，工业界放弃了<strong>5V固定电压</strong>的设计模式，开始采用<strong>等比降压</strong>的设计模式。什么叫5V固定电压设计？就是说，早先的处理器供电电压是5V，随着工艺尺寸不断减小，晶体管的阈值电压降低，理论上供电电压也可以减小。但是电压减小意味着晶体管开关速度变慢，IC厂商为了性能考虑，在设计时，即便采用更小的工艺尺寸，照样会保持5V供电电压，带来的后果就是功耗增大很多。什么叫等比降压？就是随着工艺尺寸的缩小，等比例的缩小chip电压。95年左右就是该方案的开始。</p>
+<p><img data-src="http://jcf94.com/download/2016-05-07-icpower-2.png" alt=""></p>
+<p>上面这张图展示了90年开始芯片电压是怎么变化的。95年之后，在0.35um的工艺中开始采用3.3V供电，此后随着工艺尺寸的不断缩小，供电电压也开始不断降低。在180nm的时候，电压降为1.8V。在130nm的时候，电压降为1.3V。当然了，工艺尺寸2016年已经到达14nm，chip电压可没有降到0.14V。所以，实际情况是随着工艺尺寸进一步减小，chip电压再往下降已经非常困难了。因此，最近几年再次出现了工艺尺寸不断缩小，但是供电电压基本不变的趋势。</p>
+<p>为什么工艺尺寸缩小，就一定要降电压？这个就得说到<strong>功耗密度（每c㎡的功率）</strong>。</p>
+<p><img data-src="http://jcf94.com/download/2016-05-07-icpower-3.png" alt=""></p>
+<p>上图展示了功耗密度的变化趋势。可以看到，95年之前，chip上的功耗密度与k成3次方正比，95年之后，随着chip供电电压降低，功耗密度开始与k成0.7次方正比。k是工艺尺寸缩小因子，典型值是1.41。为什么是1.41？这其实是摩尔定律决定的参数，反映了工艺尺寸的演进的跨度。180nm的下一代工艺是130nm，180/130就大约接近1.41。</p>
+<p>说了这么多，目前我们知道的是，<strong>尽管芯片工艺尺寸不断减小，chip的电压也在不断降低，但是功耗密度仍然在不断增加</strong>，但是究竟会达到什么程度？</p>
+<p><img data-src="http://jcf94.com/download/2016-05-07-icpower-4.png" alt=""></p>
+<p>上图给出了直观的对比。当然了，这是一个很惊悚的图，大概是说按照目前功耗密度的趋势，大概2004年功耗密度将跟核反应一样的程度。2008年达到火箭尾焰的程度。看到这里，我不由得掐指算了算，咦，今年好像2016年了。</p>
+<p>上图当然是危言耸听。但是也说明了一个问题，那就是从2004年开始，如果不遏制持续增长的功耗密度，芯片设计将变得不太可能。至少，封装将不太可能。现在的设计普遍认为，<strong>功耗密度高于150W/c㎡是应该极力避免的</strong>，除非说你完全不在乎封装的成本。</p>
+<p>150W/c㎡是个很大的数了，一个2c㎡的chip 能允许的是300W。想象一下指甲壳大小的chip是个300W的热源，有多烫简直不可想象。当然实际的chip远远不到这个功耗就已经烫的不行了。</p>
+<p><img data-src="http://jcf94.com/download/2016-05-07-icpower-5.png" alt=""></p>
+<p>上面这张图终于给出了我们最关心的主题。根据估算，在20nm工艺下，以前的45nm处理器如果采用1.2V供电，不考虑散热的话，其实运行频率理论上可以达到30GHZ。但是带来的问题就是功耗密度达到惊人的20KW/c㎡，远高于太阳表面的功耗密度。即便运行频率达到10GHZ，功耗密度也达到5KW/c㎡，比火箭的尾焰还热。<strong>所以从散热考虑，实际的处理器运行频率都被限制在10GHZ以内，即便晶体管的速度允许其达到10GHZ</strong>。</p>
+<p>咦？好像又有哪里不太对。我记得Intel的CPU都可以上4G的频率的。按照10G就是5KW/c㎡，4G也妥妥是800W/c㎡，依然远高于我们的阈值：150W/c㎡。那现在的处理器是怎么上4G频率的呢？</p>
+<p><img data-src="http://jcf94.com/download/2016-05-07-icpower-6.png" alt=""></p>
+<p>这张图给出了解释。对于2cmx2cm的处理器，供电电压假设为0.6V，系统频率假设可以上10GHZ，那么将会有一个极大的功耗密度。但是我们把条件放松一点，对功耗密度除以5（够仁至义尽了），最终总功耗也有4kW。如果要将chip的总功耗限制在200W，结果就是：<strong>整个chip将在任何时候只能有5%的门电路翻转</strong>。其余的95%必须不消耗任何功耗，连漏电流也不能有。</p>
+<p>这就解释了要满足功耗密度限制，如果想做高性能，你必须牺牲什么。那就是只有很少的一部分逻辑能够翻转。</p>
+<p>基于以上我们看到了功耗密度对处理器的限制究竟有多大。由于阈值摆在那里：150W/c㎡，所以处理器的频率以及晶体管翻转率就受到了极大的限制。即便晶体管速度允许达到10GHZ，带来的功耗密度也完全不可容忍。想要提高频率，在总功耗一定的情况下，就只能减少晶体管翻转率。</p>
+<p>我们经常可以看到新闻报道，某科研机构研制出来了新的晶体管，速度达到几十G乃至上T赫兹，有望改变计算机前景，而对其功耗只字不提。事实上，根据上述介绍，在不改变性能/功耗比的前提下，这些都是扯淡。<strong>未来的工艺技术，需要的绝对不仅仅是更快的开关，还需要在更低功耗下的开关</strong>。</p>
+<p>当然，还需要更好的<strong>封装技术</strong>。</p>
+<p>比较坑爹的是，封装是有成本的。对于处理器来讲，普通的塑料封装，成本可能只有几美元，但是总功率必须低于3W；高性能的封装，可以允许功率密度达到100W/c㎡，但是需要十几美元的成本。再往上，封装成本越高。</p>
+<p>因此，现在的处理器设计其实是一个悖论：想要处理器的性能更高，就必须降低某一频率下的整体功耗。因为只有整体功耗更低，才能允许核心运行更高的频率，才能允许更高的性能。IC设计早已经过了那种性能提高功耗也提高的粗放式增长年代了，<strong>在总功耗一定的情况下，性能就是看谁对功耗运用的更合理、更节省</strong>。同样的工艺，intel的CPU能上4G散热照样hold住，别人家的CPU则只能上2G或者3G，弱势就很明显。</p>
+<p>换句话说，芯片设计者不得不面对的事实是：<strong>芯片性能要稳定提高，但是功耗却不能更高</strong>，这可真是难啊！在摩尔定律尚未终结的时候，工艺尺寸的不断缩减带来的福利使得这个目标或许不难达成。但是假如工艺尺寸无法继续缩减，漏电流也无法进一步改善，芯片性能还能有提高吗？未来的CPU发展很有可能会是下图的情况，由于总功耗的限制，CPU的性能在有限范围内不断小幅升级，但是终至枯竭，急需新的封装工艺，加工工艺，电池工艺和材料物理的突破，再来一次革命。关于这图，有疑问的只是摩尔定律终结究竟是哪一年，新工艺元年又是哪一年，两者中间有多大的latency而已。</p>
+<p><img data-src="http://jcf94.com/download/2016-05-07-icpower-7.png" alt=""></p>
+<hr>
+<p>作者：龚黎明<br>链接：<a href="https://zhuanlan.zhihu.com/p/20808891" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/20808891</a><br>来源：知乎<br>著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
+<p>本文也转自微信公众号：IC免费课。</p>
+<p><img data-src="http://jcf94.com/download/2016-05-07-icpower-ic.png" alt=""></p>
+
+    </div>
+
+    
+    
+    
+      
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%BD%AC%E8%BD%BD/" rel="tag"># 转载</a>
+              <a href="/tags/IC%E5%85%8D%E8%B4%B9%E8%AF%BE/" rel="tag"># IC免费课</a>
+              <a href="/tags/CPU/" rel="tag"># CPU</a>
+              <a href="/tags/%E5%8A%9F%E8%80%97/" rel="tag"># 功耗</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/05/01/2016-05-01-jvectormap/" rel="prev" title="JS地图插件jvectormap">
+      <i class="fa fa-chevron-left"></i> JS地图插件jvectormap
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/05/16/2016-05-16-qinghai/" rel="next" title="五分之三的青海">
+      五分之三的青海 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '7d707c7c61311eaf7231048d547f3322',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

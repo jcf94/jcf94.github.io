@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前篇：  TensorFlow 拆包（一）：Session.Run() TensorFlow 拆包（二）：TF 的数据流模型实现 TensorFlow 拆包（三）：Graph 和 Node TensorFlow 拆包（四）：Device TensorFlow 拆包（五）：Distributed TensorFlow 拆包（六）：RDMA TensorFlow 拆包（七）：Profiling 踩坑">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TensorFlow 拆包（十）：Allreduce">
+<meta property="og:url" content="https://jcf94.com/2018/12/18/2018-12-18-tfunpacking10/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="前篇：  TensorFlow 拆包（一）：Session.Run() TensorFlow 拆包（二）：TF 的数据流模型实现 TensorFlow 拆包（三）：Graph 和 Node TensorFlow 拆包（四）：Device TensorFlow 拆包（五）：Distributed TensorFlow 拆包（六）：RDMA TensorFlow 拆包（七）：Profiling 踩坑">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2018-12-18T08:31:44.000Z">
+<meta property="article:modified_time" content="2018-12-21T08:55:19.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="TensorFlow">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jcf94.com/2018/12/18/2018-12-18-tfunpacking10/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>TensorFlow 拆包（十）：Allreduce | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2018/12/18/2018-12-18-tfunpacking10/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TensorFlow 拆包（十）：Allreduce
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-12-18 16:31:44" itemprop="dateCreated datePublished" datetime="2018-12-18T16:31:44+08:00">2018-12-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-12-21 16:55:19" itemprop="dateModified" datetime="2018-12-21T16:55:19+08:00">2018-12-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Project/" itemprop="url" rel="index"><span itemprop="name">Project</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>前篇：</p>
+<ul>
+<li><a href="/2018/01/13/2018-01-13-tfunpacking/">TensorFlow 拆包（一）：Session.Run()</a></li>
+<li><a href="/2018/01/23/2018-01-23-tfunpacking2/">TensorFlow 拆包（二）：TF 的数据流模型实现</a></li>
+<li><a href="/2018/02/28/2018-02-28-tfunpacking3/">TensorFlow 拆包（三）：Graph 和 Node</a></li>
+<li><a href="/2018/03/07/2018-03-07-tfunpacking4/">TensorFlow 拆包（四）：Device</a></li>
+<li><a href="/2018/03/09/2018-03-09-tfunpacking5/">TensorFlow 拆包（五）：Distributed</a></li>
+<li><a href="/2018/03/12/2018-03-12-tfunpacking6/">TensorFlow 拆包（六）：RDMA</a></li>
+<li><a href="/2018/04/10/2018-04-10-tfunpacking7/">TensorFlow 拆包（七）：Profiling 踩坑 &amp; Benchmark</a></li>
+<li><a href="/2018/06/11/2018-06-11-tfunpacking8/">TensorFlow 拆包（八）：Dynamic Control Flow in Large-Scale Machine Learning</a></li>
+<li><a href="/2018/10/21/2018-10-21-tfunpacking9/">TensorFlow 拆包（九）：High Level APIs</a></li>
+</ul>
+<p>不知不觉居然写了十篇了……写这个的初衷是觉得自己是个容易忘事的人，不找个地方做点笔记可能回过头就忘了自己看过什么了。</p>
+<p>这篇要分析的是 TensorFlow 自带的 Allreduce 实现。</p>
+<a id="more"></a>
+
+<hr>
+<h1 id="APIs-outside-of-tf-wrapper"><a href="#APIs-outside-of-tf-wrapper" class="headerlink" title="APIs outside of tf wrapper"></a>APIs outside of tf wrapper</h1><p>TensorFlow 中常规的使用操作是：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br></pre></td></tr></table></figure>
+
+<p>但是实际上 TensorFlow 目录下的 <code>__init__.py</code> 里面并没有把全部的内容都包含进去，另外的内容需要通过：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> tensorflow.xxx.xxx <span class="keyword">import</span> xxx</span><br></pre></td></tr></table></figure>
+
+<p>这样的方式直接导入单独的包。</p>
+<p>然后更奇怪的是有的 API 明明不在 <code>contrib</code> 中，按理说应该算是官方库中正式内容了，但是在官网的文档中却找不到。也可能是正要从 <code>contrib</code> 往官方库中移？</p>
+<p>举例来说前面提过的 StagingArea 就是这样，然后这里的 Allreduce 操作的 API 也是，这就让人很好奇是不是还有别的什么不常用到的 API 可能在某些场景下会有奇效？</p>
+<p>扯远了，</p>
+<h1 id="collective-op"><a href="#collective-op" class="headerlink" title="collective op"></a>collective op</h1><p>首先是 <code>tensorflow.python.ops</code> 下的 <code>collective_ops.py</code> 这个文件，一共包含了 3 个 API：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">all_reduce</span><span class="params">(t, group_size, group_key, instance_key, merge_op, final_op,</span></span></span><br><span class="line"><span class="function"><span class="params">               subdiv_offsets=<span class="params">(<span class="number">0</span>,)</span>)</span></span></span><br><span class="line">  """Reduces tensors collectively, across devices.</span><br><span class="line"></span><br><span class="line">  Args:</span><br><span class="line">    t: the tensor to be reduced.</span><br><span class="line">    group_size: the total number of tensors to be collectively reduced.</span><br><span class="line">      Each must reside on a different device.</span><br><span class="line">    group_key: an integer identifying the group of devices.</span><br><span class="line">    instance_key: an integer identifying the participating group of Ops.</span><br><span class="line">    merge_op: string naming the binary Op to be applied to compute each</span><br><span class="line">      partial reduction.</span><br><span class="line">    final_op: string naming the unary Op to be applied to each fully</span><br><span class="line">      reduced value.  Can be <span class="string">'Id'</span> <span class="keyword">for</span> no operation.</span><br><span class="line">    subdiv_offsets: a list of integer offsets into the tensor at which each</span><br><span class="line">      independent subdivision should begin.  Use [<span class="number">0</span>] <span class="keyword">if</span> no subdivision should</span><br><span class="line">      be done.</span><br><span class="line"></span><br><span class="line">  Returns:</span><br><span class="line">    An Op implementing the distributed reduction.</span><br><span class="line"></span><br><span class="line">  Raises:</span><br><span class="line">    ValueError: <span class="keyword">if</span> any of the input parameter constraints are <span class="keyword">not</span> met.</span><br><span class="line">  <span class="string">"""</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">def broadcast_send(t, shape, dtype, group_size, group_key, instance_key)</span></span><br><span class="line"><span class="string">  """</span>Broadcasts one tensor to a group of others, across devices.</span><br><span class="line"></span><br><span class="line">  Args:</span><br><span class="line">    t: the tensor to be sent.</span><br><span class="line">    shape: the shape of the tensor being sent, which must agree <span class="keyword">with</span> t.</span><br><span class="line">    dtype: the type of the tensor being sent, which must agree <span class="keyword">with</span> t.</span><br><span class="line">    group_size: one plus the number of receiving tensors, i.e. the total</span><br><span class="line">      number of devices participating.  Each tensor must reside on a</span><br><span class="line">      different device.</span><br><span class="line">    group_key: an integer identifying the group of devices.</span><br><span class="line">    instance_key: an integer identifying the participating group of Ops.</span><br><span class="line"></span><br><span class="line">  Returns:</span><br><span class="line">    An Op implementing the distributed broadcast send.</span><br><span class="line"></span><br><span class="line">  Raises:</span><br><span class="line">    ValueError: <span class="keyword">if</span> any of the input parameter constraints are <span class="keyword">not</span> met.</span><br><span class="line"></span><br><span class="line">  Note that the shape <span class="keyword">and</span> dtype arguments appear redundant since they</span><br><span class="line">  should be obtainable <span class="keyword">from</span> t.  The are two reasons <span class="keyword">for</span> including</span><br><span class="line">  them.  First, the shape <span class="keyword">and</span> type of tensors passed via broadcast must</span><br><span class="line">  be known ahead of time <span class="keyword">in</span> their most specific form so that the receive</span><br><span class="line">  side can allocate memory <span class="keyword">for</span> the operation <span class="keyword">and</span> shape/type inference can</span><br><span class="line">  carry forward <span class="keyword">from</span> there.  Including the same declarations on the</span><br><span class="line">  send side clarifies a commitment already made.  Secondly, having nearly</span><br><span class="line">  identical use syntax <span class="keyword">for</span> send <span class="keyword">and</span> receive sides may simplify tool-driven</span><br><span class="line">  generation of broadcast.</span><br><span class="line">  <span class="string">"""</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">def broadcast_recv(shape, dtype, group_size, group_key, instance_key)</span></span><br><span class="line"><span class="string">  """</span>Receives a broadcasts tensor, across devices.</span><br><span class="line"></span><br><span class="line">  Args:</span><br><span class="line">    shape: Shape of the tensor to be received.</span><br><span class="line">    dtype: Type of the tensor to be received.</span><br><span class="line">    group_size: one plus the number of receiving tensors, i.e. the total</span><br><span class="line">      number of devices participating.  Each tensor must reside on a</span><br><span class="line">      different device.</span><br><span class="line">    group_key: an integer identifying the group of devices.</span><br><span class="line">    instance_key: an integer identifying the participating group of Ops.</span><br><span class="line"></span><br><span class="line">  Returns:</span><br><span class="line">    An Op implementing the broadcast receive.</span><br><span class="line"></span><br><span class="line">  Raises:</span><br><span class="line">    ValueError: <span class="keyword">if</span> any of the input parameter constraints are <span class="keyword">not</span> met.</span><br><span class="line">  <span class="string">"""</span></span><br></pre></td></tr></table></figure>
+
+<p>基本的用法示例如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> tf.device(<span class="string">'cpu:0'</span>):</span><br><span class="line">    v0 = tf.Variable([<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>], dtype=tf.float32)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> tf.device(<span class="string">'gpu:0'</span>):</span><br><span class="line">    v1 = tf.Variable([<span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>], dtype=tf.float32)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> tf.device(<span class="string">'gpu:1'</span>):</span><br><span class="line">    v2 = tf.Variable([<span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>], dtype=tf.float32)</span><br><span class="line"></span><br><span class="line">sess = tf.Session(config=CONFIG)</span><br><span class="line"></span><br><span class="line">sess.run(tf.global_variables_initializer())</span><br><span class="line"></span><br><span class="line">print(sess.run([v0, v1, v2]))</span><br><span class="line"></span><br><span class="line">sum_reduce = []</span><br><span class="line"><span class="comment"># with tf.device('cpu:0'):</span></span><br><span class="line"><span class="comment">#     out.append(collective_ops.all_reduce(v0, 3, 1, 1, 'Add', 'Id'))</span></span><br><span class="line"><span class="keyword">with</span> tf.device(<span class="string">'gpu:0'</span>):</span><br><span class="line">    sum_reduce.append(collective_ops.all_reduce(v1, <span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="string">'Add'</span>, <span class="string">'Id'</span>))</span><br><span class="line"><span class="keyword">with</span> tf.device(<span class="string">'gpu:1'</span>):</span><br><span class="line">    sum_reduce.append(collective_ops.all_reduce(v2, <span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="string">'Add'</span>, <span class="string">'Id'</span>))</span><br><span class="line">print(sess.run(sum_reduce))</span><br><span class="line"></span><br><span class="line">average_reduce = []</span><br><span class="line"><span class="keyword">with</span> tf.device(<span class="string">'gpu:0'</span>):</span><br><span class="line">    average_reduce.append(collective_ops.all_reduce(v1, <span class="number">2</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="string">'Add'</span>, <span class="string">'Div'</span>))</span><br><span class="line"><span class="keyword">with</span> tf.device(<span class="string">'gpu:1'</span>):</span><br><span class="line">    average_reduce.append(collective_ops.all_reduce(v2, <span class="number">2</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="string">'Add'</span>, <span class="string">'Div'</span>))</span><br><span class="line">print(sess.run(average_reduce))</span><br><span class="line"></span><br><span class="line">print(sess.run([v0, v1, v2]))</span><br><span class="line"></span><br><span class="line">print(<span class="string">'=========================='</span>)</span><br><span class="line"></span><br><span class="line">bcast = []</span><br><span class="line"><span class="comment"># with tf.device('cpu:0'):</span></span><br><span class="line"><span class="comment">#     bcast.append(collective_ops.broadcast_send(v0, v0.shape, v0.dtype, 2, 3, 1))</span></span><br><span class="line"><span class="keyword">with</span> tf.device(<span class="string">'gpu:0'</span>):</span><br><span class="line">    bcast.append(collective_ops.broadcast_send(v0, v0.shape, v0.dtype, <span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>))</span><br><span class="line"><span class="keyword">with</span> tf.device(<span class="string">'gpu:1'</span>):</span><br><span class="line">    bcast.append(collective_ops.broadcast_recv(v0.shape, v0.dtype, <span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>))</span><br><span class="line"></span><br><span class="line">print(sess.run(bcast))</span><br></pre></td></tr></table></figure>
+
+<p>参数中的 t 是每个 device 上要进行 reduce 的本地 Tensor，group_size 是一共需要参与的 Tensor 数量，merge_op 和 final_op 分别是 reduce 聚合时和聚合结束之后要做的事情。</p>
+<p>然后比较坑的是 group_key 和 instance_key 这两个参数，注释写的太不明确了（还是我理解能力有问题？）。instance_key 应该是用于标识完整的一次 reduce 操作，而 group_key 具体是怎么来的还不是很清楚。测试的时候整体换成另外的数字都是可以正常工作的。</p>
+<p>另外 all_reduce 和 broadcast 都似乎不能在 GPU 和 CPU 间进行工作？选择两块 GPU 卡之前是没有问题的，而再加上一个 CPU 就报错了。</p>
+<hr>
+<p>其中的具体实现来自于 <code>gen_collective_ops</code> 这个包，那我们就知道这又是个用 C++ 写的然后封装到 python 下面用的操作了。</p>
+<p>接口定义在 <code>tensorflow/core/ops/collective_ops.cc</code> 中，C++ 部分的实际实现在 <code>tensorflow/core/kernels/collective_ops.cc</code> 中，但是这里的 <code>CollectiveReduceOpKernel</code>、<code>CollectiveBcastSendOpKernel</code>、<code>CollectiveBcastRecvOpKernel</code> 三个类也主要还是用于设置输入输出的参数信息、检查结果等等，更进一步的实现要到 <code>tensorflow/core/common_runtime/base_collective_executor.cc</code> 中。</p>
+<p>继续深挖下去之后，在 <code>collective_param_resolver_local.cc</code> 中看到了这样一段：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cp-&gt;instance.impl_details.collective_name =</span><br><span class="line">    (cp-&gt;instance.type == BROADCAST_COLLECTIVE) ? <span class="string">"HierarchicalTreeBroadcast"</span></span><br><span class="line">                                                : <span class="string">"RingReduce"</span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>……</p>
+</blockquote>
+<p>嗯，所以这里的实现又是注册、又是各种封装的，结果到最后只有两种算法。</p>
+<p>目前这里的 all_reduce 只有环状通信的算法实现，broadcast 则只有二叉树广播方式的算法实现。</p>
+<h2 id="group-key"><a href="#group-key" class="headerlink" title="group_key"></a>group_key</h2><p>要想搞清楚这个 group_key 是怎么回事，还得从 <code>tensorflow/core/kernels/collective_ops.cc</code> 这个接口开始。</p>
+<p><code>CollectiveReduceOpKernel</code>、<code>CollectiveBcastSendOpKernel</code>、<code>CollectiveBcastRecvOpKernel</code>  三个类的 <code>ComputeAsync()</code> 方法的基本结构都差不多：</p>
+<ul>
+<li>准备输出用的 Tensor，由于 Reduce 操作本身带有输入，这里也会尝试是否可以重用输入的 Tensor</li>
+<li>调用 <code>CanProceedWithCompute()</code> 方法检查各项参数，对 group_key 的检查也在这里完成</li>
+<li>调用对应的实现算法完成计算</li>
+</ul>
+<p>单机环境下的 <code>CanProceedWithCompute()</code> 最后会调用 <code>CollectiveParamResolverLocal::CompleteGroupLocal()</code> ，group_key 在这里只是完全作为一个 map 的关键字来使用：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="function">mutex_lock <span class="title">l</span><span class="params">(group_mu_)</span></span>;</span><br><span class="line">  <span class="keyword">auto</span> it = group_table_.find(cp-&gt;group.group_key);</span><br><span class="line">  <span class="keyword">if</span> (it == group_table_.end()) &#123;</span><br><span class="line">    gr = <span class="keyword">new</span> GroupRec;</span><br><span class="line">    gr-&gt;group.group_key = cp-&gt;group.group_key;</span><br><span class="line">    gr-&gt;group.group_size = cp-&gt;group.group_size;</span><br><span class="line">    gr-&gt;group.device_type = cp-&gt;group.device_type;</span><br><span class="line">    group_table_[gr-&gt;group.group_key].reset(gr);</span><br><span class="line">    VLOG(<span class="number">2</span>) &lt;&lt; <span class="string">"New group_key="</span> &lt;&lt; gr-&gt;group.group_key</span><br><span class="line">            &lt;&lt; <span class="string">" group_size="</span> &lt;&lt; gr-&gt;group.group_size;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    gr = it-&gt;second.get();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>若某个 group_key 是第一次被使用，则与之关联的 GroupRec 会用当前创建该 op 的默认设备类型来作为整个 GroupRec 的设备类型。</p>
+<p>当下一个 collective_op 创建时，再对目标的设备类型和根据 group_key 找出来的 GroupRec 作对比，不一致则报错，因此这里确实是限制了参与 reduce 或者 broadcast 的所有 op 都要是同一种设备类型的。</p>
+<p>另外需要注意的是，同一个 group 中参与 all_reduce 和 broadcast 的 op 必须要和设备独立一一对应，所以也不可以在一块卡上同时发起 broadcast 的 send 和 recv，或者在同一块卡上的两个变量间进行 allreduce。</p>
+<blockquote>
+<p>这个设备限制我觉得还是比较奇怪的，从 CPU 向当前节点下的所有 GPU 设备广播我觉得是很常规的一种逻辑啊……</p>
+</blockquote>
+<p>instance_key 的作用也与 group_key 类似，InstanceRec 在这里主要是用来维护几个 mutex，主要负责多个 op 之间的同步，同时发生的多个 collective_op 操作只要 instance 不一样相互之间是不影响的。</p>
+<hr>
+<p>To be continued.</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/02/04/2017-02-04-tensorflow/" rel="bookmark">TensorFlow</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/04/04/2017-04-04-alexnet/" rel="bookmark">AlexNet</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/13/2018-01-13-tfunpacking/" rel="bookmark">TensorFlow 拆包（一）：Session.Run()</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/23/2018-01-23-tfunpacking2/" rel="bookmark">TensorFlow 拆包（二）：TF 的数据流模型实现以及自动求导</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/03/07/2018-03-07-tfunpacking4/" rel="bookmark">TensorFlow 拆包（四）：Device</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/TensorFlow/" rel="tag"># TensorFlow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/11/26/2018-11-26-fasterimagenet/" rel="prev" title="Faster and Faster -- ImageNet">
+      <i class="fa fa-chevron-left"></i> Faster and Faster -- ImageNet
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/01/01/2019-01-01-vizgraph/" rel="next" title="Release 了一个新的 VizGraph">
+      Release 了一个新的 VizGraph <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#APIs-outside-of-tf-wrapper"><span class="nav-text">APIs outside of tf wrapper</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#collective-op"><span class="nav-text">collective op</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#group-key"><span class="nav-text">group_key</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '918e5ddc3d8c1812118f2179945d1ad0',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

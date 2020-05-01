@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+
+  <link rel="search" type="application/opensearchdescription+xml" href="https://jcf94.com/sitesearch.xml" title="Chenfan Blog">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jcf94.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前篇：  TensorFlow 拆包（一）：Session.Run() TensorFlow 拆包（二）：TF 的数据流模型实现 TensorFlow 拆包（三）：Graph 和 Node TensorFlow 拆包（四）：Device TensorFlow 拆包（五）：Distributed TensorFlow 拆包（六）：RDMA TensorFlow 拆包（七）：Profiling 踩坑">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TensorFlow 拆包（九）：High Level APIs">
+<meta property="og:url" content="https://jcf94.com/2018/10/21/2018-10-21-tfunpacking9/index.html">
+<meta property="og:site_name" content="Chenfan Blog">
+<meta property="og:description" content="前篇：  TensorFlow 拆包（一）：Session.Run() TensorFlow 拆包（二）：TF 的数据流模型实现 TensorFlow 拆包（三）：Graph 和 Node TensorFlow 拆包（四）：Device TensorFlow 拆包（五）：Distributed TensorFlow 拆包（六）：RDMA TensorFlow 拆包（七）：Profiling 踩坑">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-21-tfunpacking9-staging1.svg">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-21-tfunpacking9-staging2.svg">
+<meta property="og:image" content="http://jcf94.com/download/2018-10-21-tfunpacking9-staging3.svg">
+<meta property="article:published_time" content="2018-10-21T02:26:53.000Z">
+<meta property="article:modified_time" content="2018-12-10T13:12:54.000Z">
+<meta property="article:author" content="Jcf94">
+<meta property="article:tag" content="TensorFlow">
+<meta property="article:tag" content="Estimator">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://jcf94.com/download/2018-10-21-tfunpacking9-staging1.svg">
+
+<link rel="canonical" href="https://jcf94.com/2018/10/21/2018-10-21-tfunpacking9/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>TensorFlow 拆包（九）：High Level APIs | Chenfan Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Chenfan Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chenfan Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Do cool things that matter.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-paper-reading">
+
+    <a href="/2017/08/18/2017-08-18-paper/" rel="section"><i class="fa fa-fw fa-bookmark"></i>Paper Reading</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-fw fa-link"></i>Links</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://jcf94.com/2018/10/21/2018-10-21-tfunpacking9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/photo.jpg">
+      <meta itemprop="name" content="Jcf94">
+      <meta itemprop="description" content="To live is to change the world.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chenfan Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TensorFlow 拆包（九）：High Level APIs
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-10-21 10:26:53" itemprop="dateCreated datePublished" datetime="2018-10-21T10:26:53+08:00">2018-10-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2018-12-10 21:12:54" itemprop="dateModified" datetime="2018-12-10T21:12:54+08:00">2018-12-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Project/" itemprop="url" rel="index"><span itemprop="name">Project</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>前篇：</p>
+<ul>
+<li><a href="/2018/01/13/2018-01-13-tfunpacking/">TensorFlow 拆包（一）：Session.Run()</a></li>
+<li><a href="/2018/01/23/2018-01-23-tfunpacking2/">TensorFlow 拆包（二）：TF 的数据流模型实现</a></li>
+<li><a href="/2018/02/28/2018-02-28-tfunpacking3/">TensorFlow 拆包（三）：Graph 和 Node</a></li>
+<li><a href="/2018/03/07/2018-03-07-tfunpacking4/">TensorFlow 拆包（四）：Device</a></li>
+<li><a href="/2018/03/09/2018-03-09-tfunpacking5/">TensorFlow 拆包（五）：Distributed</a></li>
+<li><a href="/2018/03/12/2018-03-12-tfunpacking6/">TensorFlow 拆包（六）：RDMA</a></li>
+<li><a href="/2018/04/10/2018-04-10-tfunpacking7/">TensorFlow 拆包（七）：Profiling 踩坑 &amp; Benchmark</a></li>
+<li><a href="/2018/06/11/2018-06-11-tfunpacking8/">TensorFlow 拆包（八）：Dynamic Control Flow in Large-Scale Machine Learning</a></li>
+</ul>
+<p>这篇来研究一下 TF 中的一些高级 API。</p>
+<p>TensorFlow 由于一直是在开源的社区环境中发展起来的，早期的一些 API 都比较简单粗暴（更直白地说就是<strong>不那么好用</strong>），以至于在它之上封装的更友好的 Keras 可能在大部分的使用者群体中会有更高的出现率。后来的 TensorFlow 中也有吸收 Keras 里面一些比较好的结构，有出现像 <code>tf.layers</code> 这样的更高层封装，可以期待一下 2.0 以后会不会大幅优化上层的编码 API 吧。</p>
+<p>那这里说的高级 API 是什么呢？</p>
+<a id="more"></a>
+
+<p>官网的 guide 里面列了几个：</p>
+<ul>
+<li>Keras：一个神奇的包 <code>tf.keras</code>，官方提供的从 TensorFlow 本身向 Keras API 兼容的实现（感觉怪怪的，底层库中包含了一个对高层封装的兼容？？？）</li>
+<li>Eager Execution：TensorFlow 的动态计算图实现，类似普通的 Numpy 或者 Pytorch 的执行模式</li>
+<li>Importing Data：对输入数据的流水线封装 API</li>
+<li>Estimator：用于把封装好的模型方便地扩展到多卡/多机的高级 API</li>
+</ul>
+<p>其他的还有包括像 StagingArea（构建软件流水，神器！！！）等等目前还在 <code>tf.contrib</code> 中处于实验阶段的很多东西，开源的力量太强大了，每隔一段时间就有很多新功能被社区添加进库中。</p>
+<hr>
+<h1 id="Estimator"><a href="#Estimator" class="headerlink" title="Estimator"></a>Estimator</h1><p>像 <code>tf.keras</code> 和 Estimator 的设计都是为了让用户能够更方便地编写网络，话说简单看了下 Estimator 的用法，API 的设计方式应该大概率是从 Keras 里面借鉴的。</p>
+<p>具体的使用这里就不多记了，<a href="https://github.com/jcf94/my-dl-script/blob/master/mnist/dbg_mnist_estimator.py" target="_blank" rel="noopener">这里</a> 写了个很小的例子，直接开始拆 Estimator 的实现吧。</p>
+<p>核心是 <code>tf.estimator.Estimator</code> 这个类，先看初始化参数：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">__init__(</span><br><span class="line">    model_fn,</span><br><span class="line">    model_dir=<span class="literal">None</span>,</span><br><span class="line">    config=<span class="literal">None</span>,</span><br><span class="line">    params=<span class="literal">None</span>,</span><br><span class="line">    warm_start_from=<span class="literal">None</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>第一个是用来构建网络的模型函数，具体后面详细分析；<code>model_dir</code> 用于指定保存的参数、checkpoint、log 信息等等存放的目录；再后面的几个都是一些额外的配置选项。</p>
+<blockquote>
+<p>让我觉得非常怪的是官网的介绍页面说 Estimator 的优势是不需要用户建图……我真是一脸懵逼。或许对于 TF 内置的一些事先建好的 Estimator 是这样吧，但是如果想自定义呢？……写文档的人吹的有点过了吧。</p>
+</blockquote>
+<p>创建 Estimator 时，首先初始化各项配置参数信息（值得一提的是 <code>model_dir</code> 是允许被 <code>config</code> 中的选项覆盖的），设置训练或者验证时用的<strong>数据分布策略（DistributionStrategy，后面再详细分析）</strong>，设置参数和图节点分布的 <code>device_fn</code>；之后简单检查 <code>model_fn</code> 的参数是否符合规范，然后完处理完 <code>warm_start</code> 的一些设置就结束了。</p>
+<p>传入的 <code>model_fn</code> 是用于构建 Estimator 代表的模型网络的核心函数，它能够接受的参数名有严格的规定：</p>
+<ul>
+<li>features：网络的输入数据，即一个 batch 的数据；</li>
+<li>labels：网络的标签数据，即一个 batch 的目标标签；</li>
+<li>mode：可选，但是一般都必须要有，要不实现起来会很麻烦。这个值会根据执行的模式由 Estimator 传入，会有 3 种，<code>tf.estimator.ModeKeys.PREDICT</code>、<code>tf.estimator.ModeKeys.TRAIN</code> 和 <code>tf.estimator.ModeKeys.EVALUATE</code>；</li>
+<li>params：可选，对应的是 Estimator 的初始化参数；</li>
+<li>config：可选，对应的是 Estimator 的初始化参数</li>
+</ul>
+<h2 id="Run-the-Estimator"><a href="#Run-the-Estimator" class="headerlink" title="Run the Estimator"></a>Run the Estimator</h2><p>接下来是 Estimator 类的三个调用方法 evaluate、predict 和 train，从字面上就能够看出来各自对应的是什么功能了（Keras 里面对应的 API 应该是 evaluate、predict 和 fit）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">evaluate(</span><br><span class="line">    input_fn,</span><br><span class="line">    steps=<span class="literal">None</span>,</span><br><span class="line">    hooks=<span class="literal">None</span>,</span><br><span class="line">    checkpoint_path=<span class="literal">None</span>,</span><br><span class="line">    name=<span class="literal">None</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">predict(</span><br><span class="line">    input_fn,</span><br><span class="line">    predict_keys=<span class="literal">None</span>,</span><br><span class="line">    hooks=<span class="literal">None</span>,</span><br><span class="line">    checkpoint_path=<span class="literal">None</span>,</span><br><span class="line">    yield_single_examples=<span class="literal">True</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">train(</span><br><span class="line">    input_fn,</span><br><span class="line">    hooks=<span class="literal">None</span>,</span><br><span class="line">    steps=<span class="literal">None</span>,</span><br><span class="line">    max_steps=<span class="literal">None</span>,</span><br><span class="line">    saving_listeners=<span class="literal">None</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>三个方法的共同参数是这个 <code>input_fn</code>，这是类似前面 <code>model_fn</code> 一样，也需要 Estimator 的创建者写好的输出数据产生函数。这个函数的返回值是一个二元组 <code>(features, labels)</code> 对应了 <code>model_fn</code> 的前两个输入参数。</p>
+<p>train 中的 steps 表示从哪里开始训练，Estimator 将首先从保存的 checkpoint 中找到最接近的保存点，然后开始这次的训练，max_steps 则简单地就是训练的 batch 数了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_train_model</span><span class="params">(self, input_fn, hooks, saving_listeners)</span>:</span></span><br><span class="line">  <span class="keyword">if</span> self._train_distribution:</span><br><span class="line">    <span class="keyword">return</span> self._train_model_distributed(input_fn, hooks, saving_listeners)</span><br><span class="line">  <span class="keyword">else</span>:</span><br><span class="line">    <span class="keyword">return</span> self._train_model_default(input_fn, hooks, saving_listeners)</span><br></pre></td></tr></table></figure>
+
+<p>如果在初始化时没有配置 <code>_train_distribution</code> 项，则会使用默认的方式来执行 train 操作，最终把 <code>model_fn</code> 也绑定出来：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">estimator_spec = self._call_model_fn(</span><br><span class="line">    features, labels, model_fn_lib.ModeKeys.TRAIN, self.config)</span><br></pre></td></tr></table></figure>
+
+<p>向 <code>model_fn</code> 中传入输入数据以及 <code>ModeKeys.TRAIN</code>，接下来实际的执行函数是：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_train_with_estimator_spec</span><span class="params">(self, estimator_spec, worker_hooks, hooks,</span></span></span><br><span class="line"><span class="function"><span class="params">                               global_step_tensor, saving_listeners)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>添加 TensorBoard 中的 Summary、创建参数保存点、如果有 <code>saving_listeners</code> 则额外添加到运行的 hooks 中，之后：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> training.MonitoredTrainingSession(</span><br><span class="line">    master=self._config.master,</span><br><span class="line">    is_chief=self._config.is_chief,</span><br><span class="line">    checkpoint_dir=self._model_dir,</span><br><span class="line">    scaffold=estimator_spec.scaffold,</span><br><span class="line">    hooks=worker_hooks,</span><br><span class="line">    chief_only_hooks=(</span><br><span class="line">        tuple(chief_hooks) + tuple(estimator_spec.training_chief_hooks)),</span><br><span class="line">    save_checkpoint_secs=<span class="number">0</span>,  <span class="comment"># Saving is handled by a hook.</span></span><br><span class="line">    save_summaries_steps=self._config.save_summary_steps,</span><br><span class="line">    config=self._session_config,</span><br><span class="line">    log_step_count_steps=self._config.log_step_count_steps) <span class="keyword">as</span> mon_sess:</span><br><span class="line">  loss = <span class="literal">None</span></span><br><span class="line">  <span class="keyword">while</span> <span class="keyword">not</span> mon_sess.should_stop():</span><br><span class="line">    _, loss = mon_sess.run([estimator_spec.train_op, estimator_spec.loss])</span><br></pre></td></tr></table></figure>
+
+<p>嗯……这段代码是不是很熟悉，没错，官方建议的常规 TensorFlow 训练代码就是要写成这个格式。</p>
+<p>至此，train 部分基本上分析完了（带 DistributionStrategy 的版本后面再说），整个过程就是把一套常规的 TensorFlow 代码的各个部分做了几级封装，要说有什么特别的就是它把 Summary 和 Saver 都默认包含在内了。</p>
+<blockquote>
+<p>如果按照这个格式解开成普通的 TensorFlow 代码的话，可以说是非常好的官方范例了。</p>
+</blockquote>
+<h2 id="EstimatorSpec"><a href="#EstimatorSpec" class="headerlink" title="EstimatorSpec"></a>EstimatorSpec</h2><p>然后再注意到 <code>model_fn</code> 的返回值，前面也提到了 evaluate、predict 和 train 这三个实际执行的方法其实最终都是把 <code>input_fn</code> 中产生的数据传给 <code>model_fn</code> 来跑，这里的控制差别就需要配合对不同的 mode 选项的分支判断来做，所以一个 <code>model_fn</code> 函数写出来大概是这个样子的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">model_fn</span><span class="params">(features, labels, mode)</span>:</span></span><br><span class="line"></span><br><span class="line">    xxxxxx</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (mode == tf.estimator.ModeKeys.PREDICT):</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">return</span> tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (mode == tf.estimator.ModeKeys.EVAL):</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">return</span> tf.estimator.EstimatorSpec(mode=mode, loss=cross_entropy, eval_metric_ops=eval_metric_ops)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (mode == tf.estimator.ModeKeys.TRAIN):</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">return</span> tf.estimator.EstimatorSpec(mode=mode, loss=cross_entropy, train_op=train_step, eval_metric_ops=eval_metric_ops)</span><br></pre></td></tr></table></figure>
+
+<p>不管是哪种模式，<code>model_fn</code> 最终的返回值都需要通过 <code>EstimatorSpec</code> 这个结构来传出去，其属性有：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@staticmethod</span></span><br><span class="line">__new__(</span><br><span class="line">    cls,</span><br><span class="line">    mode,</span><br><span class="line">    predictions=<span class="literal">None</span>,</span><br><span class="line">    loss=<span class="literal">None</span>,</span><br><span class="line">    train_op=<span class="literal">None</span>,</span><br><span class="line">    eval_metric_ops=<span class="literal">None</span>,</span><br><span class="line">    export_outputs=<span class="literal">None</span>,</span><br><span class="line">    training_chief_hooks=<span class="literal">None</span>,</span><br><span class="line">    training_hooks=<span class="literal">None</span>,</span><br><span class="line">    scaffold=<span class="literal">None</span>,</span><br><span class="line">    evaluation_hooks=<span class="literal">None</span>,</span><br><span class="line">    prediction_hooks=<span class="literal">None</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>mode：对应三种不同的模式标识；</li>
+<li>predictions：预测结果，要是一个 Tensor 或者 Tensor 组成的 dict；</li>
+<li>loss：训练的损失函数值，必须是一个标量或者形状为 <code>[1]</code> 的 Tensor；</li>
+<li>train_op：训练 step 的 op，一般是某个 Optimizer 的 <code>minimize()</code> 方法返回的那个；</li>
+<li>eval_metric_ops：一个包含了验证结果的 dict，可以是 <code>Metric</code> 类，或者一个 <code>(metric_tensor, update_op)</code> 的元组；</li>
+<li>其他…略了</li>
+</ul>
+<p>要求 <code>ModeKeys.TRAIN</code> 模式返回的必须包含 loss 和 train_op，<code>ModeKeys.EVAL</code> 模式返回的必须包含 <code>loss</code>，<code>ModeKeys.PREDICT</code> 模式返回的必须包含 predictions。</p>
+<h1 id="DistributionStrategy"><a href="#DistributionStrategy" class="headerlink" title="DistributionStrategy"></a>DistributionStrategy</h1><p>前面说了，Estimator 这套 API 的出现是因为开发者希望能够方便用户快速搭网络，并且易于扩展到各种不同的计算结构上。</p>
+<p>那么 Estimator 本体上面已经拆过了，没什么神秘的，就是个简单封装，距离实现单机到多卡/多机的这种扩展其实还差挺多的，而 DistributionStrategy 就是用来补上中间那个 Gap 的。</p>
+<p>官方提供的资料是个 Github 上的 README：<a href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/distribute" target="_blank" rel="noopener">Distribution Strategy</a></p>
+<p>里面给的使用的例子都非常简明易懂：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">distribution = tf.contrib.distribute.MirroredStrategy()</span><br><span class="line">config = tf.estimator.RunConfig(train_distribute=distribution)</span><br><span class="line"></span><br><span class="line">classifier = tf.estimator.Estimator(model_fn=model_fn, config=config)</span><br><span class="line">classifier.train(input_fn=input_fn)</span><br><span class="line">classifier.evaluate(input_fn=input_fn)</span><br></pre></td></tr></table></figure>
+
+<p>下面的三行是个普通的 Estimator 的使用，跟前面一样，唯一区别的就是在 <code>tf.estimator.RunConfig</code> 中创建一个 DistributionStrategy，然后作为 config 选项传递给 Estimator 即可。</p>
+<p>确实很方便啊。</p>
+<hr>
+<p>如果有看过<a href="https://github.com/tensorflow/benchmarks" target="_blank" rel="noopener">官方的 benchmarks</a>中对多卡/多机的写法的话，可以发现那个写法大致上跟 DistributionStrategy 的设计非常像。</p>
+<p><code>_train_model_distributed</code> 的大致结构是这个样子的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> self._train_distribution.scope():</span><br><span class="line">    ...</span><br><span class="line">    features, labels = estimator_util.parse_iterator_result(</span><br><span class="line">        iterator.get_next())</span><br><span class="line">    grouped_estimator_spec = self._train_distribution.call_for_each_tower(</span><br><span class="line">        self._call_model_fn,</span><br><span class="line">        features,</span><br><span class="line">        labels,  <span class="comment"># although this will be None it seems</span></span><br><span class="line">        model_fn_lib.ModeKeys.TRAIN,</span><br><span class="line">        self.config)</span><br><span class="line">    loss = self._train_distribution.unwrap(</span><br><span class="line">        self._train_distribution.reduce(</span><br><span class="line">            distribute_lib.get_loss_reduction(),</span><br><span class="line">            grouped_estimator_spec.loss,</span><br><span class="line">            destinations=<span class="string">'/device:CPU:0'</span>))[<span class="number">0</span>]</span><br><span class="line">    distributed_train_op = grouped_estimator_spec.train_op</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+
+<p><code>_train_distribution.scope</code> 中封装的是一些 <code>variable_scope</code> 和 <code>custom_getter</code>，用于在用<code>tf.get_variable()</code> 创建的变量之上再套上一层额外的封装控制。</p>
+<blockquote>
+<p>对普通的 <code>tf.get_variable()</code> 套上 <code>variable_scope</code> 之后可以控制这个变量创建的设备位置等等很多东西，第一次看到这种写法的时候还觉得这像是一种 hack 的方法，但是不用改变原本里面的代码，还是非常方便的。</p>
+</blockquote>
+<p>以单机多卡为例，<code>call_for_each_tower</code> 是在每块 GPU 卡上跑一遍 Estimator 中给定的 <code>model_fn</code>，即在每一块卡上独立创建一份数据并行的网络。基类里面这个函数是留空的，要求具体的实现类来完成这个部分。</p>
+<p>话说这里我有个疑问……<code>model_fn</code> 中的正常写法应该是对训练模式返回一个包含了 <code>Optimizer.minimize()</code> 的 EstimatorSpec，但是多卡并行的过程中不是应该需要做梯度的聚合平均之后再更新到每个变量上吗？而且不同的并行模式下，这部分的处理方式应该也是不一样的，不知道这套 API 要怎么把这些全都统一起来。</p>
+<p>看一下 MirroredStrategy 的这个实例里面是怎么实现这个函数的吧，中间部分的代码是这样的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># TODO(isaprykin): Create these threads once instead of during every run()</span></span><br><span class="line"><span class="comment"># call.</span></span><br><span class="line">threads = []</span><br><span class="line"><span class="keyword">for</span> index, d <span class="keyword">in</span> enumerate(distribution.worker_devices):</span><br><span class="line">  variable_creator_fn = shared_variable_creator.make_fn(</span><br><span class="line">      shared_variable_store, index)</span><br><span class="line">  t = MirroredStrategy._MirroredTowerThread(  <span class="comment"># pylint: disable=protected-access</span></span><br><span class="line">      distribution, coord, d, variable_creator_fn, fn,</span><br><span class="line">      *values.select_device(d, args), **values.select_device(d, kwargs))</span><br><span class="line">  threads.append(t)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> t <span class="keyword">in</span> threads:</span><br><span class="line">  t.start()</span><br></pre></td></tr></table></figure>
+
+<p><code>distribution.worker_devices</code> 中保存了单机中的多块 GPU 卡设备，这里直接对每块卡挂一个 <code>shared_variable_creator</code> 并且开一些的一对一的线程去处理。</p>
+<p><code>shared_variable_creator</code> 用于处理多卡之间的参数共享，在 device_id 为 0 的设备上调用 <code>get_variable()</code> 函数是创建新变量，并且保存到给定的 <code>shared_variable_store</code> dict 中；在 device_id 大于 0 的设备上调用 <code>get_variable()</code> 则会尝试共用前面创建好的变量。</p>
+<p>接下来看一下创建线程这部分的逻辑。</p>
+<p>主线程和多个子线程之间的控制这里用了 <code>should_run</code> 和 <code>has_paused</code> 两个 <code>threading.Event()</code> 来控制。开始的时候，每个线程都调用 <code>should_run.wait()</code> 来等待，等待主线程调用对应的 <code>should_run.set()</code> 来唤醒它们。主线程随后阻塞在 <code>has_paused.wait()</code>  上，等到每个线程完成自己那部分图的构建之后再用 <code>has_paused.set()</code> 唤醒。</p>
+<blockquote>
+<p>话说为啥一定要用多线程来实现这个部分呢……感觉就用普通的单线程循环一样可以做到这里想要的事情。</p>
+</blockquote>
+<p>那么对梯度的聚合和最终的 apply 呢？似乎这部分代码里面根本没看到啊，每个线程的 <code>run()</code> 函数基本上就是跑完各自的网络部分就没了。唯一看上去非常让人介意的是 <code>run()</code> 中在执行 <code>main_fn()</code> 前套了一堆 Python 的 Context，难道又是用有点 hack 的方法完成的？</p>
+<p>其中 MirroredTowerContext 这个结构继承了 distribute_lib.TowerContext，只用于<code>call_for_each_tower</code> 中用于处理多块卡之间相同代表数据的同步。</p>
+<p>问题是我还是没有看到处理 reduce 等等这些的代码。</p>
+<p>然后……抱着一种怀疑的想法，我重新打开了 Optimizer 中关于梯度计算部分的代码！！发现这里已经跟当时拆包第二篇（<a href="/2018/01/23/2018-01-23-tfunpacking2/">Optimizer in TF</a>）里看到的不一样了。</p>
+<p>例如新的 <code>apply_gradients</code> 中增加了这样的一段：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> distribution_strategy_context.has_distribution_strategy():</span><br><span class="line">  grads_and_vars = get_filtered_grad_fn(<span class="keyword">lambda</span>: grads_and_vars)()</span><br><span class="line">  <span class="keyword">return</span> distribution_strategy_context.get_tower_context().merge_call(</span><br><span class="line">      self._distributed_apply, grads_and_vars, global_step, name)</span><br></pre></td></tr></table></figure>
+
+<p>那么 DistributionStrategy 是如何配合 Estimator 把原本单机的代码直接扩展开来就很明白了。</p>
+<blockquote>
+<p>当时最早拆包开始时大概是 TensorFlow 的 1.6 版左右。</p>
+<p>查了下 Optimizer 中增加部分的 git 记录，差不多是在今年 3 月底的时候加上的，应该是在 TensorFlow 的 1.7 版左右，然后后来又有过一次较大的改动。</p>
+</blockquote>
+<h2 id="Design-Philosophy"><a href="#Design-Philosophy" class="headerlink" title="Design Philosophy"></a>Design Philosophy</h2><p>再看一下<a href="https://tensorflow.google.cn/api_docs/python/tf/contrib/distribute/DistributionStrategy" target="_blank" rel="noopener">官方文档</a>中对 DistributionStrategy 的设计思想。</p>
+<p>首先是一些底层的概念：</p>
+<ul>
+<li>Wrapped values：跨设备相关的变量可以被封装为两种类别，PerDevice 对象表示的变量在每个设备上的值不同，Mirrored 对象表示的变量在每个设备上的值都相同</li>
+<li>Unwrapping and merging：考虑前面提过的这个函数 <code>call_for_each_tower(fn, w)</code>，fn 是模型函数，w 代表一些 Wrapped values。这个函数的调用过程中就包含了变量的 unwrapping 和 merging，假定在设备 <code>d0</code> 上 <code>fn(w0)</code> 得到的结果是 <code>(x, a, v0)</code>，在设备 <code>d1</code> 上 <code>fn(w1)</code> 得到的结果是 <code>(x, b, v1)</code>。首先在调用函数之前，w 需要被解包变成 w0 和 w1 然后分别调用 fn 函数。返回的结果有三种情况，第一个值都返回了一个相同的对象 <code>x</code>，则最终 merge 之后还是对象 x；第二个值是每个设备不一样的，则 merge 之后是一个 PerDevice 对象（其实就是个设备和对应值的 map）；第三个值是每个设备返回的分别是一组 Mirrored 对象的成员，则 merge 之后是一个 Mirrored 对象。所以 <code>call_for_each_tower(fn, w)</code> 在这里返回得到的就是一组 <code>(x, PerDevice{...}, Mirrored{...})</code></li>
+<li>Tower context vs. Cross-tower context：Tower context 指的是对每个设备的封装上下文，通常对每个设备分别跑一遍模型函数就需要这种封装；Cross-tower context 指的是跨设备的封装上下文，比如说像 <code>reduce()</code> 这种所有设备共同参与的一个操作就需要这种封装</li>
+<li>Worker devices vs. parameter devices：负责计算的设备和存参数的设备，没啥好说的。</li>
+</ul>
+<p>更新一个变量的常规操作如下：</p>
+<ol>
+<li>把输入数据集封装在 <code>d.distribute_dataset()</code> 中，然后创建一个 iterator</li>
+<li>对每一个设备共同调用 <code>d.call_for_each_tower()</code> 来分别创建网络模型，并且最终各自得到一组梯度/变量对：<code>d0</code> 上有 <code>{(g0, v0), (g1, v1), ...}</code>，<code>d1</code> 上有 <code>{(g&#39;0, v0), (g&#39;1, v1), ...}</code> 等等这样</li>
+<li>调用 <code>d.reduce(VariableAggregation.SUM, t, v)</code> 或者 <code>d.batch_reduce()</code> 来对梯度求和，并且对应到各自的变量上：<code>{(Sum(g0, g&#39;0), v0), (Sum(g1, g&#39;1), v1), ...}</code></li>
+<li>调用 <code>d.update(v)</code> 来对每一个变量进行更新</li>
+</ol>
+<p>3、4 两步如果用 Optimizer 中的 <code>apply_gradients()</code> 方法可以自动完成（……这就是 Optimizer 后来加进去那部分代码的作用），或者在一个 Cross-tower context 中调用 <code>_distributed_apply()</code> 方法也可以。常规的网络层都应该在 Tower context 中被调用。</p>
+<blockquote>
+<p>话说这个 <code>_distributed_apply()</code> 为什么前面带下划线啊喂，这个方法本来不打算直接给人调的吧？？？大概是 API 还没最终设计好。</p>
+</blockquote>
+<p>嗯，所以 Estimator 本身一点都不神奇，真正这套机制麻烦的地方在 DistributionStrategy 里面，手写一个 DistributionStrategy 应该会是一件很麻烦的事情。</p>
+<p>不知道未来这套机制会如何改进得更好用一些。</p>
+<hr>
+<blockquote>
+<p>2018 12月更新</p>
+<p>最近正在试图手动 DIY 一个 DistributionStrategy，发现到处都找不到相关的资料，官方的文档方面对这部分也是写的不明不白。</p>
+<p>试了下自己继承一个 DistributionStrategy 类，但是发现这个基类的几乎所有功能都是交给另外一个 DistributionStrategyExtend 类来做的，而且直接从空类开始写缺的东西也有点太多了，还没下手成功。准备之后再试试直接继承一个现有的类比如 MirroredStrategy 然后重载掉里面的功能函数试试看。</p>
+<p>Estimator 这套机制想要达到的目标是非常好的，但是似乎……由于 TensorFlow 本身过于庞大和复杂，不知道什么时候这两个东西才能真正成为方便用户使用的好接口。</p>
+</blockquote>
+<hr>
+<h1 id="StagingArea"><a href="#StagingArea" class="headerlink" title="StagingArea"></a>StagingArea</h1><p>从名字上直译过来应该是用于暂存的区域，这套 API 用于跨 step 地把数据保存到网络 data path 之外的地方，然后可以在另外的 step 中把保存下来的数据取出来。</p>
+<p>解释上看起来挺绕的，而实际上用这套 API 实现出来的效果就是——<strong>软件流水</strong>。</p>
+<p>例如以下面这个由三个阶段组成的计算过程为例：</p>
+<p><img data-src="http://jcf94.com/download/2018-10-21-tfunpacking9-staging1.svg" alt=""></p>
+<p>在 a/b 和 b/c 之间分别加入 StagingArea 即：</p>
+<p><img data-src="http://jcf94.com/download/2018-10-21-tfunpacking9-staging2.svg" alt=""></p>
+<p>更重要的是加入了暂存结构之后，事实上 a、b、c 三个计算阶段的依赖就被解耦了：</p>
+<p><img data-src="http://jcf94.com/download/2018-10-21-tfunpacking9-staging3.svg" alt=""></p>
+<p>对执行的流程稍微进行一些修改：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">step1: A1</span><br><span class="line">step2: A2 B1</span><br><span class="line">step3: A3 B2 C1</span><br><span class="line">step4: A4 B3 C2</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>原本必须按顺序执行的三个计算阶段现在就可以互不相关地并行执行了，在某些计算与 I/O、数据通信共同存在的环境中，原本可能存在的数据延迟、等待等等就有可能通过流水线的方式隐藏掉！（例如多机分布式训练的情况，实测效果非常好）</p>
+<p>关于这套 API 如何使用的介绍这里就不多记了，直接来看 TensorFlow 是怎么实现它的。</p>
+<h2 id="Implementation"><a href="#Implementation" class="headerlink" title="Implementation"></a>Implementation</h2><p>StagingArea 这个类在 <code>tensorflow/python/ops/data_flow_ops.py</code> 中，很早以前应该是在 <code>tf.contrib</code> 里面的，大概试验成熟之后移到正式的包部分了。</p>
+<p><code>put()</code> 和 <code>get()</code> 这两个方法的实现分别调用了 <code>gen_data_flow_ops.stage()</code> 和 <code>gen_data_flow_ops.unstage()</code>，然后你会发现虽然一开始是从 <code>from tensorflow.python.ops import gen_data_flow_ops</code> 中引入了这个包，但是源代码里面是找不到这个包的。</p>
+<p>原因在于这里面的东西都是在 C++ 层代码中定义然后在编译过程中生成的，追到 <code>tensorflow/core/ops/data_flow_ops.cc</code> 中可以看到大量用 <code>REGISTER_OP</code> 宏注册的 op，其中就有 StagingArea 用到的 <code>stage()</code>、<code>unstage()</code> 等等函数。</p>
+<p>当然到这里为止还是没办法找到它的实现，因为 <code>REGISTER_OP</code> 宏只是负责 Python 与 C++ 的接口部分的处理，具体 C++ 层调用的实际内容还要再往 Kernel 里面找：<code>tensorflow/core/kernels/stage_op.cc</code> 。这里才是真正最底层的实现内容了，然后还能看到很多 <code>REGISTER_KERNEL_BUILDER</code> 宏，用于把 C++ 部分编译成的库与上面的接口绑定起来。</p>
+<blockquote>
+<p>在<a href="/2018/02/28/2018-02-28-tfunpacking3/">拆包第三篇</a>简单记过 TensorFlow 中 Op 的创建方式，嗯，在这里用上了。</p>
+</blockquote>
+<hr>
+<p>然后就发现这玩意的实现就是个双向队列的封装，没啥神奇的……╮(╯_╰)╭</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">deque</span>&lt;Tuple&gt; buf_;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Get</span><span class="params">(Tuple* tuple)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    *tuple = <span class="built_in">std</span>::move(buf_.front());</span><br><span class="line">    buf_.pop_front();</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">Status <span class="title">Put</span><span class="params">(Tuple* tuple)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    buf_.push_back(<span class="built_in">std</span>::move(*tuple));</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/02/04/2017-02-04-tensorflow/" rel="bookmark">TensorFlow</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/04/04/2017-04-04-alexnet/" rel="bookmark">AlexNet</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/13/2018-01-13-tfunpacking/" rel="bookmark">TensorFlow 拆包（一）：Session.Run()</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/01/23/2018-01-23-tfunpacking2/" rel="bookmark">TensorFlow 拆包（二）：TF 的数据流模型实现以及自动求导</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/03/07/2018-03-07-tfunpacking4/" rel="bookmark">TensorFlow 拆包（四）：Device</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/TensorFlow/" rel="tag"># TensorFlow</a>
+              <a href="/tags/Estimator/" rel="tag"># Estimator</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/10/04/2018-10-04-cse559w/" rel="prev" title="CSE 599W： Systems for ML">
+      <i class="fa fa-chevron-left"></i> CSE 599W： Systems for ML
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/11/26/2018-11-26-fasterimagenet/" rel="next" title="Faster and Faster -- ImageNet">
+      Faster and Faster -- ImageNet <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Estimator"><span class="nav-text">Estimator</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Run-the-Estimator"><span class="nav-text">Run the Estimator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EstimatorSpec"><span class="nav-text">EstimatorSpec</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DistributionStrategy"><span class="nav-text">DistributionStrategy</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Design-Philosophy"><span class="nav-text">Design Philosophy</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#StagingArea"><span class="nav-text">StagingArea</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Implementation"><span class="nav-text">Implementation</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jcf94"
+      src="/photo.jpg">
+  <p class="site-author-name" itemprop="name">Jcf94</p>
+  <div class="site-description" itemprop="description">To live is to change the world.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jcf94" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/jcf94" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.zhihu.com/people/jcf94" title="Zhihu → http:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;jcf94" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>Zhihu</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://cn.linkedin.com/in/jcf94/en" title="Linked-in → https:&#x2F;&#x2F;cn.linkedin.com&#x2F;in&#x2F;jcf94&#x2F;en" rel="noopener" target="_blank"><i class="fa fa-fw fa-linkedin"></i>Linked-in</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jcf94</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '53c17a207b0eb9315f41',
+      clientSecret: 'e697661132cf0936345a27b937f76074f55002be',
+      repo        : 'blog-comments',
+      owner       : 'jcf94',
+      admin       : ['jcf94'],
+      // id          : '4f01d6962d208eb0c89e36f64b92fb2c',
+      id          : page.path,
+        language: 'en',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>
