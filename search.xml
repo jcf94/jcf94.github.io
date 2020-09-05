@@ -15666,7 +15666,7 @@ Haswell-LP (ultrabooks)</td>
 <blockquote>
 <p>看起来确实相当麻烦，不过想想可能好像也还好，本来如果要写出性能很好的 CUDA 代码来，每个 warp 要算多少东西也是需要精细考虑清楚的。</p>
 </blockquote>
-<h3 id="SIMT-Model-Upgrade"><a href="#SIMT-Model-Upgrade" class="headerlink" title="SIMT Model Upgrade"></a>SIMT Model Upgrade</h3><p>Volta 这一代对 SIMT 的编程模型也做了改变。</p>
+<h3 id="SIMT-Model-Upgrade-amp-COOPERATIVE-GROUPS"><a href="#SIMT-Model-Upgrade-amp-COOPERATIVE-GROUPS" class="headerlink" title="SIMT Model Upgrade &amp; COOPERATIVE GROUPS"></a>SIMT Model Upgrade &amp; COOPERATIVE GROUPS</h3><p>Volta 这一代对 SIMT 的编程模型也做了改变。</p>
 <p>在之前的 SIMT 流水线中，如果一个 warp 的指令里面出现了分支，这些分支块是不能被同时执行的。所以一直以来写 CUDA 代码都会要有一个原则是不要在一个 warp 里面出现不同的分支，要不需要花费两倍的时间去处理。</p>
 <p><img data-src="https://jcf94.com/download/2020-05-24-nvidia-arch-simt-old.png" alt="SIMT Warp Execution Model of Pascal and Earlier GPUs"></p>
 <p>这一代开始把 PC 和调用栈做成了每个线程独立的：</p>
@@ -15677,6 +15677,7 @@ Haswell-LP (ultrabooks)</td>
 <blockquote>
 <p>可能也是因为这样所以 1 个 Dispatch Unit 配 1 个 Warp Scheduler 了？因为线程指令的实现事实上更加复杂了。<br>所以其实最后还是同时只能执行一个分支里面的一部分，这个 upgrade 我暂时还没有想到具体的应用场景会有多常出现（上面这个带锁双向链表我觉得写在 CUDA 里面就很不常见啊…），以及会具体有多少性能收益，说不定还是原本的那种简单的设计更直接更高效一些呢。（期待一下未来的硬件里面会不会把这个恢复回去……）<br>以前 CUDA 编程原则里面不要写分支的那条在新架构下我觉得还是适用的，不写分支就不会有这么多额外的麻烦要考虑了。</p>
 </blockquote>
+<p>另外有一个 Cooperative Group 的新设计倒是看起来感觉更有用一些。原本的 <code>__syncthreads( )</code> 是针对一个 block 里面的所有 thread 做同步的，现在可以对不同 block 的不同 thread 单独定义同步组了，CUDA launch 的时候会把同一个组的一起 launch 上去，同步可以在一个更加细粒度的层面上完成。</p>
 <h2 id="Turing"><a href="#Turing" class="headerlink" title="Turing"></a>Turing</h2><p>Compute Capability: 7.5</p>
 <h1 id="Ampere"><a href="#Ampere" class="headerlink" title="Ampere"></a>Ampere</h1><p>Compute Capability: 8.0</p>
 <hr>
