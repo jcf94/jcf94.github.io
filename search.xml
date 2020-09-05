@@ -15635,7 +15635,48 @@ Haswell-LP (ultrabooks)</td>
 </ul>
 <p>这里把原本的 CUDA Core 给拆开了，FP32 和 INT32 的两组运算单元现在是独立出现在流水线 lane 里面了，这一设计的好处是在前几代架构中 CUDA Core 同时只能处理一种类型的运算，而现在每个 cycle 都可以同时有 FP32 和 INT32 的指令在一起跑了。Pascal 中需要 6 个 cycles 来做一组 FMA，现在在 Volta 中只需要 4 个 cycles。</p>
 <p>另外每个 Warp Scheduler 还有了自己的 L0 指令 cache。</p>
-<p>最重大的改动不用说也知道是 Tensor Core 了，不过这里暂时先不展开 … 后面可能会回来补充完整。</p>
+<p>这一代还改进了一下 MPS，现在从硬件上直接支持对资源的隔离，方便多任务共享 GPU。</p>
+<p>其他一些比较重要的改进：</p>
+<h3 id="Tensor-Core"><a href="#Tensor-Core" class="headerlink" title="Tensor Core"></a>Tensor Core</h3><p>最重大的改动不用说也知道是 Tensor Core 了。</p>
+<p>Tensor Core 的思路从系统设计上还是相当直接的，目前深度学习的 workload 中最主要的计算量都在矩阵的乘加上，因此为了专门去高效地支持这些 workload，就增加一些专用于矩阵运算的专用部件进去。</p>
+<p>这个也是常见的 AI ASIC（比如 Google 的 TPU、其他厂商的各种 xPU 等等）通常采用的思路，只不过 ASIC 可以从一开始就是针对特定的 workload 去的，因此设计上可以更直接更激进一些，直接上大量的 MMU（Matrix Multiply Unit），然后采用例如脉冲阵列这种设计去最大化它的 throughput。</p>
+<p>而 NV 的 GPU 毕竟还要用作其他一些通用的运算，所以只能往原本的 SM 流水线里面插进去一些额外的专用部件 lane 了。开个脑洞，要是哪一天发现除了 FMA 以外还有其他另外一种形式的运算有大量的需求，未来的 GPU 设计里面说不定也会出现其他 xx Core。好在 FMA 除了深度学习以外在 HPC 的 workload 里面也是挺常见的，这个设计以后还是比较有用的。</p>
+<p><img data-src="https://jcf94.com/download/2020-05-24-nvidia-arch-tensorcore1.png" alt="Tensor Core 4x4 Matrix Multiply and Accumulate"></p>
+<p><img data-src="https://jcf94.com/download/2020-05-24-nvidia-arch-tensorcore2.png" alt="Mixed Precision Multiply and Accumulate in Tensor Core"></p>
+<p>Tensor Core 这个部件直接从 SM 的寄存器里面取两个 FP16 的矩阵作为输入，进行全精度的矩阵乘之后得到的结果可以是 FP16 或者 FP32 的，然后累加到 FP16/FP32 的 accumulator 里面去。数据类型选择 FP16 作为输入然后输出 FP32 猜测可能是为了保证结果不溢出，然后在加速部件设计等等方面做了一些 trade off。</p>
+<blockquote>
+<p>所以 FP16 in -&gt; FP16 out 和 FP16 in -&gt; FP32 out 哪一个性能更好呢…<br>我没有测过，但是猜测可能默认结果是 FP32 out 更快？反而是输出 FP16 需要从 FP32 再转一次？</p>
+</blockquote>
+<hr>
+<p>接下来道理我们都懂了，那 Tensor Core 要怎么用呢？这个部件的编程模型在一开始接触的时候可能会有一些坑。</p>
+<p>我们知道常规的 CUDA 代码需要制定 grid 的结构、block 的结构，然后其实我们写的 kernel 代码都是针对每一个单独的 thread 的，可以认为是 thread level 的编程。对一个子矩阵的 FMA 运算存在比较多的数据重用机会，这时候如果只是一个 thread 算一个矩阵块的 FMA 就比较浪费了，因此 Tensor Core 的设计是用一整个 warp 去共同完成一个 FMA 运算，一个 warp 中的 32 个 thread 可以复用寄存器里面的数据。CUDA 对 Tensor Core 的指南里面把这个叫做 “WMMA warp-wide macro-instructions”。所以 Tensor Core 的编程模型直接就是针对一整个 warp 写的。</p>
+<p>事实上，Tensor Core 的代码写起来还是有相当多的限制的，CUDA 给 Tensor Core 提供了以下这些 c 的 API：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> Use, <span class="keyword">int</span> m, <span class="keyword">int</span> n, <span class="keyword">int</span> k, <span class="keyword">typename</span> T, <span class="keyword">typename</span> Layout=<span class="keyword">void</span>&gt; class fragment;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">load_matrix_sync</span><span class="params">(fragment&lt;...&gt; &amp;a, <span class="keyword">const</span> T* mptr, <span class="keyword">unsigned</span> ldm)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">load_matrix_sync</span><span class="params">(fragment&lt;...&gt; &amp;a, <span class="keyword">const</span> T* mptr, <span class="keyword">unsigned</span> ldm, <span class="keyword">layout_t</span> layout)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">store_matrix_sync</span><span class="params">(T* mptr, <span class="keyword">const</span> fragment&lt;...&gt; &amp;a, <span class="keyword">unsigned</span> ldm, <span class="keyword">layout_t</span> layout)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">fill_fragment</span><span class="params">(fragment&lt;...&gt; &amp;a, <span class="keyword">const</span> T&amp; v)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">mma_sync</span><span class="params">(fragment&lt;...&gt; &amp;d, <span class="keyword">const</span> fragment&lt;...&gt; &amp;a, <span class="keyword">const</span> fragment&lt;...&gt; &amp;b, <span class="keyword">const</span> fragment&lt;...&gt; &amp;c, <span class="keyword">bool</span> satf=<span class="literal">false</span>)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>PTX 的指令应该更多一些，不过我没有详细看过。</p>
+<p>首先用来做乘加的矩阵都需要放在这个叫 <code>wmma::fragment</code> 的变量里面，这个本质上就是定义了一个要放在 SM 寄存器上的存储空间，但是需要提供详细的 FMA 参数：</p>
+<ul>
+<li>第一个参数 <code>Use</code> 是这个 <code>fragment</code> 在 FMA 运算里面的角色，可选项有：<code>matrix_a</code>、<code>matrix_b</code> 和 <code>accumulator</code>，含义就是字面意思，也没什么需要再解释的了。</li>
+<li>m，n，k，T 是这一个 warp 里面要处理的的 FMA 子矩阵的形状以及数据类型，不同的 Capability 能够支持的组合还不太一样，比如最基础的就是 a、b 都是 <code>__half</code>，accumulator 是 <code>float</code>，然后 m、n、k 都是 16。<br>m、n、k 的组合不是任意的，能支持的种类跟 Capability 直接相关，比如 V100 和后来出的 T4 能够支持的就不一样，具体可以在 <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#wmma-type-sizes" target="_blank" rel="noopener">Programming Guide</a> 里面查。</li>
+<li>最后这个 <code>Layout</code> 可选项有两个 <code>row_major</code> 和 <code>col_major</code>，代表这个 <code>fragment</code> 在内存里面实际存储的行列主序情况。</li>
+</ul>
+<p><code>load_matrix_sync</code> 和 <code>store_matrix_sync</code> 分别是把数据写到 <code>fragment</code> 空间里面和从这里面取出来写到别的地方去。<code>fill_fragment</code> 对 <code>fragment</code> 初始化。<code>mma_sync</code> 就是对整个 warp 调用 Tensor Core 去跑完这一个 FMA 运算了。</p>
+<p>常规的写法也是先把矩阵 A、B 都 load 到 shared_memory 上，然后再从 shared_memory 里面取对应 FMA 块大小的数据到 <code>fragment</code> 里面，<code>mma_sync</code> 跑完，最后从 <code>fragment</code> 里面把结果写到外面去。</p>
+<p>这里的注意点是上面这些代码（包括 <code>fragment</code> 定义以及下面几个函数的调用）都是<strong>针对 warp</strong> 的，即我们在写代码的一开始就需要考虑到每个 block 里面的 thread 结构，保证一个 warp 的 32 个 thread 执行的代码是完全相同的。相应地，对矩阵的分块也是需要在写代码的时候就考虑清楚，我们要保证每个 warp 处理的 a、b 矩阵的大小刚好是这个地方设定好的 m、n、k。</p>
+<blockquote>
+<p>看起来确实相当麻烦，不过想想可能好像也还好，本来如果要写出性能很好的 CUDA 代码来，每个 warp 要算多少东西也是需要精细考虑清楚的。</p>
+</blockquote>
+<h3 id="SIMT-Model-Upgrade"><a href="#SIMT-Model-Upgrade" class="headerlink" title="SIMT Model Upgrade"></a>SIMT Model Upgrade</h3><p>Volta 这一代对 SIMT 的编程模型也做了改变。</p>
+<p>在之前的 SIMT 流水线中，如果一个 warp 的指令里面出现了分支，这些分支块是不能被同时执行的。所以一直以来写 CUDA 代码都会要有一个原则是不要在一个 warp 里面出现不同的分支，要不需要花费两倍的时间去处理。</p>
+<p><img data-src="https://jcf94.com/download/2020-05-24-nvidia-arch-simt-old.png" alt="SIMT Warp Execution Model of Pascal and Earlier GPUs"></p>
+<p>这一代开始把 PC 和调用栈做成了每个线程独立的：</p>
+<p><img data-src="https://jcf94.com/download/2020-05-24-nvidia-arch-simt-design.png" alt="Volta Warp with Per-Thread Program Counter and Call Stack"></p>
+<p>现在呢，每个分支里面的指令可以在更细粒度的层面上进行混合调度了，也可以手动插入一些在 warp 层面同步的指令进去：</p>
+<p><img data-src="https://jcf94.com/download/2020-05-24-nvidia-arch-simt-new.png" alt="Programs use Explicit Synchronization to Reconverge Threads in a Warp"></p>
+<p>白皮书后面给了一个可以从这个改动上得到收益的 Starvation-Free Algorithms 的示例，修改带锁的双向链表的时候，不同 thread 可能会被 block 在锁上，以前的架构应该基本上不太可能能处理得了这种 case，新架构就保证了即使有些 thread 还在等待锁，另外的 thread 也有可能先拉出来跑。</p>
+<blockquote>
+<p>可能也是因为这样所以 1 个 Dispatch Unit 配 1 个 Warp Scheduler 了？因为线程指令的实现事实上更加复杂了。<br>所以其实最后还是同时只能执行一个分支里面的一部分，这个 upgrade 我暂时还没有想到具体的应用场景会有多常出现（上面这个带锁双向链表我觉得写在 CUDA 里面就很不常见啊…），以及会具体有多少性能收益，说不定还是原本的那种简单的设计更直接更高效一些呢。（期待一下未来的硬件里面会不会把这个恢复回去……）<br>以前 CUDA 编程原则里面不要写分支的那条在新架构下我觉得还是适用的，不写分支就不会有这么多额外的麻烦要考虑了。</p>
+</blockquote>
 <h2 id="Turing"><a href="#Turing" class="headerlink" title="Turing"></a>Turing</h2><p>Compute Capability: 7.5</p>
 <h1 id="Ampere"><a href="#Ampere" class="headerlink" title="Ampere"></a>Ampere</h1><p>Compute Capability: 8.0</p>
 <hr>
